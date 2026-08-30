@@ -1,0 +1,41 @@
+/**
+ * 公共组件 · EmptyState 空态样式
+ * 图标圆底取模块主色淡染；引导按钮主色底白字
+ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cb-space-3);
+  padding: var(--cb-space-7) 0;
+
+  &__icon {
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--cb-mod) 12%, var(--cb-surface));
+    color: var(--cb-mod);
+  }
+
+  &__text {
+    margin: 0;
+    color: var(--cb-ink-secondary);
+    font-size: var(--cb-font-sm);
+  }
+
+  &__go {
+    padding: 7px 24px;
+    border: 0;
+    border-radius: var(--cb-radius-btn);
+    background: var(--cb-mod);
+    color: #fff;
+    font-weight: var(--cb-font-weight-medium);
+    font-size: var(--cb-font-sm);
+    cursor: pointer;
+    &:hover {
+      filter: brightness(1.06);
+    }
+  }
+}

@@ -1,0 +1,203 @@
+/**
+ * 公共布局 · 左侧导航栏样式
+ * 宽度由布局 store 通过 inline style 控制（宽度过渡实现伸缩/隐藏动画）
+ * 隐藏态 width:0；aside 不裁剪，内部 .scroller 负责裁剪内容，右边框按钮可半外露
+ */
+.side-nav {
+  position: relative;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--cb-mod) 82%, #191512);
+  color: rgba(255, 255, 255, 0.92);
+  transition: width 0.3s ease, background-color 0.9s ease;
+
+  &--fullscreen {
+    width: 100% !important;
+  }
+
+  // 内部滚动容器：裁剪内容 + 独立滚动，让边框按钮可溢出露出
+  &__scroller {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  // ---- 首行：Logo + 品牌 + 按钮 ----
+  &__brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 18px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    user-select: none;
+
+    &-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+  }
+
+  &__logo {
+    flex-shrink: 0;
+    width: 39px; // 当前尺寸（52px）的 0.75 倍
+    height: 39px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--cb-mod) 58%, #fff);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px;
+    transition: background-color 0.9s ease;
+  }
+
+  &__brand-name {
+    font-family: var(--cb-font-cute);
+    font-size: var(--cb-font-2xl); // 当前 3xl（约40px）的 0.75 倍 → 2xl（约30px）
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__icon-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.78);
+    border-radius: var(--cb-radius-btn);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+  }
+
+  // ---- 菜单 ----
+  &__menu {
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 11px 14px;
+    border-radius: var(--cb-radius-btn);
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    font-size: var(--cb-font-md);
+    white-space: nowrap;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    &--active {
+      background: color-mix(in srgb, var(--cb-mod) 58%, #fff);
+      color: #2c312f;
+      font-weight: var(--cb-font-weight-medium);
+      transition: background-color 0.9s ease;
+    }
+
+    &-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    &-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    &-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // 行右侧小字标注（如 LIVE / 存钱余额）
+    &-tag {
+      flex-shrink: 0;
+      font-family: var(--cb-font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: var(--cb-font-xs);
+      color: rgba(255, 255, 255, 0.5);
+      max-width: 90px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  // ---- 底部：白天黑夜（上）+ 版本号（下），固定在侧栏底部（不随菜单滚动） ----
+  &__foot {
+    flex-shrink: 0;
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    &-theme {
+      display: inline-flex;
+    }
+  }
+
+  &__version {
+    font-family: var(--cb-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--cb-font-sm);
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+  }
+
+  // ---- 缩导航栏（仅图标） ----
+  &--collapsed {
+    .side-nav__brand {
+      justify-content: center;
+      padding: 18px 6px;
+
+      &-left {
+        gap: 0;
+      }
+    }
+    .side-nav__item {
+      justify-content: center;
+      padding: 11px 0;
+    }
+    .side-nav__controls {
+      display: none;
+    }
+    .side-nav__foot {
+      padding: 14px 6px;
+    }
+  }
+}

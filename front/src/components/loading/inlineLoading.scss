@@ -1,0 +1,32 @@
+/**
+ * InlineLoading 区域内加载（转圈）样式
+ */
+
+.inline-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  // 有文字时留间距
+  gap: 8px;
+  vertical-align: middle;
+
+  &__ring {
+    display: block;
+    // 转圈动画
+    animation: inline-loading-spin 0.9s linear infinite;
+  }
+
+  &__text {
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-secondary);
+  }
+}
+
+@keyframes inline-loading-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

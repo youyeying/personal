@@ -1,0 +1,60 @@
+/**
+ * 公共组件 · PagePanel 页面模板样式
+ * header 卡片 + 数据卡片；数据卡片相对定位承载不透明加载遮罩
+ */
+.page-panel {
+  display: flex;
+  flex-direction: column;
+  // 内容区左右留白 + 卡间距：clamp 平滑缩放（rem，随视口连续变化，无断点跳变）
+  gap: clamp(0.75rem, 1.1vw, 1.5rem); // 12px ~ 24px
+  padding: clamp(0.75rem, 2vw, 2rem); // 左右 12px ~ 32px
+
+  // ---- header 卡片 ----
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cb-space-4);
+    padding: var(--cb-space-4) var(--cb-space-5);
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--cb-font-xl);
+    font-weight: var(--cb-font-weight-medium);
+    color: var(--cb-mod);
+    transition: color 0.9s ease;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--cb-space-3);
+    flex-wrap: wrap;
+  }
+
+  // ---- 数据卡片 ----
+  &__data {
+    position: relative;
+    min-width: 0;
+    // 高度随内容自适应，内部不设滚动
+    overflow: hidden;
+  }
+
+  &__body {
+    padding: var(--cb-space-5);
+  }
+
+  // ---- 不透明加载遮罩 ----
+  &__loading {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // 不透明：完全盖住底层内容
+    background: var(--cb-surface);
+  }
+}

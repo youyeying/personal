@@ -1,0 +1,49 @@
+/**
+ * MetricCard 指标卡样式（统一记账 /__metric 与健康 /__metric）
+ */
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--cb-space-4) var(--cb-space-5);
+  border: 1px solid var(--cb-hairline);
+  border-radius: var(--cb-radius-btn);
+  background: var(--cb-canvas);
+
+  &--accent {
+    border-color: var(--cb-mod);
+    background: color-mix(in srgb, var(--cb-mod) 14%, var(--cb-surface));
+  }
+
+  &__label {
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-secondary);
+  }
+
+  &__value {
+    font-family: var(--cb-font-mono);
+    font-size: 22px;
+    font-weight: 600;
+
+    &.is-ok {
+      color: var(--cb-success);
+    }
+    &.is-err {
+      color: var(--cb-error);
+    }
+
+    // 单位（全局 .num 内的 <i>）相对缩小
+    :deep(i) {
+      font-style: normal;
+      font-size: var(--cb-font-xs);
+      color: var(--cb-ink-muted);
+      margin-left: 3px;
+      font-weight: 400;
+    }
+  }
+
+  &__sub {
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+  }
+}

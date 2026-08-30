@@ -1,0 +1,472 @@
+/**
+ * 健康 · 锻炼子页专用样式（ExerciseInput / ExerciseStats / ExerciseHistory）
+ * 类名前缀：运动打卡 exi__ / 锻炼统计 exs__ / 锻炼历史 exh__（与组件模板一致）
+ * 颜色/间距一律来自 --cb-* 令牌；数字等宽
+ */
+
+/* ================= 锻炼打卡 (ExerciseInput, exi__) ================= */
+.exi {
+  // 与健康页其余子页卡一致：全局 .card 不带 padding，由各卡根补 24px
+  padding: var(--cb-space-5);
+  &__groups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-2);
+    margin-bottom: var(--cb-space-4);
+  }
+  &__group-label {
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+    margin: var(--cb-space-3) 0 var(--cb-space-2);
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cb-space-2);
+  }
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--cb-radius-btn);
+    border: 1px solid var(--cb-hairline);
+    background: var(--cb-canvas);
+    color: var(--cb-ink-secondary);
+    font-size: var(--cb-font-sm);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    i {
+      font-style: normal;
+      font-size: 11px;
+      color: var(--cb-ink-muted);
+    }
+    &.is-on {
+      border-color: var(--cb-mod);
+      color: var(--cb-mod);
+      background: color-mix(in srgb, var(--cb-mod) 10%, var(--cb-surface));
+      font-weight: var(--cb-font-weight-medium);
+      i { color: var(--cb-mod); }
+    }
+    &:hover:not(.is-on) {
+      border-color: var(--cb-mod);
+    }
+    &--add {
+      border-style: dashed;
+      color: var(--cb-ink-muted);
+    }
+  }
+  &__last {
+    display: flex;
+    align-items: center;
+    gap: var(--cb-space-2);
+    background: color-mix(in srgb, var(--cb-teal) 8%, var(--cb-surface));
+    border: 1px solid color-mix(in srgb, var(--cb-teal) 25%, transparent);
+    color: var(--cb-teal);
+    border-radius: var(--cb-radius-btn);
+    padding: 8px 12px;
+    font-size: var(--cb-font-xs);
+    margin: var(--cb-space-3) 0;
+    b {
+      font-family: var(--cb-font-mono);
+      font-weight: 600;
+    }
+  }
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-3);
+  }
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--cb-space-3);
+    &--note {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    span {
+      font-size: var(--cb-font-xs);
+      color: var(--cb-ink-secondary);
+    }
+    input, select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--cb-hairline);
+      border-radius: var(--cb-radius-input);
+      background: var(--cb-canvas);
+      color: var(--cb-ink);
+      font-size: var(--cb-font-md);
+      font-family: inherit;
+      outline: none;
+      &:focus {
+        border-color: var(--cb-mod);
+      }
+      &.num { font-family: var(--cb-font-mono); }
+    }
+    select { font-family: var(--cb-font-mono); }
+  }
+  &__calc {
+    background: color-mix(in srgb, var(--cb-teal) 8%, var(--cb-surface));
+    border-left: 3px solid var(--cb-teal);
+    border-radius: 0 var(--cb-radius-btn) var(--cb-radius-btn) 0;
+    padding: 8px 12px;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-secondary);
+    line-height: 1.7;
+    b {
+      font-family: var(--cb-font-mono);
+      color: var(--cb-teal);
+      font-weight: 600;
+      font-size: var(--cb-font-lg);
+    }
+  }
+  &__calc-sub {
+    color: var(--cb-ink-muted);
+  }
+  &__save {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 28px;
+    border: 0;
+    border-radius: var(--cb-radius-btn);
+    background: var(--cb-mod);
+    color: #fff;
+    font-size: var(--cb-font-md);
+    font-weight: var(--cb-font-weight-medium);
+    font-family: inherit;
+    cursor: pointer;
+    svg { color: #fff; }
+    &:hover {
+      background: var(--cb-mod-hover, var(--cb-primary-hover));
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+  &__today {
+    margin-top: var(--cb-space-5);
+    border-top: 1px dashed var(--cb-hairline);
+    padding-top: var(--cb-space-4);
+  }
+  &__today-title {
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-secondary);
+    margin-bottom: var(--cb-space-3);
+    b {
+      font-family: var(--cb-font-mono);
+      color: var(--cb-teal);
+    }
+  }
+  &__today-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-2);
+  }
+  // 新增条目入场（下滑淡入）、删除离场（淡出）、兄弟位移
+  &__today-list-enter-active,
+  &__today-list-leave-active {
+    transition: all 0.25s ease;
+  }
+  &__today-list-enter-from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  &__today-list-leave-to {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  &__today-list-move {
+    transition: transform 0.25s ease;
+  }
+  &__today-item {
+    display: flex;
+    align-items: center;
+    gap: var(--cb-space-3);
+    padding: 9px 14px;
+    background: var(--cb-canvas);
+    border-radius: var(--cb-radius-btn);
+    font-size: var(--cb-font-sm);
+    flex-wrap: wrap;
+  }
+  &__today-name {
+    font-weight: var(--cb-font-weight-medium);
+    min-width: 96px;
+  }
+  &__today-detail {
+    color: var(--cb-ink-secondary);
+  }
+  &__today-hand {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--cb-mod) 14%, transparent);
+    color: var(--cb-mod);
+  }
+  &__today-kcal {
+    margin-left: auto;
+    font-family: var(--cb-font-mono);
+    color: var(--cb-teal);
+    font-weight: 600;
+  }
+  &__today-copy {
+    border: 0;
+    background: transparent;
+    color: var(--cb-ink-muted);
+    cursor: pointer;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    &:hover {
+      color: var(--cb-mod);
+    }
+  }
+  &__today-del {
+    border: 0;
+    background: transparent;
+    color: var(--cb-ink-muted);
+    cursor: pointer;
+    font-size: 15px;
+    &:hover { color: var(--cb-error); }
+  }
+  &__today-empty {
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-muted);
+  }
+  &__add {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-3);
+    .exi__field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      span {
+        font-size: var(--cb-font-xs);
+        color: var(--cb-ink-secondary);
+      }
+      input,
+      select {
+        padding: 9px 12px;
+        border: 1px solid var(--cb-hairline);
+        border-radius: var(--cb-radius-input);
+        background: var(--cb-canvas);
+        color: var(--cb-ink);
+        font-family: var(--cb-font-mono);
+        font-size: var(--cb-font-md);
+      }
+    }
+  }
+}
+
+/* ================= 锻炼统计 (ExerciseStats, exs__) ================= */
+.exs {
+  padding: var(--cb-space-5);
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--cb-space-3);
+    margin-bottom: var(--cb-space-5);
+  }
+  &__panel {
+    margin-bottom: var(--cb-space-5);
+  }
+  &__panel-head {
+    display: flex;
+    align-items: center;
+    gap: var(--cb-space-2);
+    margin-bottom: var(--cb-space-3);
+    svg { color: var(--cb-mod); }
+  }
+  &__panel-title {
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  &__panel-hint {
+    margin-left: auto;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+  }
+  &__chart {
+    width: 100%;
+    height: 180px;
+  }
+  &__dist-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-2);
+  }
+  &__dist-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 100px;
+    align-items: center;
+    gap: var(--cb-space-3);
+    font-size: var(--cb-font-sm);
+  }
+  &__dist-name {
+    color: var(--cb-ink-secondary);
+  }
+  &__dist-track {
+    height: 8px;
+    background: var(--cb-canvas);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  &__dist-fill {
+    height: 100%;
+    background: var(--cb-mod);
+    border-radius: 4px;
+  }
+  &__dist-val {
+    text-align: right;
+    font-family: var(--cb-font-mono);
+    color: var(--cb-ink-secondary);
+  }
+}
+
+/* ================= 锻炼历史 (ExerciseHistory, exh__) ================= */
+.exh {
+  padding: var(--cb-space-5);
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--cb-space-3);
+    margin-bottom: var(--cb-space-4);
+    flex-wrap: wrap;
+  }
+  &__link {
+    border: 0;
+    background: transparent;
+    color: var(--cb-mod);
+    cursor: pointer;
+    font-size: var(--cb-font-xs);
+  }
+  &__empty {
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-muted);
+    text-align: center;
+    padding: var(--cb-space-5) 0;
+  }
+  &__pager {
+    margin-top: var(--cb-space-4);
+  }
+  &__action {
+    font-weight: var(--cb-font-weight-medium);
+  }
+  &__param {
+    color: var(--cb-ink-secondary);
+  }
+  &__hand {
+    display: inline-block;
+    font-size: 12px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--cb-mod) 14%, transparent);
+    color: var(--cb-mod);
+    margin-left: 6px;
+    &.is-hand { font-family: var(--cb-font-mono); }
+  }
+  &__kcal {
+    color: var(--cb-teal);
+    font-weight: 600;
+    small {
+      display: block;
+      font-size: 11px;
+      color: var(--cb-ink-muted);
+      font-weight: 400;
+    }
+  }
+  &__op {
+    border: 0;
+    background: transparent;
+    color: var(--cb-ink-muted);
+    cursor: pointer;
+    padding: 4px;
+    &:hover { color: var(--cb-mod); }
+    &--del:hover { color: var(--cb-error); }
+  }
+  &__edit {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-3);
+    label {
+      font-size: var(--cb-font-xs);
+      color: var(--cb-ink-secondary);
+    }
+    input, select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--cb-hairline);
+      border-radius: var(--cb-radius-input);
+      background: var(--cb-canvas);
+      color: var(--cb-ink);
+      font-size: var(--cb-font-md);
+      font-family: inherit;
+      outline: none;
+      &.num { font-family: var(--cb-font-mono); }
+      &:focus { border-color: var(--cb-mod); }
+    }
+    select { font-family: var(--cb-font-mono); }
+  }
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  &__optgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--cb-space-3);
+  }
+  &__detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-3);
+  }
+  &__drow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--cb-space-3);
+    span.num { font-family: var(--cb-font-mono); }
+  }
+  &__dlabel {
+    flex: 0 0 64px;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+  }
+  &__drow--note {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    border-top: 1px dashed var(--cb-hairline);
+    padding-top: var(--cb-space-3);
+  }
+}
+
+/* ================= 响应式 ================= */
+@media (max-width: 900px) {
+  .exs__metrics { grid-template-columns: repeat(2, 1fr); }
+  .exi__row { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .exi__row,
+  .exi__row--note {
+    grid-template-columns: 1fr;
+  }
+  .exs__metrics { grid-template-columns: 1fr 1fr; }
+  .exh__optgrid { grid-template-columns: 1fr; }
+}

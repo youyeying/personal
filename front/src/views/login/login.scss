@@ -1,0 +1,305 @@
+/**
+ * 登录页样式
+ * - 全屏背景（浅色主题下用浅灰，与白色卡片形成对比）
+ * - 宽屏：两卡片相连并排（左壁纸 + 右认证）
+ * - 卡片尺寸：宽高 = 页面宽度的 30%，最大 600px，最小 400px（严格执行）
+ * - 窄屏：全屏加载1号过渡后只显示单卡片（认证卡）
+ */
+
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // 占满视口高度，flex 居中才能相对整个屏幕垂直居中
+  width: 100%;
+  // 高度 = max(视口高度, 450px)：正常屏幕撑满视口居中；极小窗口至少 450px 可滚动
+  min-height: max(100vh, 450px);
+  // 最小宽度：保证布局稳定
+  min-width: 450px;
+  padding: var(--cb-space-5);
+  // 页面最外层背景：暂时改为白色
+  background: #ffffff;
+  position: relative;
+  // 内容溢出时允许滚动
+  overflow-x: auto;
+  overflow-y: auto;
+
+  // ---- 右上角主题切换 ----
+  &__theme-toggle {
+    position: absolute;
+    top: var(--cb-space-5);
+    right: var(--cb-space-5);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--cb-hairline);
+    border-radius: 50%;
+    background: var(--cb-surface);
+    color: var(--cb-ink);
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      border-color: var(--cb-primary);
+      box-shadow: var(--cb-shadow-card-hover);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--cb-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__theme-icon {
+    display: block;
+  }
+
+  // ---- 相连双卡片容器 ----
+  // 面板：左右两个内容半区（注册左 / 登录右）固定不动，壁纸浮空层在其上左右滑动
+  &__cards {
+    position: relative;
+    width: calc(var(--cb-login-card-size) * 2);
+    height: var(--cb-login-card-size);
+    overflow: hidden;
+    border: 1px solid var(--cb-hairline);
+    border-radius: var(--cb-radius-card);
+    box-shadow:
+      0 8px 24px rgba(26, 25, 23, 0.08),
+      0 2px 6px rgba(26, 25, 23, 0.06);
+
+    // 单卡状态：容器收窄到单卡宽度
+    &--single {
+      width: var(--cb-login-card-size);
+      max-width: var(--cb-login-card-size);
+    }
+
+    // 单卡状态：渲染的内容层占满整个面板（v-if 保证只有当前 mode 一个层）
+    &--single .login-card--register,
+    &--single .login-card--login {
+      left: 0;
+      width: 100%;
+      border-left: none;
+    }
+  }
+}
+
+// ---- 卡片通用 ----
+// 内容半区固定在各自位置（不参与滑动）；壁纸为独立浮空层
+.login-card {
+  position: absolute;
+  top: 0;
+  // 每层占一个半区（单卡宽）
+  width: var(--cb-login-card-size);
+  height: 100%;
+
+  &__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--cb-ink-muted);
+    font-size: var(--cb-font-sm);
+  }
+}
+
+// ---- 注册内容层（固定在左半区，v-if 渲染） ----
+.login-card--register {
+  left: 0;
+  background: var(--cb-surface);
+}
+
+// ---- 登录内容层（固定在右半区，v-if 渲染） ----
+.login-card--login {
+  left: 50%;
+  background: var(--cb-surface);
+  border-left: 1px solid var(--cb-hairline);
+}
+
+// ---- 内容层切换动画（渐隐渐现，配合壁纸移动） ----
+.auth-card-enter-active,
+.auth-card-leave-active {
+  transition: opacity 1.2s ease;
+}
+
+.auth-card-enter-from,
+.auth-card-leave-to {
+  opacity: 0;
+}
+
+// ---- 壁纸浮空层（A方案） ----
+// 浮空覆盖在内容层之上，login 时盖住左半区（露出右侧登录），register 时滑到右半区（露出左侧注册）
+.login-card--wallpaper {
+  left: 0;
+  z-index: 2;
+  // 动画时长调慢，更优雅
+  transition: transform 0.8s ease;
+  // 浮空感：轻微投影 + 圆角，让它看起来是独立浮在上面的卡片
+  box-shadow:
+    0 4px 16px rgba(26, 25, 23, 0.18),
+    0 1px 4px rgba(26, 25, 23, 0.1);
+
+  // 注册模式：壁纸滑到右半区（盖住登录，露出注册）
+  .login-page__cards--register & {
+    transform: translateX(100%);
+  }
+}
+
+// 壁纸底图：整图填满（cover 裁切填满正方形）
+.login-card__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+// 暗化蒙层：提升壁纸上的文字对比度（A方案核心）
+.login-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 25, 23, 0.08);
+}
+
+// 壁纸卡上的品牌文字（氛围层）
+.login-card__brand {
+  position: absolute;
+  left: var(--cb-space-5);
+  right: var(--cb-space-5);
+  bottom: var(--cb-space-5);
+  color: #fff;
+  text-align: left;
+
+  &-title {
+    margin: 0 0 var(--cb-space-1);
+    font-size: var(--cb-font-xl);
+    font-weight: var(--cb-font-weight-bold);
+    text-shadow: 0 1px 4px rgba(26, 25, 23, 0.4);
+  }
+
+  &-sub {
+    margin: 0;
+    font-size: var(--cb-font-sm);
+    font-weight: var(--cb-font-weight-regular);
+    opacity: 0.9;
+  }
+}
+
+// ---- 右卡片：认证区内容 ----
+// 认证内容容器：内边距撑出表单空间
+.login-card__auth-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--cb-space-6);
+}
+
+// 表单标题：位于卡片顶部，不堵着输入框
+.login-card__auth-title {
+  display: flex;
+  gap: var(--cb-space-2);
+  margin: 0 0 var(--cb-space-5);
+  font-size: var(--cb-font-2xl);
+  font-weight: var(--cb-font-weight-bold);
+  color: var(--cb-ink);
+
+  // 每个字独立 span，可分别着色
+  &-char {
+    display: inline-block;
+  }
+
+  // 强调字用主色
+  &-char--accent {
+    color: var(--cb-primary);
+  }
+}
+
+// 登录/注册层：标题统一在右上角
+.login-card--register .login-card__auth-title,
+.login-card--login .login-card__auth-title {
+  position: absolute;
+  top: var(--cb-space-6);
+  right: var(--cb-space-6);
+  margin: 0;
+}
+
+// 表单主体：垂直居中在标题与底部链接之间
+.login-card__auth-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+}
+
+// 输入框字段：组件自身已含顶部标签空间 + 错误区，字段间只需轻间距
+.login-card__auth-field {
+  // 字段之间仅 10px（组件高度已留足上下空间）
+  margin-bottom: 10px;
+
+  // 最后一个字段底部不留（切换链接会紧贴）
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// 登录/注册提交按钮：在表单内全宽
+.login-card__submit {
+  width: 100%;
+  margin-top: var(--cb-space-5);
+}
+
+// 切换链接（登录 ↔ 注册）
+.login-card__switch-link {
+  margin-top: var(--cb-space-3);
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--cb-font-sm);
+  color: var(--cb-primary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--cb-primary-active);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--cb-primary);
+    outline-offset: 2px;
+  }
+}
+
+// 登录层：链接在左下角
+.login-card--login .login-card__switch-link {
+  align-self: flex-start;
+}
+
+// 注册层：链接在右下角
+.login-card--register .login-card__switch-link {
+  align-self: flex-end;
+}
+
+// ===================== 滚动条设计 =====================
+// 全局统一滚动条（细、圆角、弱化）
+.login-page ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.login-page ::-webkit-scrollbar-thumb {
+  background: var(--cb-hairline);
+  border-radius: 4px;
+
+  &:hover {
+    background: var(--cb-ink-muted);
+  }
+}
+
+.login-page ::-webkit-scrollbar-track {
+  background: transparent;
+}

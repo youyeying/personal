@@ -1,0 +1,61 @@
+/**
+ * 公共组件 · 白天/黑夜模式切换样式（苹果风开关）
+ * 轨道 + 滑钮：亮色时滑钮在左（太阳高亮），暗色时滑到右（月亮高亮）
+ */
+.theme-toggle {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+
+  &__track {
+    position: relative;
+    width: 58px;
+    height: 32px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    background: color-mix(in srgb, var(--cb-mod) 26%, var(--cb-hairline));
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.35s ease;
+  }
+
+  &__sun {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  &__moon {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  &__thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cb-ink-secondary);
+    transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.3, 1.35);
+  }
+
+  &--dark {
+    .theme-toggle__track {
+      background: color-mix(in srgb, var(--cb-mod) 60%, #1e1c18);
+    }
+    .theme-toggle__thumb {
+      transform: translateX(26px);
+      color: #f3d578; // 月亮微暖黄
+    }
+  }
+}

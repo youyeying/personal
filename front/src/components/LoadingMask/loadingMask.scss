@@ -1,0 +1,13 @@
+/**
+ * LoadingMask 不透明加载遮罩样式
+ * 覆盖所在卡片区域（父级需 position:relative），背景用表面色不透出内容
+ */
+.loading-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cb-surface);
+}

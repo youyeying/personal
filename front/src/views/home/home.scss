@@ -1,0 +1,86 @@
+/**
+ * 后台布局壳样式
+ * - 两栏：左侧导航满高（flex 子项自动贴满高度）+ 右侧 side（header + 内容区）
+ * - 右侧内容区独立滚动（min-height:0 + overflow-y:auto）
+ * - 抽屉全屏 overlay：导航隐藏时由 header 菜单按钮调起
+ */
+.app-layout {
+  height: 100%;
+  display: flex;
+  background: var(--cb-canvas);
+
+  // 右侧：横向滚动容器（header 与内容区一起左右滚动）
+  &__side {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    // 横向滚动在这一层：窄屏时 header 随内容同进同出
+    overflow-x: auto;
+  }
+
+  // 内包裹：与内容同宽（fit-content），保证 header 拉伸到内容实际宽度（含页面 min-width）
+  &__inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: fit-content;
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    // 纵向滚动仍在 main：滚动条只在 header 下方，不延伸到 header
+    overflow-y: auto;
+  }
+
+  // ---- 抽屉全屏导航 ----
+  &__drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+  }
+
+  &__mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 18, 14, 0.4);
+  }
+
+  &__panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%; // 全屏导航
+  }
+}
+
+// ---- 抽屉进入/退出动画 ----
+.drawer-enter-active,
+.drawer-leave-active {
+  transition: opacity 0.3s ease;
+
+  .app-layout__panel {
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+}
+
+.drawer-enter-from,
+.drawer-leave-to {
+  opacity: 0;
+
+  .app-layout__panel {
+    transform: translateX(-100%);
+  }
+}
+
+.drawer-enter-to,
+.drawer-leave-from {
+  opacity: 1;
+
+  .app-layout__panel {
+    transform: translateX(0);
+  }
+}

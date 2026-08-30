@@ -1,0 +1,27 @@
+/**
+ * Fireworks 烟花样式
+ * - 全屏覆盖层（默认），指针事件穿透不影响交互
+ * - canvas 绘制粒子
+ */
+
+.fireworks {
+  // 全屏覆盖
+  &--fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  // 局部模式
+  &:not(&--fullscreen) {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
