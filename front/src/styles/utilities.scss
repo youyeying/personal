@@ -1,0 +1,56 @@
+/**
+ * 通用工具类：间距 / 文本 / 布局 / 状态
+ */
+
+// ---- 间距工具 ----
+.mt-1 { margin-top: var(--cb-space-1); }
+.mt-2 { margin-top: var(--cb-space-2); }
+.mt-3 { margin-top: var(--cb-space-3); }
+.mt-4 { margin-top: var(--cb-space-4); }
+.mb-1 { margin-bottom: var(--cb-space-1); }
+.mb-2 { margin-bottom: var(--cb-space-2); }
+.mb-3 { margin-bottom: var(--cb-space-3); }
+.mb-4 { margin-bottom: var(--cb-space-4); }
+
+// ---- 文本工具 ----
+// 三级对比度：主要(ink) / 次要(secondary) / 弱化(muted)
+// 主要文字可直接用默认 body 色（--cb-ink），无需加 class
+.text-secondary { color: var(--cb-ink-secondary); } // 次要信息
+.text-muted { color: var(--cb-ink-muted); }         // 提示/占位符
+.text-error { color: var(--cb-error); }
+.text-success { color: var(--cb-success); }
+.text-warning { color: var(--cb-warning); }
+.text-teal { color: var(--cb-teal); }
+
+// 文字粗细
+.font-regular { font-weight: var(--cb-font-weight-regular); }
+.font-medium { font-weight: var(--cb-font-weight-medium); }
+.font-bold { font-weight: var(--cb-font-weight-bold); }
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ---- 布局工具 ----
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-col { display: flex; flex-direction: column; }
+
+// ---- 卡片通用 ----
+.card {
+  background: var(--cb-surface);
+  border: 1px solid var(--cb-hairline);
+  border-radius: var(--cb-radius-card);
+  box-shadow: var(--cb-shadow-card);
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--cb-shadow-card-hover);
+  }
+}

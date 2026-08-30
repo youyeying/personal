@@ -1,0 +1,19 @@
+/**
+ * 公共组件 · DateRangePicker 样式
+ * 窄屏退化模式：上下两个单日选择，各输入框自适应宽度（不溢出）
+ */
+.date-range-picker {
+  &__narrow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  &__single {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+  }
+}

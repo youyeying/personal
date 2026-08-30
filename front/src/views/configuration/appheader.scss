@@ -1,0 +1,157 @@
+/**
+ * 公共布局 · 顶部 header 样式
+ * 整体背景随模块主色着色（色块渐变），标题/底部描边引用 --cb-mod，切换模块平滑变色
+ * 高度固定，不参与内容区滚动
+ */
+.app-header {
+  height: 68px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: color-mix(in srgb, var(--cb-mod) 14%, var(--cb-surface));
+  border-bottom: 2px solid var(--cb-mod);
+  transition: background-color 0.9s ease, border-bottom-color 0.9s ease;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  &__menu-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    color: var(--cb-mod);
+    border-radius: var(--cb-radius-btn);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--cb-mod) 16%, transparent);
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--cb-font-xl);
+    font-weight: var(--cb-font-weight-medium);
+    color: var(--cb-mod);
+    transition: color 0.9s ease;
+    white-space: nowrap;
+    // 弹性收缩：空间不足时标题截断省略（而非覆盖到右侧头像）
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    cursor: pointer;
+    height: 100%; // 组合撑满 header 高度，垂直居中
+    padding: 0 10px;
+    border-radius: var(--cb-radius-btn);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--cb-mod) 14%, transparent);
+    }
+  }
+
+  // 头像壳：44×44 圆形，内含 <img> 或兜底 icon
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--cb-mod) 40%, var(--cb-surface));
+    border: 1px solid color-mix(in srgb, var(--cb-mod) 45%, transparent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in srgb, var(--cb-mod) 75%, #fff);
+    overflow: hidden; // 图片填满圆形
+    flex-shrink: 0;
+    transition: background-color 0.9s ease, color 0.9s ease;
+  }
+
+  // 上传头像图片：等比铺满，不出圆角外
+  &__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+  }
+
+  &__avatar-icon {
+    font-size: 24px;
+  }
+
+  &__nick {
+    font-size: var(--cb-font-lg);
+    font-weight: var(--cb-font-weight-medium);
+    user-select: text;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// 窄屏（<600）：隐藏「标题右侧小字」；标题/昵称保留（header 已随内容横向滚动，宽度足够不覆盖）
+@media (max-width: 600px) {
+  .app-header {
+    padding: 0 12px;
+
+    &__info {
+      gap: 10px;
+    }
+
+    &__desc {
+      display: none;
+    }
+
+    &__title {
+      font-size: var(--cb-font-lg);
+    }
+  }
+}
+
+// 头像下拉（teleport 到 body，需全局选择器）：
+// 固定适中宽度 + 文本居中
+:global(.app-header__dd) {
+  .el-dropdown-menu {
+    min-width: 168px;
+  }
+  .el-dropdown-menu__item {
+    justify-content: center;
+    font-size: var(--cb-font-md);
+  }
+}

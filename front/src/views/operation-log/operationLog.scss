@@ -1,0 +1,45 @@
+/**
+ * 操作日志页样式
+ * 分页区 + 详情弹窗
+ */
+.op-log {
+  &__action {
+    color: var(--cb-teal);
+  }
+
+  &__content {
+    color: var(--cb-ink);
+  }
+
+  &__pager {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--cb-space-4) var(--cb-space-5) var(--cb-space-5);
+  }
+}
+
+// 详情弹窗
+.op-log-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-space-3);
+
+  &__row {
+    display: flex;
+    gap: var(--cb-space-4);
+    font-size: var(--cb-font-md);
+  }
+
+  &__label {
+    flex-shrink: 0;
+    width: 72px;
+    color: var(--cb-ink-secondary);
+  }
+
+  &__content {
+    color: var(--cb-ink);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+}

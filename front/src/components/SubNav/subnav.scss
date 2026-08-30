@@ -1,0 +1,37 @@
+/**
+ * SubNav 内容区子页 Tab 样式（页头切换条）
+ * 由记账 exp__subnav / 健康 hl__subnav 抽取统一
+ */
+.subnav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--cb-space-3) var(--cb-space-4);
+  background: color-mix(in srgb, var(--cb-mod) 8%, var(--cb-surface));
+  border: 1px solid var(--cb-hairline);
+  border-radius: var(--cb-radius-card);
+
+  &__btn {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--cb-ink-secondary);
+    padding: 6px 20px;
+    border-radius: var(--cb-radius-btn);
+    font-size: var(--cb-font-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &.is-active {
+      border-color: var(--cb-mod);
+      background: var(--cb-surface);
+      color: var(--cb-mod);
+      font-weight: var(--cb-font-weight-medium);
+    }
+  }
+
+  &__hint {
+    margin-left: auto;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+  }
+}

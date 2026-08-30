@@ -1,0 +1,174 @@
+/**
+ * 公共组件 · DataList 数据列表样式
+ * 表头 + 数据行；固定高度、无滚动；仅数据行显示边框；单行不换行省略
+ */
+.data-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // 禁止滚动
+  min-height: 0;
+}
+
+// ===== 卡片降级模式 =====
+.data-list__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-space-2);
+  padding: var(--cb-space-4);
+  border: 1px solid var(--cb-hairline);
+  border-radius: var(--cb-radius-card);
+  background: var(--cb-surface);
+
+  & + & {
+    margin-top: var(--cb-space-3);
+  }
+}
+
+// 卡片主体（头部 + 信息区）：可点击时整块触发 row-click
+.data-list__card-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-space-3);
+
+  &--clickable {
+    cursor: pointer;
+
+    &:active {
+      opacity: 0.85;
+    }
+  }
+}
+
+// 卡片头部：第一列主字段放大
+.data-list__card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.data-list__card-head-label {
+  font-size: var(--cb-font-xs);
+  color: var(--cb-ink-muted);
+}
+.data-list__card-head-value {
+  font-size: var(--cb-font-lg);
+  font-weight: var(--cb-font-weight-medium);
+  color: var(--cb-ink);
+}
+
+// 卡片信息区：label → value 对，两列网格
+.data-list__card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--cb-space-2) var(--cb-space-4);
+}
+.data-list__card-pair {
+  display: flex;
+  align-items: baseline;
+  gap: var(--cb-space-2);
+  min-width: 0;
+  font-size: var(--cb-font-sm);
+}
+.data-list__card-label {
+  flex-shrink: 0;
+  color: var(--cb-ink-muted);
+  font-size: var(--cb-font-xs);
+}
+.data-list__card-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--cb-ink);
+  text-align: right;
+}
+
+// 卡片底部：操作列
+.data-list__card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--cb-space-2);
+  padding-top: var(--cb-space-2);
+  border-top: 1px solid var(--cb-hairline);
+}
+
+.data-list__row {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+// ---- 表头行（grid 容器，模板由组件内联注入）----
+.data-list__head {
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
+  background: color-mix(in srgb, var(--cb-mod) 8%, var(--cb-surface));
+  border-bottom: 1px solid var(--cb-hairline);
+}
+
+.data-list__head-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center; // 表头文本居中
+  padding: 0 var(--cb-space-3);
+  color: var(--cb-ink-secondary);
+  font-weight: var(--cb-font-weight-medium);
+  font-size: var(--cb-font-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+// ---- 数据单元格：仅在「有数据」时渲染，因此空行不会出现任何边框 ----
+// 列模式=grid 容器（模板内联注入）；非列模式=flex 整行插槽
+.data-list__cell {
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+  border-bottom: 1px solid var(--cb-hairline);
+
+  // 非 columns 模式的单行渲染（首行顶部画线）
+  &--first {
+    border-top: 1px solid var(--cb-hairline);
+  }
+
+  // 可点击行
+  &--clickable {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--cb-mod) 8%, transparent);
+    }
+  }
+
+  // 让插槽内容默认单行不换行、超长省略；父组件也可自行覆盖
+  :deep(> *) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// 按列单元格（grid item；文本居中；内容超长省略）
+.data-list__col {
+  display: flex;
+  align-items: center;
+  justify-content: center; // 数据单元格文本居中
+  padding: 0 var(--cb-space-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+
+  :deep(> *) {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

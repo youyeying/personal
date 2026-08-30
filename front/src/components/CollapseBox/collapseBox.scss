@@ -1,0 +1,17 @@
+/**
+ * CollapseBox 收纳/展开动画容器样式（grid-template-rows 0fr↔1fr）
+ */
+.collapse-box {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.32s ease;
+
+  &.is-collapsed {
+    grid-template-rows: 0fr;
+  }
+
+  &__inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+}

@@ -1,0 +1,121 @@
+/**
+ * 设计令牌：全项目统一引用，禁止在页面内硬编码颜色/间距
+ */
+
+:root {
+  // ---- 画布（从登录页壁纸提取：暖米白 + 陶土棕 + 墨绿灰） ----
+  --cb-canvas: #f2ede4;          // 页面背景（暖米白）
+  --cb-surface: #faf7f0;         // 卡片/面板背景
+  --cb-hairline: #e0d8ca;        // 分隔线
+
+  // ---- 主色（陶土棕，取自壁纸暖棕红） ----
+  --cb-primary: #a8765a;
+  --cb-primary-hover: #b88a6e;
+  --cb-primary-active: #94664c;
+
+  // ---- 文本（墨绿灰，取自壁纸暗部） ----
+  --cb-ink: #2c312f;              // 主文本
+  --cb-ink-secondary: #5c6159;    // 次要文本
+  --cb-ink-muted: #92988d;        // 弱化文本
+
+  // ---- 语义色（克制稳定，暖色系协调） ----
+  --cb-error: #b04a3a;
+  --cb-warning: #a8821f;
+  --cb-teal: #3f7a72;
+  --cb-success: #3d7a55;
+
+  // ---- 字体 ----
+  // 正常页面：霞鹜文楷 Screen（手写楷体，书卷气，unicode-range 按需加载）
+  // 装饰/加载场景：站酷庆科黄油体（圆润可爱卡通风）
+  // 数字/数据：等宽字体（科幻/数据感）
+  --cb-font-family: 'LXGW WenKai Screen', 'ZCOOL XiaoWei', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --cb-font-cute: 'ZCOOL QingKe HuangYou', 'LXGW WenKai Screen', -apple-system, 'PingFang SC', sans-serif;
+  --cb-font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+
+  // ---- 字号（响应式：手机最小 16px → 34 寸最小 26px 为基础） ----
+  // 以 --cb-font-md 为基准：手机 16px、34 寸 26px
+  // 其余层级在此基础上按比例缩放，标题与基础差距保持在 1.6 倍以内（层级紧凑）
+  --cb-font-xs: clamp(14px, 0.9rem, 22px);      // 手机 14 / 34寸 22
+  --cb-font-sm: clamp(15px, 0.97rem, 24px);     // 手机 15 / 34寸 24
+  --cb-font-md: clamp(16px, 1.08rem, 26px);     // 手机 16 / 34寸 26（基础基准）
+  --cb-font-lg: clamp(17px, 1.18rem, 28px);     // 手机 17 / 34寸 28
+  --cb-font-xl: clamp(18px, 1.3rem, 30px);      // 手机 18 / 34寸 30
+  --cb-font-2xl: clamp(20px, 1.5rem, 34px);     // 手机 20 / 34寸 34
+  --cb-font-3xl: clamp(22px, 1.75rem, 40px);    // 手机 22 / 34寸 40（标题上限）
+
+  // ---- 文字粗细 ----
+  --cb-font-weight-regular: 400;   // 正文常规
+  --cb-font-weight-medium: 500;    // 强调（label / 重要信息）
+  --cb-font-weight-bold: 600;      // 标题 / 按钮 / 关键数字
+
+  // ---- 圆角 ----
+  --cb-radius-btn: 8px;
+  --cb-radius-card: 12px;
+  --cb-radius-input: 8px;
+
+  // ---- 登录页卡片尺寸 ----
+  // 宽高 = 页面宽度 30%，最大 600px，最小 400px（严格执行最小）
+  --cb-login-card-size: clamp(400px, 30vw, 600px);
+  // 输入框组件高度：随卡片尺寸缩放（卡片大输入框高，卡片小输入框矮）
+  --cb-input-height: clamp(76px, calc(var(--cb-login-card-size) * 0.17), 92px);
+  // 输入框内文字与浮动标签字号（跟随卡片缩放）
+  --cb-input-font: clamp(14px, calc(var(--cb-login-card-size) * 0.032), 17px);
+
+  // ---- 阴影 ----
+  --cb-shadow-card: 0 1px 3px rgba(26, 25, 23, 0.06), 0 1px 2px rgba(26, 25, 23, 0.04);
+  --cb-shadow-card-hover: 0 4px 12px rgba(26, 25, 23, 0.1);
+
+  // ---- 间距 ----
+  --cb-space-1: 4px;
+  --cb-space-2: 8px;
+  --cb-space-3: 12px;
+  --cb-space-4: 16px;
+  --cb-space-5: 24px;
+  --cb-space-6: 32px;
+  --cb-space-7: 40px;
+
+  // ---- Element Plus 主色覆盖为陶土棕 ----
+  --el-color-primary: var(--cb-primary);
+  --el-color-primary-light-3: var(--cb-primary-hover);
+  --el-color-primary-light-5: #d8c0ae;
+  --el-color-primary-light-7: #e9dbd0;
+  --el-color-primary-light-8: #f1e7de;
+  --el-color-primary-light-9: #f9f3ee;
+  --el-color-primary-dark-2: var(--cb-primary-active);
+}
+
+// ===================== 暗色模式（html.dark） =====================
+// 白天/黑夜切换（公共组件 ThemeToggle）通过给 <html> 加/去 .dark 触发
+// 仅覆盖核心令牌即可整体换肤，其余组件均引用这些变量自动跟随
+html.dark {
+  --cb-canvas: #1d1b17;            // 深暖墨画布
+  --cb-surface: #272420;           // 深卡片
+  --cb-hairline: #3b372f;          // 暗分隔线
+
+  // 主色提亮一级，暗底上更好读（仍是暖陶土系）
+  --cb-primary: #c08563;
+  --cb-primary-hover: #d09471;
+  --cb-primary-active: #a8765a;
+
+  --cb-ink: #ece5d6;               // 主文本换浅暖白
+  --cb-ink-secondary: #b6af9f;
+  --cb-ink-muted: #857f71;
+
+  // 语义色微提亮，保证暗底识别度
+  --cb-error: #d06a55;
+  --cb-warning: #c99a3a;
+  --cb-teal: #54a095;
+  --cb-success: #57a06b;
+
+  --cb-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --cb-shadow-card-hover: 0 6px 18px rgba(0, 0, 0, 0.55);
+
+  // Element Plus 深色派生
+  --el-color-primary: var(--cb-primary);
+  --el-color-primary-light-3: var(--cb-primary-hover);
+  --el-color-primary-light-5: #6b5a4a;
+  --el-color-primary-light-7: #51463c;
+  --el-color-primary-light-8: #463c33;
+  --el-color-primary-light-9: #3a3129;
+  --el-color-primary-dark-2: #ca9a7c;
+}

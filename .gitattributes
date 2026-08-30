@@ -1,0 +1,3 @@
+# mvnw 保持 LF（bash 脚本），Windows 批处理用 CRLF
+backend/mvnw text eol=lf
+*.cmd text eol=crlf

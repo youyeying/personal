@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康 · 锻炼子页 模板 v4（个数+分钟→速度→MET 强度）</title>
+<style>
+:root {
+  --cb-canvas: #f2ede4; --cb-surface: #faf7f0; --cb-hairline: #e0d8ca;
+  --cb-primary: #a8765a; --cb-primary-hover: #b88a6e;
+  --cb-ink: #2c312f; --cb-ink-secondary: #5c6159; --cb-ink-muted: #92988d;
+  --cb-error: #b04a3a; --cb-warning: #a8821f; --cb-teal: #3f7a72; --cb-success: #3d7a55;
+  --font-main: 'LXGW WenKai Screen', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  --radius-btn: 8px; --radius-card: 12px;
+  --shadow-card: 0 1px 3px rgba(26,25,23,.06), 0 1px 2px rgba(26,25,23,.04);
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+}
+html.dark {
+  --cb-canvas: #1d1b17; --cb-surface: #272420; --cb-hairline: #3b372f;
+  --cb-primary: #c08563; --cb-primary-hover: #d09471;
+  --cb-ink: #ece5d6; --cb-ink-secondary: #b6af9f; --cb-ink-muted: #857f71;
+  --cb-error: #d06a55; --cb-warning: #c99a3a; --cb-teal: #54a095; --cb-success: #57a06b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--cb-canvas); font-family:var(--font-main); color:var(--cb-ink); padding:var(--s4); max-width:1100px; margin:0 auto; transition:background .25s,color .25s; }
+.mono,.num { font-family:var(--font-mono); }
+
+.subnav { display:flex; align-items:center; gap:var(--s2); background:var(--cb-surface); border:1px solid var(--cb-hairline); border-radius:var(--radius-card); padding:var(--s3) var(--s4); margin-bottom:var(--s5); box-shadow:var(--shadow-card); flex-wrap:wrap; }
+.subnav__hint { font-size:13px; color:var(--cb-ink-muted); margin-right:auto; }
+.subnav__tabs { display:flex; gap:var(--s1); }
+.subnav__tab { padding:6px 14px; border-radius:20px; font-size:14px; cursor:pointer; color:var(--cb-ink-secondary); border:none; background:transparent; font-family:inherit; }
+.subnav__tab.is-active { background:var(--cb-primary); color:#fff; font-weight:600; }
+.subnav__tab:not(.is-active):hover { background:rgba(168,118,90,.12); }
+.theme-toggle { position:fixed; top:16px; right:16px; z-index:9; padding:6px 12px; border-radius:var(--radius-btn); border:1px solid var(--cb-hairline); background:var(--cb-surface); color:var(--cb-ink); cursor:pointer; font-family:inherit; font-size:13px; }
+
+.card { background:var(--cb-surface); border:1px solid var(--cb-hairline); border-radius:var(--radius-card); padding:var(--s4) var(--s5) var(--s5); margin-bottom:var(--s5); box-shadow:var(--shadow-card); }
+.card__title { font-size:17px; font-weight:600; margin-bottom:var(--s2); display:flex; align-items:baseline; gap:var(--s3); }
+.card__hint { font-size:13px; color:var(--cb-ink-muted); font-weight:400; }
+
+.group-label { font-size:12px; color:var(--cb-ink-muted); margin:var(--s3) 0 var(--s2); }
+.group-label:first-child { margin-top:0; }
+.chips { display:flex; flex-wrap:wrap; gap:var(--s2); }
+.chip { padding:7px 14px; border-radius:var(--radius-btn); border:1px solid var(--cb-hairline); background:var(--cb-canvas); color:var(--cb-ink-secondary); font-size:14px; cursor:pointer; font-family:inherit; transition:all .15s; }
+.chip.is-on { border-color:var(--cb-primary); color:var(--cb-primary); background:rgba(168,118,90,.1); font-weight:600; }
+.chip--add { border-style:dashed; color:var(--cb-ink-muted); }
+.chip__met { font-size:11px; color:var(--cb-ink-muted); margin-left:4px; }
+
+.body-info { display:flex; gap:var(--s4); flex-wrap:wrap; background:var(--cb-canvas); border-radius:8px; padding:var(--s2) var(--s4); margin:var(--s3) 0; font-size:13px; color:var(--cb-ink-secondary); }
+.body-info b { font-family:var(--font-mono); color:var(--cb-ink); }
+
+.last-hint { display:flex; align-items:center; gap:var(--s2); background:rgba(63,122,114,.08); border:1px solid rgba(63,122,114,.25); color:var(--cb-teal); border-radius:var(--radius-btn); padding:8px 12px; font-size:13px; margin: var(--s3) 0; }
+.last-hint b { font-family:var(--font-mono); }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--s3); margin-bottom:var(--s3); }
+.form-grid--2 { grid-template-columns:1fr 1fr; }
+.form-grid--4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+.field label { display:block; font-size:13px; color:var(--cb-ink-secondary); margin-bottom:5px; }
+.field input { width:100%; padding:9px 12px; border:1px solid var(--cb-hairline); border-radius:8px; background:var(--cb-canvas); color:var(--cb-ink); font-size:15px; font-family:inherit; outline:none; }
+.field input:focus { border-color:var(--cb-primary); }
+.field input.mono { font-family:var(--font-mono); }
+.field__unit { position:relative; }
+.field__unit input { padding-right:42px; }
+.field__unit i { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-style:normal; font-size:12px; color:var(--cb-ink-muted); }
+.hand-seg { display:flex; border:1px solid var(--cb-hairline); border-radius:8px; overflow:hidden; }
+.hand-seg button { flex:1; padding:9px 0; border:none; background:var(--cb-canvas); color:var(--cb-ink-secondary); font-size:14px; cursor:pointer; font-family:inherit; }
+.hand-seg button.is-on { background:var(--cb-primary); color:#fff; font-weight:600; }
+.form-note { margin-bottom:var(--s3); }
+.form-actions { display:flex; gap:var(--s3); flex-wrap:wrap; }
+.btn-primary { padding:10px 28px; background:var(--cb-primary); color:#fff; border:none; border-radius:var(--radius-btn); font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn-primary:hover { background:var(--cb-primary-hover); }
+.btn-ghost { padding:10px 20px; background:transparent; color:var(--cb-ink-secondary); border:1px solid var(--cb-hairline); border-radius:var(--radius-btn); font-size:14px; cursor:pointer; font-family:inherit; }
+
+.auto-line { background:rgba(63,122,114,.08); border-left:3px solid var(--cb-teal); border-radius:0 8px 8px 0; padding:8px 12px; margin-top:var(--s3); font-size:13px; color:var(--cb-ink-secondary); line-height:1.7; }
+.auto-line b { font-family:var(--font-mono); color:var(--cb-teal); font-weight:600; }
+.auto-line .met { display:inline-block; font-family:var(--font-mono); font-size:12px; padding:1px 8px; border-radius:10px; background:rgba(168,118,90,.14); color:var(--cb-primary); margin-left:4px; }
+
+.kcal-preview { display:flex; align-items:baseline; gap:var(--s5); background:var(--cb-canvas); border-radius:8px; padding:var(--s2) var(--s4); margin-top:var(--s3); font-size:13px; color:var(--cb-ink-secondary); flex-wrap:wrap; }
+.kcal-preview__main { display:flex; align-items:baseline; gap:var(--s2); }
+.kcal-preview__main b { font-family:var(--font-mono); font-size:22px; color:var(--cb-teal); font-weight:600; }
+.kcal-preview__sub { font-size:13px; color:var(--cb-ink-muted); }
+.kcal-preview__sub b { font-family:var(--font-mono); color:var(--cb-ink-secondary); }
+
+.today-list { margin-top:var(--s5); border-top:1px dashed var(--cb-hairline); padding-top:var(--s4); }
+.today-list__title { font-size:14px; color:var(--cb-ink-secondary); margin-bottom:var(--s3); }
+.today-list__title b { font-family:var(--font-mono); color:var(--cb-teal); }
+.today-item { display:flex; align-items:center; gap:var(--s3); padding:9px 14px; background:var(--cb-canvas); border-radius:8px; margin-bottom:var(--s2); font-size:14px; flex-wrap:wrap; }
+.today-item__name { font-weight:600; min-width:110px; }
+.today-item__detail { color:var(--cb-ink-secondary); }
+.today-item__detail b { font-family:var(--font-mono); color:var(--cb-ink); }
+.today-item__hand { font-size:12px; padding:2px 8px; border-radius:10px; background:rgba(168,118,90,.14); color:var(--cb-primary); }
+.today-item__kcal { font-family:var(--font-mono); color:var(--cb-teal); font-weight:600; margin-left:auto; }
+.today-item__kcal small { font-size:11px; color:var(--cb-ink-muted); font-weight:400; margin-left:2px; }
+.today-item__del { color:var(--cb-ink-muted); cursor:pointer; font-size:15px; margin-left:6px; }
+.today-item__del:hover { color:var(--cb-error); }
+
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--s3); margin-bottom:var(--s5); }
+.metric { background:var(--cb-canvas); border-radius:8px; padding:var(--s3) var(--s4); }
+.metric__label { font-size:13px; color:var(--cb-ink-muted); margin-bottom:4px; }
+.metric__value { font-family:var(--font-mono); font-size:22px; font-weight:600; }
+.metric__value i { font-style:normal; font-size:12px; color:var(--cb-ink-muted); font-weight:400; margin-left:3px; }
+.metric__value--teal { color:var(--cb-teal); }
+.metric__value--primary { color:var(--cb-primary); }
+.metric__sub { font-size:11px; color:var(--cb-ink-muted); margin-top:2px; font-family:var(--font-mono); }
+
+.chart-wrap { margin-bottom:var(--s5); }
+.chart { display:flex; align-items:flex-end; gap:6px; height:120px; padding-top:var(--s2); }
+.chart__col { flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%; }
+.chart__bar { background:var(--cb-primary); opacity:.85; border-radius:4px 4px 0 0; min-height:3px; }
+.chart__label { text-align:center; font-size:10px; color:var(--cb-ink-muted); margin-top:6px; font-family:var(--font-mono); }
+.chart__today { background:var(--cb-teal); }
+
+.dist { display:flex; flex-direction:column; gap:var(--s2); }
+.dist__row { display:grid; grid-template-columns:120px 1fr 100px; align-items:center; gap:var(--s3); font-size:13px; }
+.dist__name { color:var(--cb-ink-secondary); }
+.dist__track { height:8px; background:var(--cb-canvas); border-radius:4px; overflow:hidden; }
+.dist__fill { height:100%; background:var(--cb-primary); border-radius:4px; }
+.dist__val { text-align:right; font-family:var(--font-mono); color:var(--cb-ink-secondary); }
+
+.table-wrap { overflow-x:auto; }
+.history-bar { display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s4); flex-wrap:wrap; }
+.history-bar input { padding:8px 12px; border:1px solid var(--cb-hairline); border-radius:8px; background:var(--cb-canvas); color:var(--cb-ink); font-family:var(--font-mono); font-size:13px; }
+.history-bar__count { margin-left:auto; font-size:13px; color:var(--cb-ink-muted); }
+table { width:100%; border-collapse:collapse; font-size:14px; min-width:640px; }
+th { text-align:center; color:var(--cb-ink-muted); font-weight:500; font-size:13px; padding:8px 10px; border-bottom:1px solid var(--cb-hairline); }
+td { padding:10px; text-align:center; border-bottom:1px solid var(--cb-hairline); }
+td.num { font-family:var(--font-mono); }
+td.kcal { font-family:var(--font-mono); color:var(--cb-teal); font-weight:600; }
+td.kcal small { display:block; font-size:11px; color:var(--cb-ink-muted); font-weight:400; }
+.hand-badge { font-size:12px; padding:2px 8px; border-radius:10px; background:rgba(168,118,90,.14); color:var(--cb-primary); }
+.op-btn { color:var(--cb-ink-muted); cursor:pointer; margin:0 4px; font-size:14px; }
+.op-btn:hover { color:var(--cb-primary); }
+.op-btn--del:hover { color:var(--cb-error); }
+
+@media (max-width:900px){ .form-grid,.form-grid--4{grid-template-columns:1fr 1fr;} .metrics{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:560px){ body{padding:var(--s3);} .form-grid,.form-grid--2,.form-grid--4{grid-template-columns:1fr;} .metrics{grid-template-columns:1fr 1fr;} .subnav__hint{width:100%;order:2;} }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">切换明暗</button>
+
+<div class="subnav">
+  <span class="subnav__hint">健康 · 锻炼</span>
+  <div class="subnav__tabs">
+    <button class="subnav__tab">打卡</button>
+    <button class="subnav__tab">趋势</button>
+    <button class="subnav__tab is-active">锻炼</button>
+    <button class="subnav__tab">历史</button>
+  </div>
+</div>
+
+<!-- ===== 锻炼打卡 ===== -->
+<section class="card">
+  <div class="card__title">锻炼打卡 <span class="card__hint">记个数+分钟 → 自动算强度与消耗</span></div>
+
+  <div class="body-info">
+    <span>体重 <b>80</b> kg</span>
+    <span>年龄 <b>26</b> 岁</span>
+    <span>身高 <b>184.5</b> cm</span>
+    <span>性别 <b>男</b></span>
+    <span style="color:var(--cb-ink-muted)">（身高/性别 BMR 二期用）</span>
+  </div>
+
+  <div class="group-label">力量 / 核心</div>
+  <div class="chips">
+    <button class="chip is-on" data-type="dumbbell" onclick="selectAction(this)">床上平躺举哑铃<span class="chip__met">基础 3.5</span></button>
+    <button class="chip" data-type="pushup" onclick="selectAction(this)">平肩俯卧撑<span class="chip__met">基础 4.0</span></button>
+    <button class="chip" data-type="bridge" onclick="selectAction(this)">臀桥<span class="chip__met">基础 3.5</span></button>
+    <button class="chip" data-type="barbell" onclick="selectAction(this)">臂力棒<span class="chip__met">基础 3.0</span></button>
+    <button class="chip" data-type="plank" onclick="selectAction(this)">平板支撑<span class="chip__met">基础 4.0</span></button>
+  </div>
+  <div class="group-label">有氧</div>
+  <div class="chips">
+    <button class="chip" data-type="walk" onclick="selectAction(this)">散步<span class="chip__met">按速度定 MET</span></button>
+    <button class="chip" data-type="stairs" onclick="selectAction(this)">爬楼梯<span class="chip__met">基础 8.0</span></button>
+    <button class="chip chip--add">＋ 自定义</button>
+  </div>
+
+  <div id="formArea"></div>
+
+  <div class="kcal-preview">
+    <span class="kcal-preview__main">净消耗 <b id="kcalNet">11</b> kcal</span>
+    <span class="kcal-preview__sub">总消耗 <b id="kcalTotal">15</b> kcal · 含静息基础代谢</span>
+  </div>
+
+  <div class="today-list">
+    <div class="today-list__title">今日已练 · 3 条 · 净消耗 <b>312</b> kcal</div>
+    <div class="today-item">
+      <span class="today-item__name">散步</span>
+      <span class="today-item__detail"><b>2.5</b>km · <b>30</b>min · 5.0km/h · 快走</span>
+      <span class="today-item__kcal">139<small>净</small></span>
+      <span class="today-item__del">✕</span>
+    </div>
+    <div class="today-item">
+      <span class="today-item__name">床上平躺举哑铃</span>
+      <span class="today-item__detail"><b>12</b>个 · <b>2</b>min · 慢做</span>
+      <span class="today-item__hand">左</span>
+      <span class="today-item__kcal">7<small>净</small></span>
+      <span class="today-item__del">✕</span>
+    </div>
+    <div class="today-item">
+      <span class="today-item__name">爬楼梯</span>
+      <span class="today-item__detail"><b>10</b>层 × <b>3</b>次 · 约 6min</span>
+      <span class="today-item__kcal">58<small>净</small></span>
+      <span class="today-item__del">✕</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 锻炼统计 ===== -->
+<section class="card">
+  <div class="card__title">锻炼统计 <span class="card__hint">近 14 天净消耗趋势 · kcal</span></div>
+  <div class="metrics">
+    <div class="metric"><div class="metric__label">今日净消耗</div><div class="metric__value metric__value--teal">312<i>kcal</i></div><div class="metric__sub">总 405 kcal</div></div>
+    <div class="metric"><div class="metric__label">本周净消耗</div><div class="metric__value metric__value--primary">1,240<i>kcal</i></div><div class="metric__sub">总 1,610 kcal</div></div>
+    <div class="metric"><div class="metric__label">本月净消耗</div><div class="metric__value">4,680<i>kcal</i></div><div class="metric__sub">总 6,080 kcal</div></div>
+    <div class="metric"><div class="metric__label">连续锻炼</div><div class="metric__value">5<i>天</i></div></div>
+  </div>
+  <div class="chart-wrap"><div class="chart" id="chart"></div></div>
+  <div class="dist">
+    <div class="dist__row"><span class="dist__name">散步</span><div class="dist__track"><div class="dist__fill" style="width:62%"></div></div><span class="dist__val">1,400 kcal</span></div>
+    <div class="dist__row"><span class="dist__name">爬楼梯</span><div class="dist__track"><div class="dist__fill" style="width:38%"></div></div><span class="dist__val">860 kcal</span></div>
+    <div class="dist__row"><span class="dist__name">举哑铃</span><div class="dist__track"><div class="dist__fill" style="width:22%"></div></div><span class="dist__val">490 kcal</span></div>
+    <div class="dist__row"><span class="dist__name">俯卧撑</span><div class="dist__track"><div class="dist__fill" style="width:15%"></div></div><span class="dist__val">340 kcal</span></div>
+  </div>
+</section>
+
+<!-- ===== 锻炼历史 ===== -->
+<section class="card">
+  <div class="card__title">锻炼历史</div>
+  <div class="history-bar">
+    <input value="2026-08-01"><input value="2026-08-29">
+    <button class="btn-ghost" style="padding:8px 16px">查询</button>
+    <span class="history-bar__count">共 86 条 · 本月净 4,680 kcal</span>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>日期</th><th>动作</th><th>参数</th><th>手</th><th>时长</th><th>强度</th><th>净消耗</th><th>操作</th></tr></thead>
+    <tbody>
+      <tr><td class="num">08-29</td><td>散步</td><td class="num">2.5km·30min<br><span style="font-size:11px;color:var(--cb-ink-muted)">5.0km/h · 快走</span></td><td><span class="hand-badge">-</span></td><td class="num">30m</td><td><span class="hand-badge">快</span></td><td class="kcal">139<small>总 181</small></td><td><span class="op-btn">✎</span><span class="op-btn op-btn--del">🗑</span></td></tr>
+      <tr><td class="num">08-29</td><td>床上平躺举哑铃</td><td class="num">12个·2min<br><span style="font-size:11px;color:var(--cb-ink-muted)">6个/min · MET 2.5</span></td><td><span class="hand-badge">左</span></td><td class="num">2m</td><td><span class="hand-badge">低</span></td><td class="kcal">7<small>总 9</small></td><td><span class="op-btn">✎</span><span class="op-btn op-btn--del">🗑</span></td></tr>
+      <tr><td class="num">08-29</td><td>爬楼梯</td><td class="num">10层×3次<br><span style="font-size:11px;color:var(--cb-ink-muted)">约6min · 上楼梯</span></td><td><span class="hand-badge">-</span></td><td class="num">6m</td><td><span class="hand-badge">高</span></td><td class="kcal">58<small>总 75</small></td><td><span class="op-btn">✎</span><span class="op-btn op-btn--del">🗑</span></td></tr>
+      <tr><td class="num">08-28</td><td>平板支撑</td><td class="num">90秒</td><td><span class="hand-badge">-</span></td><td class="num">90s</td><td><span class="hand-badge">中</span></td><td class="kcal">4<small>总 5</small></td><td><span class="op-btn">✎</span><span class="op-btn op-btn--del">🗑</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<script>
+/* ===== 动作字典（落地时存 exercise_item 表） ===== */
+const ACTIONS = {
+  dumbbell: { name: '床上平躺举哑铃', group: 'strength', baseMet: 3.5, refSpeed: 12, hasWeight: true, hasHand: true, last: '12 个 · 2 分钟 · 左' },
+  pushup:   { name: '平肩俯卧撑',     group: 'strength', baseMet: 4.0, refSpeed: 15, hasWeight: false, hasHand: true, last: '20 个 · 1.5 分钟' },
+  bridge:   { name: '臀桥',           group: 'strength', baseMet: 3.5, refSpeed: 15, hasWeight: false, hasHand: false, last: '20 个 · 1.5 分钟' },
+  barbell:  { name: '臂力棒',         group: 'strength', baseMet: 3.0, refSpeed: 10, hasWeight: false, hasHand: true, last: '15 个 · 1.5 分钟' },
+  plank:    { name: '平板支撑',       group: 'plank',    baseMet: 4.0, refSpeed: 0,  hasWeight: false, hasHand: false, last: '90 秒' },
+  walk:     { name: '散步',           group: 'walk',     baseMet: 0,   refSpeed: 0,  hasWeight: false, hasHand: false, last: '2.5km · 30 分钟' },
+  stairs:   { name: '爬楼梯',         group: 'stairs',   baseMet: 8.0, refSpeed: 0,  hasWeight: false, hasHand: false, last: '10 层 × 3 次' }
+};
+const WALK_MET = [
+  { max: 3.2, met: 2.8, label: '慢走' },
+  { max: 4.0, met: 3.0, label: '正常走' },
+  { max: 4.8, met: 3.5, label: '稍快走' },
+  { max: 5.6, met: 4.3, label: '快走' },
+  { max: Infinity, met: 5.0, label: '暴走' }
+];
+const W = 80;   // 体重 kg
+const NET = 1;  // 净消耗减去的静息 MET
+
+function calcKcal(met, minutes) {
+  const total = Math.round(met * 3.5 * W * minutes / 200);
+  const net = Math.round((met - NET) * 3.5 * W * minutes / 200);
+  return { total, net };
+}
+/* 强度系数：实际速度/参考速度，夹在 0.6~1.4 */
+function intensity(speed, ref) {
+  const c = Math.min(Math.max(speed / ref, 0.6), 1.4);
+  const label = c < 0.85 ? '低' : c < 1.15 ? '中' : '高';
+  return { coef: c, label };
+}
+function metForSpeed(kmh) {
+  for (const s of WALK_MET) if (kmh < s.max) return s;
+  return WALK_MET[WALK_MET.length - 1];
+}
+
+let current = 'dumbbell';
+function selectAction(btn) {
+  current = btn.dataset.type;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('is-on'));
+  btn.classList.add('is-on');
+  renderForm();
+}
+
+function renderForm() {
+  const a = ACTIONS[current];
+  const area = document.getElementById('formArea');
+  let html = `<div class="last-hint">↩ 上次：${a.name} · <b>${a.last}</b> —— 已带出，可直接改</div>`;
+  const field = (id, label, val, unit, evt) =>
+    `<div class="field field__unit"><label>${label}</label><input class="mono" id="${id}" value="${val}" inputmode="decimal" oninput="${evt}()"><i>${unit}</i></div>`;
+
+  if (a.group === 'strength') {
+    html += `<div class="form-grid form-grid--4">
+      ${a.hasWeight ? field('sWeight', '重量（自重留空）', '12.5', 'kg', 'updateStrength') : ''}
+      ${field('sReps', '做了多少个', '12', '个', 'updateStrength')}
+      ${field('sMin', '这组花了几分钟', '2', 'min', 'updateStrength')}
+      ${a.hasHand ? `<div class="field"><label>手</label><div class="hand-seg"><button class="is-on">左</button><button>右</button><button>双</button></div></div>` : ''}
+    </div>
+    <div class="field form-note"><label>备注（可选）</label><input placeholder="如：做慢一点更到位"></div>
+    <div class="form-actions"><button class="btn-primary">保存记录</button></div>
+    <div class="auto-line" id="strengthLine"></div>`;
+    area.innerHTML = html;
+    updateStrength();
+  } else if (a.group === 'plank') {
+    html += `<div class="form-grid form-grid--2">
+      ${field('pSec', '撑了多久', '90', '秒', 'updatePlank')}
+    </div>
+    <div class="field form-note"><label>备注（可选）</label><input placeholder="如：比上次多撑 10 秒"></div>
+    <div class="form-actions"><button class="btn-primary">保存记录</button></div>
+    <div class="auto-line" id="plankLine"></div>`;
+    area.innerHTML = html;
+    updatePlank();
+  } else if (a.group === 'walk') {
+    html += `<div class="form-grid form-grid--2">
+      ${field('wDist', '走了多远', '2.5', 'km', 'updateWalk')}
+      ${field('wMin', '花了多久', '30', 'min', 'updateWalk')}
+    </div>
+    <div class="field form-note"><label>备注（可选）</label><input placeholder="如：晚饭后绕小区"></div>
+    <div class="form-actions"><button class="btn-primary">保存记录</button></div>
+    <div class="auto-line" id="walkLine"></div>`;
+    area.innerHTML = html;
+    updateWalk();
+  } else if (a.group === 'stairs') {
+    html += `<div class="form-grid form-grid--2">
+      ${field('sFloors', '一次爬几层', '10', '层', 'updateStairs')}
+      ${field('sTimes', '爬了几次', '3', '次', 'updateStairs')}
+    </div>
+    <div class="field form-note"><label>备注（可选）</label><input placeholder="如：上楼梯电梯下"></div>
+    <div class="form-actions"><button class="btn-primary">保存记录</button></div>
+    <div class="auto-line" id="stairsLine"></div>`;
+    area.innerHTML = html;
+    updateStairs();
+  }
+}
+
+function updateStrength() {
+  const a = ACTIONS[current];
+  const reps = parseFloat(document.getElementById('sReps').value) || 0;
+  const min = parseFloat(document.getElementById('sMin').value) || 0;
+  const speed = min > 0 ? reps / min : 0;
+  const it = intensity(speed, a.refSpeed);
+  const met = Math.round(a.baseMet * it.coef * 10) / 10;
+  const line = document.getElementById('strengthLine');
+  line.innerHTML = `${reps} 个 ÷ ${min} min = <b>${speed.toFixed(1)} 个/分钟</b> · 强度 <b>${it.label}</b>` +
+    `<span class="met">MET ${a.baseMet} × ${it.coef.toFixed(2)} = ${met}</span>`;
+  if (min > 0) updateKcal(met, min);
+}
+
+function updatePlank() {
+  const sec = parseFloat(document.getElementById('pSec').value) || 0;
+  const min = sec / 60;
+  document.getElementById('plankLine').innerHTML = `<b>${sec.toFixed(0)} 秒</b> = ${min.toFixed(2)} 分钟 · MET 4.0`;
+  if (min > 0) updateKcal(ACTIONS.plank.baseMet, min);
+}
+
+function updateWalk() {
+  const d = parseFloat(document.getElementById('wDist').value) || 0;
+  const m = parseFloat(document.getElementById('wMin').value) || 0;
+  const kmh = m > 0 ? d / (m / 60) : 0;
+  const mi = metForSpeed(kmh);
+  document.getElementById('walkLine').innerHTML = `自动判定：${d}km ÷ ${m}min = <b>${kmh.toFixed(1)} km/h</b> → ${mi.label}<span class="met">MET ${mi.met}</span>`;
+  if (m > 0) updateKcal(mi.met, m);
+}
+
+function updateStairs() {
+  const f = parseFloat(document.getElementById('sFloors').value) || 0;
+  const t = parseFloat(document.getElementById('sTimes').value) || 0;
+  const totalFloors = f * t;
+  const min = totalFloors * 12 / 60; // 每层 12 秒
+  document.getElementById('stairsLine').innerHTML = `${f} 层 × ${t} 次 = <b>${totalFloors} 层</b> × 12秒/层 ≈ <b>${min.toFixed(0)} min</b><span class="met">MET 8.0 上楼梯</span>`;
+  if (min > 0) updateKcal(ACTIONS.stairs.baseMet, min);
+}
+
+function updateKcal(met, minutes) {
+  const { total, net } = calcKcal(met, minutes);
+  document.getElementById('kcalNet').textContent = net;
+  document.getElementById('kcalTotal').textContent = total;
+}
+
+/* 初始：哑铃 */
+renderForm();
+
+/* 柱状图 */
+const chart = document.getElementById('chart');
+const vals = [180, 0, 260, 320, 0, 340, 230, 210, 0, 290, 350, 280, 300, 312];
+const max = Math.max(...vals);
+for (let i = 0; i < vals.length; i++) {
+  const col = document.createElement('div');
+  col.className = 'chart__col';
+  const h = vals[i] / max * 100;
+  col.innerHTML = `<div class="chart__bar ${i === vals.length - 1 ? 'chart__today' : ''}" style="height:${Math.max(h, 2)}%"></div><div class="chart__label">${8 + i < 10 ? '0' + (8 + i) : (8 + i)}</div>`;
+  chart.appendChild(col);
+}
+
+function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+</script>
+</body>
+</html>

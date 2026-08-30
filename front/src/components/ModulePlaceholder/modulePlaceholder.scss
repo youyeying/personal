@@ -1,0 +1,48 @@
+/**
+ * 公共组件 · 模块占位页样式（空态卡片）
+ * 图标 / 标题引用 --cb-mod，随模块主题加载后变色
+ */
+.module-placeholder {
+  min-height: 100%;
+  padding: var(--cb-space-6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  &__card {
+    width: 100%;
+    max-width: 520px;
+    margin-top: 10vh;
+    padding: var(--cb-space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+    background: var(--cb-surface);
+    border: 1px solid var(--cb-hairline);
+    border-radius: var(--cb-radius-card);
+    box-shadow: var(--cb-shadow-card);
+  }
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    font-size: 32px;
+    color: var(--cb-mod);
+    transition: color 0.6s ease;
+  }
+
+  &__name {
+    margin: 0;
+    font-size: var(--cb-font-2xl);
+    color: var(--cb-mod);
+    transition: color 0.6s ease;
+  }
+
+  &__desc {
+    margin: 0;
+    color: var(--cb-ink-secondary);
+    font-size: var(--cb-font-md);
+  }
+}

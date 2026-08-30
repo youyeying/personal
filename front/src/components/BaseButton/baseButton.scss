@@ -1,0 +1,105 @@
+/**
+ * BaseButton 通用按钮样式
+ * - 无边框、小圆角（非椭圆）
+ * - hover：微微抬起 + 底部阴影 + 文本与图标间距展开
+ * - loading：图标区被转圈覆盖，按钮禁用
+ */
+
+.base-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  // 文本 + 图标 + 间距
+  gap: var(--cb-space-2);
+  padding: 10px 20px;
+  // 无边框
+  border: none;
+  // 小圆角（非椭圆胶囊）
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: var(--cb-font-md);
+  font-weight: var(--cb-font-weight-medium);
+  cursor: pointer;
+  // hover 抬起动画
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    gap 0.25s ease,
+    opacity 0.2s ease;
+
+  // hover：微微抬起 + 底部阴影 + 图标文本展开
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -6px rgba(26, 25, 23, 0.3);
+    // 文本与图标间距展开
+    gap: var(--cb-space-3);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--cb-primary);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  // ---- 主题 ----
+  // 主色：陶土棕
+  &--primary {
+    background: var(--cb-primary);
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: var(--cb-primary-hover);
+    }
+  }
+
+  // 浅色：米白底 + 主色字
+  &--plain {
+    background: var(--cb-surface);
+    color: var(--cb-primary);
+    box-shadow: 0 1px 2px rgba(26, 25, 23, 0.06);
+
+    &:hover:not(:disabled) {
+      background: var(--cb-canvas);
+      box-shadow: 0 8px 16px -6px rgba(26, 25, 23, 0.2);
+    }
+  }
+
+  // 纯文字
+  &--text {
+    background: transparent;
+    color: var(--cb-primary);
+    padding: 8px 12px;
+
+    &:hover:not(:disabled) {
+      background: rgba(168, 118, 90, 0.08);
+      box-shadow: none;
+      transform: none;
+    }
+  }
+
+  // ---- 图标区（文本右侧） ----
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // ---- 区域内加载（转圈，不透明替换图标） ----
+  // 转圈占位区域，不透明背景盖住原图标位置
+  &__spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    // 不透明背景：完全替换图标
+    background: inherit;
+    // 固定占位尺寸，与图标区一致，避免布局抖动
+    width: 16px;
+    height: 16px;
+  }
+}

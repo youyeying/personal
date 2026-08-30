@@ -1,0 +1,36 @@
+# ===== IDE / 编辑器 =====
+.idea/
+.vscode/
+*.iml
+
+# ===== Git 备份目录（隐私清洗产生的旧仓库备份，勿提交）=====
+.git-*/
+
+# ===== TRAE 工具 =====
+.trae-html-share-packages/
+
+# ===== 前端 =====
+front/node_modules/
+front/dist/
+*.tsbuildinfo
+
+# ===== 后端 =====
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# ===== 日志 =====
+*.log
+
+# ===== 本地数据（隐私，不上传）=====
+backend/uploads/
+uploads/
+png/
+
+# ===== 敏感配置（含数据库账号密码，严禁上传）=====
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-*.properties
+backend/src/main/resources/application-*.yml
+
+# ===== 系统杂项 =====
+Thumbs.db
+.DS_Store

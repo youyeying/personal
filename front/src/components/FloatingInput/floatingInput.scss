@@ -1,0 +1,173 @@
+/**
+ * FloatingInput 浮动标签输入框样式（下划线风格）
+ * 核心动画：
+ * - label 框内 ↔ 上移（transform + font-size 过渡，上移位置充足）
+ * - 聚焦下划线：从中间向两边展开（scaleX 中心展开）
+ * - hover 下方轻投影（微微抬起），非整体阴影
+ * - 错误态：下划线变红 + 错误提示
+ */
+
+.floating-input {
+  position: relative;
+  width: 100%;
+  // 组件整体高度：随卡片尺寸缩放（卡片 600px → 92px，卡片 400px → 76px）
+  height: var(--cb-input-height);
+
+  // ---- 浮动标签 ----
+  &__label {
+    position: absolute;
+    left: 2px;
+    // 默认在输入框垂直居中
+    top: 55%;
+    transform: translateY(-50%);
+    // 输入框文字字号（随卡片缩放）
+    font-size: var(--cb-input-font);
+    color: var(--cb-ink-muted);
+    pointer-events: none;
+    white-space: nowrap;
+    // 上移动画
+    transition:
+      transform 0.25s ease,
+      font-size 0.25s ease,
+      color 0.25s ease,
+      top 0.25s ease;
+  }
+
+  // 上移状态：label 浮到组件顶部（空间充足，不再压框）
+  &--floated &__label {
+    top: calc(var(--cb-input-height) * 0.13);
+    transform: none;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-secondary);
+  }
+
+  // 聚焦时标签用主色
+  &--focused &__label {
+    color: var(--cb-primary);
+  }
+
+  // ---- 输入框（定位在组件中下部，与顶部浮动标签分离） ----
+  &__field {
+    position: absolute;
+    left: 0;
+    // 顶部留出浮动标签空间（约 1/3）
+    top: calc(var(--cb-input-height) * 0.36);
+    width: 100%;
+    height: calc(var(--cb-input-height) * 0.42);
+    padding: 0 2px;
+    // 密码框右侧留出切换按钮空间
+    padding-right: 36px;
+    // 字体跟随主题字号（随卡片缩放）
+    font-size: var(--cb-input-font);
+    color: var(--cb-ink);
+    background: transparent;
+    // 下划线风格：只有底部一条横线
+    border: none;
+    border-bottom: 2px solid var(--cb-hairline);
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    // hover：只在下方产生轻投影（微微抬起感），非整体阴影
+    &:hover:not(:focus) {
+      border-bottom-color: var(--cb-ink-muted);
+      // 负 spread 收缩阴影范围：只在底部下方出现投影，不扩散到整框
+      box-shadow: 0 8px 12px -8px rgba(44, 49, 47, 0.18);
+    }
+
+    // 占位符（聚焦时的空白占位）：透明
+    &::placeholder {
+      color: transparent;
+    }
+
+    &:disabled {
+      color: var(--cb-ink-muted);
+      cursor: not-allowed;
+      border-bottom-color: var(--cb-hairline);
+      box-shadow: none;
+    }
+  }
+
+  // ---- 聚焦下划线（从中间向两边展开） ----
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    // 对齐输入框底线（输入框 top + 高度）
+    bottom: calc(var(--cb-input-height) * 0.22);
+    width: 100%;
+    height: 2px;
+    background: var(--cb-primary);
+    // 默认缩放为 0（不可见），从中心向两边展开
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s ease, background 0.2s ease;
+    z-index: 1;
+  }
+
+  // 聚焦时下划线从中间向两边展开
+  &--focused::after {
+    transform: scaleX(1);
+  }
+
+  // ---- 错误态 ----
+  // 下划线变红（聚焦下划线也变红）
+  &--error &__field {
+    border-bottom-color: var(--cb-error);
+  }
+
+  &--error::after {
+    background: var(--cb-error);
+  }
+
+  &--error &__label {
+    color: var(--cb-error);
+  }
+
+  // 错误提示区：位于输入框下方，始终占位（无错误也留空间）
+  &__error-wrap {
+    position: absolute;
+    left: 0;
+    // 输入框底线下方
+    top: calc(var(--cb-input-height) * 0.78);
+    min-height: 16px;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  // 错误提示文字
+  &__error {
+    margin: 0;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-error);
+    line-height: 1.3;
+  }
+
+  // ---- 密码切换按钮 ----
+  &__toggle {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--cb-ink-muted);
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--cb-ink-secondary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--cb-primary);
+      outline-offset: 2px;
+    }
+  }
+}

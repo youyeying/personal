@@ -1,0 +1,79 @@
+/**
+ * 全屏加载1号 样式
+ * - 全屏、不透明背景（白色画布）
+ * - 转圈动画 + 提示文字
+ * - 淡出过渡
+ */
+
+.full-screen-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  // 不透明背景，完全遮住下层页面
+  background: var(--cb-canvas);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // 淡出动画（通过 class 触发）
+  transition: opacity 0.5s ease;
+
+  &--fading {
+    opacity: 0;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--cb-space-4);
+  }
+
+  // ---- 转圈 ----
+  &__spinner {
+    width: 48px;
+    height: 48px;
+  }
+
+  &__ring {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__track {
+    stroke: var(--cb-hairline);
+  }
+
+  &__bar {
+    stroke: var(--cb-primary);
+    // 旋转 + 描边弧度变化，形成流畅转圈
+    animation: fsl-rotate 0.9s linear infinite;
+    stroke-dasharray: 80 160;
+    transform-origin: center;
+  }
+
+  &__text {
+    margin: 0;
+    // 可爱字体（庆科黄油体）
+    font-family: var(--cb-font-cute);
+    font-size: var(--cb-font-lg);
+    color: var(--cb-ink-secondary);
+  }
+}
+
+@keyframes fsl-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// 淡出过渡（组件用 <Transition> 包裹）
+.fsl-fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fsl-fade-leave-to {
+  opacity: 0;
+}
