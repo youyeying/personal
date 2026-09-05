@@ -14,11 +14,30 @@
 /** 功能变更类型 */
 export const FEATURE_TYPES = ['新增', '修改', '删除', '修复'] as const
 
-/** 结束开发弹窗草稿行（导入解析的目标结构） */
+/** 描述内容上限（后端 feature_log.content varchar(500) @Size(max=500)，超限该条提交失败） */
+export const MAX_CONTENT_LEN = 500
+
+/** 结束开发弹窗草稿行（导入解析的目标结构；ok/error 为录入结果状态） */
 export interface FeatureDraft {
   type: string
   module: string
   content: string
+  /** 已成功录入（重试时跳过） */
+  ok?: boolean
+  /** 录入失败原因（预检或服务端错误），不空则该条标红 */
+  error?: string
+}
+
+/**
+ * 提交前本地预检：与后端校验规则对齐（类型白名单 / 内容 ≤500 字 / 模块非空），
+ * 提前标出问题条，避免批量录入中途失败中断
+ */
+export function draftPrecheck(d: FeatureDraft): string | null {
+  if (!d.module.trim()) return '模块不能为空'
+  if (!TYPE_SET.has(d.type)) return `类型需为 ${FEATURE_TYPES.join('/')}`
+  const len = d.content.trim().length
+  if (len > MAX_CONTENT_LEN) return `内容超长 ${len} 字（上限 ${MAX_CONTENT_LEN}）`
+  return null
 }
 
 const TYPE_SET = new Set<string>(FEATURE_TYPES)

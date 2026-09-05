@@ -6,18 +6,18 @@
 .hm {
   display: flex;
   flex-direction: column;
-  gap: var(--cb-space-2);
+  gap: var(--sk-space-2);
 
   &__row {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-2);
+    gap: var(--sk-space-2);
   }
 
   &__label {
     width: 56px;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
     text-align: right;
     flex-shrink: 0;
   }
@@ -38,10 +38,10 @@
 
     // 五档色阶：0=空、1~4=主题色渐深（color-mix 派生，禁硬编码）
     &--l0 { background: rgba(28, 30, 26, 0.06); }
-    &--l1 { background: color-mix(in srgb, var(--hm-color, var(--cb-mod)) 28%, var(--cb-surface)); }
-    &--l2 { background: color-mix(in srgb, var(--hm-color, var(--cb-mod)) 50%, var(--cb-surface)); }
-    &--l3 { background: color-mix(in srgb, var(--hm-color, var(--cb-mod)) 75%, var(--cb-surface)); }
-    &--l4 { background: var(--hm-color, var(--cb-mod)); }
+    &--l1 { background: color-mix(in srgb, var(--hm-color, var(--sk-mod)) 28%, var(--sk-surface)); }
+    &--l2 { background: color-mix(in srgb, var(--hm-color, var(--sk-mod)) 50%, var(--sk-surface)); }
+    &--l3 { background: color-mix(in srgb, var(--hm-color, var(--sk-mod)) 75%, var(--sk-surface)); }
+    &--l4 { background: var(--hm-color, var(--sk-mod)); }
   }
 
   &__legend {
@@ -49,8 +49,8 @@
     align-items: center;
     gap: 4px;
     margin-left: 64px;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
     flex-wrap: wrap;
 
     .hm__cell { width: 11px; height: 11px; }

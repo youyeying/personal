@@ -63,12 +63,12 @@
 定义在 `front/src/styles/theme.scss`（全站唯一定义处，禁止在别处硬编码颜色）：
 
 ```scss
---cb-canvas: #f2ede4;      // 页面背景 = 纸（暖米白，不是纯白）
---cb-surface: #faf7f0;     // 卡片背景 = 纸面（比背景亮半档，"纸叠纸"层次）
---cb-hairline: #e0d8ca;    // 分隔线 = 纸纹（极浅暖棕，几乎只是暗示）
---cb-ink: #2c312f;         // 主文本 = 墨（墨绿灰，不是纯黑，墨水落在暖纸上自然偏暖）
---cb-primary: #a8765a;     // 主行动色 = 陶土棕（全站唯一，暖棕红）
---cb-error: #b04a3a; --cb-warning: #a8821f; --cb-teal: #3f7a72; --cb-success: #3d7a55;  // 语义色：全部压暖、降饱和，像植物颜料而非荧光笔
+--sk-canvas: #f2ede4;      // 页面背景 = 纸（暖米白，不是纯白）
+--sk-surface: #faf7f0;     // 卡片背景 = 纸面（比背景亮半档，"纸叠纸"层次）
+--sk-hairline: #e0d8ca;    // 分隔线 = 纸纹（极浅暖棕，几乎只是暗示）
+--sk-ink: #2c312f;         // 主文本 = 墨（墨绿灰，不是纯黑，墨水落在暖纸上自然偏暖）
+--sk-primary: #a8765a;     // 主行动色 = 陶土棕（全站唯一，暖棕红）
+--sk-error: #b04a3a; --sk-warning: #a8821f; --sk-teal: #3f7a72; --sk-success: #3d7a55;  // 语义色：全部压暖、降饱和，像植物颜料而非荧光笔
 ```
 
 **理解要点**：
@@ -79,9 +79,9 @@
 ### 3.4 字体三线策略
 
 ```scss
---cb-font-family: 'LXGW WenKai Screen', ...   // 正文：霞鹜文楷（手写楷体，书卷气的核心载体）
---cb-font-cute: 'ZCOOL QingKe HuangYou', ...   // 装饰：站酷庆科黄油体（仅加载/庆祝等圆润场景）
---cb-font-mono: 'JetBrains Mono', ...          // 数据：等宽（所有数字、日期、热量、时间码）
+--sk-font-family: 'LXGW WenKai Screen', ...   // 正文：霞鹜文楷（手写楷体，书卷气的核心载体）
+--sk-font-cute: 'ZCOOL QingKe HuangYou', ...   // 装饰：站酷庆科黄油体（仅加载/庆祝等圆润场景）
+--sk-font-mono: 'JetBrains Mono', ...          // 数据：等宽（所有数字、日期、热量、时间码）
 ```
 
 - **霞鹜文楷是气质的根**——手写楷体让整个界面像「写」出来的账本，换掉它等于换掉灵魂
@@ -90,8 +90,8 @@
 
 ### 3.5 色彩纪律：一主 + 模块各色 + 语义四色
 
-1. **全站唯一主行动色**：陶土棕 `--cb-primary`，只有它承担「主按钮/主强调」
-2. **模块主色机制（重要）**：`--cb-mod` 由 `Home.vue` 布局层按当前路由写入 `.app-layout` 容器（定义在 `store/theme.ts`），组件内一律 `var(--cb-mod)` + `color-mix(in srgb, ...)` 派生深浅：
+1. **全站唯一主行动色**：陶土棕 `--sk-primary`，只有它承担「主按钮/主强调」
+2. **模块主色机制（重要）**：`--sk-mod` 由 `Home.vue` 布局层按当前路由写入 `.app-layout` 容器（定义在 `store/theme.ts`），组件内一律 `var(--sk-mod)` + `color-mix(in srgb, ...)` 派生深浅：
 
 | 模块 | accent | | 模块 | accent |
 |---|---|---|---|---|
@@ -191,7 +191,7 @@
 | `cssVar` / `watchTheme` / `toggleDarkTheme` | `utils/theme.ts` | 取 CSS 变量实际值 / 明暗监听 / 主题切换（ThemeToggle 与命令面板共用） |
 | `GroupedChips` | `components/GroupedChips/` | 分组 chips（groups/activeId/showFav/showEdit/addLabel；select/toggle-fav/edit/add） |
 | `ProgressRing` | `components/ProgressRing/` | SVG 环形进度（value/max 超量封顶变红/ringColor/label/size） |
-| `RecordHeatmap` | `components/RecordHeatmap/` | 记录热力图（rows 多行多维度/level 0-4 色阶随 --cb-mod） |
+| `RecordHeatmap` | `components/RecordHeatmap/` | 记录热力图（rows 多行多维度/level 0-4 色阶随 --sk-mod） |
 | `CommandPalette` | `components/CommandPalette/` | Ctrl+K 命令面板（快捷/导航/系统三组命令） |
 | `MetricCard` | `components/MetricCard/` | 指标卡（tone: ''/ok/err/accent） |
 | `BlockTitle` | `components/BlockTitle/` | 卡片标题（title + hint + #aside 插槽） |

@@ -4,7 +4,8 @@
  * - 今日能量结余横幅：预算 = (1.2BMR + 今日锻炼净) − 目标缺口（用户自定义）；剩余 = 预算 − 已摄入
  * - 餐次分段 → 食物搜索/分组chips(收藏优先★) → 默认份量带出可改 → 六大营养实时预览 → 保存
  * - 餐次筛选：点早/午/晚/加餐 → 今日列表只显示该餐（带「全部」）；「正在记录」提示当前保存目标
- * - 我的模板一键复制到今日；今日已记列表按餐次汇总可删；收藏切换即时生效；自定义食物弹窗
+ * - 我的模板一键复制到当前记录日期；已记列表按餐次汇总可删；收藏切换即时生效；自定义食物弹窗
+ * - 记录日期默认今天，可切到过去日期补记（限制未来）；横幅/预算始终按今日口径
  * - 目标缺口由用户在页内自行设置（updateProfileApi dietTargetGap，0=维持 负=增肌）
  */
 import { computed, onMounted, ref, watch } from 'vue'
@@ -47,6 +48,10 @@ const items = ref<FoodItem[]>([])
 const records = ref<FoodRecord[]>([])
 const templates = ref<{ id: number; name: string; items: MealTemplateItem[] }[]>([])
 const today = formatDate(new Date())
+/** 记录日期（默认今天；切到过去日期即「补记」），限制不选未来 */
+const recordDate = ref(today)
+/** 是否处于补记模式（非今天） */
+const isBackfill = computed(() => recordDate.value !== today)
 function daysAgo(n: number) {
   const d = new Date()
   d.setDate(d.getDate() - n)
@@ -158,6 +163,11 @@ const todayList = computed(() => {
 /** 筛选餐次显示名（全部=null） */
 const activeMealLabel = computed(() => activeMeal.value === 'all' ? null : MEAL_LABELS[activeMeal.value])
 
+/** 当前记录日期的合计 kcal（补记时标题展示所选日期数据） */
+const dayIntake = computed(() =>
+  todayList.value.reduce((s, r) => s + ((items.value.find((i) => i.id === r.foodId)?.kcal ?? 0) * Number(r.grams)) / 100, 0)
+)
+
 /** 点击餐次：切换筛选 + 同时设为记录目标 */
 function setMeal(m: MealType | 'all') {
   activeMeal.value = m
@@ -183,7 +193,7 @@ async function load(silent = false) {
     const since = daysAgo(29)
     const [itms, recPage, tpls, erecs, itms2, wres, food30, ex30] = await Promise.all([
       listFoodItems(),
-      listFoodRecords({ startDate: today, endDate: today, page: 1, size: 100 }),
+      listFoodRecords({ startDate: recordDate.value, endDate: recordDate.value, page: 1, size: 100 }),
       listMealTemplates(),
       listExerciseRecords({ startDate: today, endDate: today, page: 1, size: 100 }),
       listExerciseItems(),
@@ -228,7 +238,9 @@ async function load(silent = false) {
     const bmr = calcBmr(weight, bodyFat)
     let burn = 0
     let intake = 0
-    for (const r of records.value) {
+    // 横幅「今日已摄入」必须恒为今天口径：从近 30 天全量里过滤今天（记录列表可能已切到补记日期）
+    for (const r of food30) {
+      if (r.recordDate !== today) continue
       const f = items.value.find((i) => i.id === r.foodId)
       if (!f) continue
       intake += f.kcal * Number(r.grams) / 100
@@ -245,7 +257,7 @@ async function load(silent = false) {
       burn: Math.round(burn),
       intake: Math.round(intake),
       budget,
-      remain: budget != null ? budget - intake : null
+      remain: budget != null ? Math.round(budget - intake) : null
     }
   } finally {
     if (!silent) loading.value = false
@@ -291,8 +303,8 @@ async function save() {
   const g = Number(grams.value)
   if (!f) return ElMessage.warning('请先选择食物')
   if (!g || g <= 0) return ElMessage.warning('请输入份量')
-  await createFoodRecord({ foodId: f.id, recordDate: today, mealType: mealType.value, grams: g })
-  ElMessage.success('已记录')
+  await createFoodRecord({ foodId: f.id, recordDate: recordDate.value, mealType: mealType.value, grams: g })
+  ElMessage.success(isBackfill.value ? `已补记 ${recordDate.value}` : '已记录')
   emit('changed')
   await load(true)
 }
@@ -305,18 +317,18 @@ async function remove(r: FoodRecord) {
   await load(true)
 }
 
-/** 一键复制模板到今日 */
+/** 一键复制模板到当前记录日期 */
 async function applyTemplate(t: { id: number; name: string; items: MealTemplateItem[] }) {
   if (!t.items.length) return
   for (const it of t.items) {
-    await createFoodRecord({ foodId: it.foodId, recordDate: today, mealType: it.mealType, grams: it.grams })
+    await createFoodRecord({ foodId: it.foodId, recordDate: recordDate.value, mealType: it.mealType, grams: it.grams })
   }
-  ElMessage.success(`已复制模板「${t.name}」到今日`)
+  ElMessage.success(`已复制模板「${t.name}」到${isBackfill.value ? recordDate.value : '今日'}`)
   emit('changed')
   await load(true)
 }
 
-/** 把今日某餐存为模板 */
+/** 把当前日期（所选）某餐存为模板 */
 async function saveAsTemplate() {
   const meals = ['breakfast', 'lunch', 'dinner', 'snack'] as const
   const tplItems: MealTemplateItem[] = []
@@ -325,7 +337,7 @@ async function saveAsTemplate() {
       tplItems.push({ foodId: r.foodId, grams: Number(r.grams), mealType: m })
     }
   }
-  if (!tplItems.length) return ElMessage.warning('今日还没有记录')
+  if (!tplItems.length) return ElMessage.warning('该日期还没有记录')
   const { value } = await ElMessageBox.prompt('给模板起个名（如：工作日早餐）', '存为我的模板', {
     inputValue: '我的模板',
     inputValidator: (v) => (v && v.trim() ? true : '模板名不能为空')
@@ -409,6 +421,8 @@ async function saveFood() {
 
 onMounted(load)
 watch(() => props.tick, () => load(true))
+/** 切换记录日期 → 静默刷新当日列表（横幅/预算仍按今日口径） */
+watch(recordDate, () => load(true))
 </script>
 
 <template>
@@ -463,10 +477,14 @@ watch(() => props.tick, () => load(true))
       </div>
     </div>
 
-    <!-- 餐次（筛选 + 记录目标） -->
+    <!-- 餐次（筛选 + 记录目标）+ 记录日期 -->
     <div class="fdi__meals">
       <button :class="{ 'is-on': activeMeal === 'all' }" @click="setMeal('all')">全部</button>
       <button v-for="(label, key) in MEAL_LABELS" :key="key" :class="{ 'is-on': activeMeal === key }" @click="setMeal(key)">{{ label }}</button>
+      <label class="fdi__date">
+        <span class="fdi__date-label">{{ isBackfill ? '补记' : '记录日期' }}</span>
+        <input class="num" type="date" :max="today" v-model="recordDate" :title="isBackfill ? `正在补记 ${recordDate}，只能选今天及以前` : '记录日期（默认今天）'">
+      </label>
       <span class="fdi__meals-hint">{{ activeMealLabel ? `正在记录：${activeMealLabel}` : '显示全部' }}</span>
     </div>
 
@@ -489,7 +507,7 @@ watch(() => props.tick, () => load(true))
     />
 
     <!-- 份量 + 营养预览 -->
-    <div v-if="selected" class="fdi__form-row" style="margin-top: var(--cb-space-4);">
+    <div v-if="selected" class="fdi__form-row" style="margin-top: var(--sk-space-4);">
       <div class="fdi__field">
         <span>份量</span>
         <input v-model="grams" class="num" type="number" min="1" :placeholder="selected.unitLabel ? `默认 1${selected.unitLabel}` : '克数'">
@@ -511,31 +529,31 @@ watch(() => props.tick, () => load(true))
         <span>纤维 <b>{{ preview.fiber.toFixed(1) }}</b>g</span>
       </div>
     </div>
-    <button v-if="selected" class="fdi__save" :disabled="!preview" @click="save"><component :is="Plus" :size="15" /> 保存到今日</button>
+    <button v-if="selected" class="fdi__save" :disabled="!preview" @click="save"><component :is="Plus" :size="15" /> {{ isBackfill ? `补记到 ${recordDate}` : '保存到今日' }}</button>
 
     <!-- 我的模板 -->
     <div v-if="templates.length" class="fdi__tpl">
       <div class="fdi__tpl-title"><component :is="Copy" :size="13" /> 我的模板</div>
       <div class="fdi__tpl-list">
-        <button v-for="t in templates" :key="t.id" class="fdi__tpl-chip" @click="applyTemplate(t)">
+        <button v-for="t in templates" :key="t.id" class="fdi__tpl-chip" :title="`复制到${isBackfill ? recordDate : '今日'}`" @click="applyTemplate(t)">
           {{ t.name }}（{{ t.items.length }}项）
           <span style="cursor:pointer" title="删除模板" @click.stop="removeTemplate(t.id)">✕</span>
         </button>
-        <button class="fdi__tpl-chip" @click="saveAsTemplate">＋ 把今日存为模板</button>
+        <button class="fdi__tpl-chip" @click="saveAsTemplate">＋ 存为模板</button>
       </div>
     </div>
     <div v-else class="fdi__tpl">
       <div class="fdi__tpl-title"><component :is="Copy" :size="13" /> 我的模板</div>
-      <button class="fdi__tpl-chip" @click="saveAsTemplate">＋ 把今日存为模板</button>
+      <button class="fdi__tpl-chip" @click="saveAsTemplate">＋ 存为模板</button>
     </div>
 
     <!-- 今日已记 -->
     <div class="fdi__today">
       <div class="fdi__today-title">
-        今日已记<template v-if="activeMealLabel">：{{ activeMealLabel }}</template> · <b>{{ todayIntake }}</b> kcal
+        {{ isBackfill ? `补记 ${recordDate}：${activeMealLabel ?? '全部'}` : `今日已记${activeMealLabel ? '：' + activeMealLabel : ''}` }} · <b>{{ Math.round(dayIntake) }}</b> kcal
         <template v-if="activeMealLabel">（合计）</template>
       </div>
-      <div v-if="!todayList.length" class="fdi__today-empty">{{ records.length ? '该餐次还没有记录' : '还没有记录，选个食物记下第一笔' }}</div>
+      <div v-if="!todayList.length" class="fdi__today-empty">{{ records.length ? '该餐次还没有记录' : (isBackfill ? '该日期还没有记录，选个食物补记' : '还没有记录，选个食物记下第一笔') }}</div>
       <div v-else class="fdi__today-list">
         <div v-for="r in todayList" :key="r.id" class="fdi__today-item">
           <span class="fdi__today-name">{{ items.find((i) => i.id === r.foodId)?.name ?? '食物' }}</span>

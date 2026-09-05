@@ -126,6 +126,7 @@ function buildWeeks(wRecords: { recordDate: string; weight: number }[]): WeekRow
   const wMap = new Map<string, number>()
   for (const r of wRecords) wMap.set(r.recordDate, Number(r.weight))
   for (const row of res) {
+    row.gap = Math.round(row.gap)  // 舍去浮点累加误差（kcal 取整，与汇总卡同口径）
     row.predictKg = Math.round(row.gap / 7700 * 100) / 100
     // 周一记录（或周内最早）与下周一记录（或周内最晚）
     const inWeek = wRecords.filter((r) => weekKey(r.recordDate) === row.week).sort((a, b) => a.recordDate.localeCompare(b.recordDate))

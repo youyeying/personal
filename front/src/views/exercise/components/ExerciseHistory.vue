@@ -121,10 +121,10 @@ function handTone(h: string | null) {
 }
 
 const columns: DataListColumn[] = [
-  { key: 'date', label: '日期', width: 'calc(6.8 * var(--cb-font-md) + 2 * var(--cb-space-3) + 4px)' },
+  { key: 'date', label: '日期', width: 'calc(6.8 * var(--sk-font-md) + 2 * var(--sk-space-3) + 4px)' },
   { key: 'action', label: '动作', ratio: 2 },
   { key: 'param', label: '参数', ratio: 3 },
-  { key: 'kcal', label: '净消耗', width: 'calc(5.2 * var(--cb-font-md) + 2 * var(--cb-space-3) + 4px)' },
+  { key: 'kcal', label: '净消耗', width: 'calc(5.2 * var(--sk-font-md) + 2 * var(--sk-space-3) + 4px)' },
   { key: 'ops', label: '操作', width: 96, ops: true }
 ]
 

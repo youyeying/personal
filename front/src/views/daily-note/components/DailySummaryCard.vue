@@ -48,7 +48,7 @@ defineProps<{
         <span class="daily-note__stat-value num">{{ summary.devMinutes }}m</span>
       </div>
     </div>
-    <InlineLoading v-else class="daily-note__summary-empty" :size="20" text="正在加载当日汇总…" color="var(--cb-mod)" />
+    <InlineLoading v-else class="daily-note__summary-empty" :size="20" text="正在加载当日汇总…" color="var(--sk-mod)" />
   </div>
 </template>
 

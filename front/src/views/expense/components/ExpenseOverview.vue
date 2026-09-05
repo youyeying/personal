@@ -178,7 +178,7 @@ const maxCat = computed(() => {
   return all.length ? Math.max(...all) : 1
 })
 function catColor(type: 1 | 2) {
-  return type === 1 ? 'var(--cb-error)' : 'var(--cb-success)'
+  return type === 1 ? 'var(--sk-error)' : 'var(--sk-success)'
 }
 
 function renderDonut() {
@@ -187,8 +187,8 @@ function renderDonut() {
   const de = donutExpenseC.ensure()
   const di = donutIncomeC.ensure()
   if (!de && !di) return
-  const muted = cssVar('--cb-ink-muted')
-  const surface = cssVar('--cb-surface')
+  const muted = cssVar('--sk-ink-muted')
+  const surface = cssVar('--sk-surface')
   const base = {
     tooltip: { trigger: 'item', formatter: '{b}<br/>{c}（{d}%）' },
     legend: { bottom: 0, textStyle: { color: muted, fontSize: 12 } },
@@ -227,9 +227,9 @@ function renderChart() {
   const h = Math.min(Math.max(trendDates.length * 26, 170), 520)
   chartEl.value!.style.height = `${h}px`
   chart.resize()
-  const muted = cssVar('--cb-ink-muted')
-  const hairline = cssVar('--cb-hairline')
-  const mod = cssVar('--cb-mod', cssVar('--cb-primary'), chartEl.value)
+  const muted = cssVar('--sk-ink-muted')
+  const hairline = cssVar('--sk-hairline')
+  const mod = cssVar('--sk-mod', cssVar('--sk-primary'), chartEl.value)
   const isAll = range.value === 'all'
   chart.setOption({
     grid: { top: 8, right: 24, bottom: 8, left: 58 },

@@ -17,10 +17,10 @@ body,
 }
 
 body {
-  font-family: var(--cb-font-family);
-  font-size: var(--cb-font-md);
-  color: var(--cb-ink);
-  background: var(--cb-canvas);
+  font-family: var(--sk-font-family);
+  font-size: var(--sk-font-md);
+  color: var(--sk-ink);
+  background: var(--sk-canvas);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   // 全局禁用选中（除非输入框等，或以后设计复制按钮的元素加 .selectable）
@@ -36,7 +36,7 @@ textarea,
 }
 
 a {
-  color: var(--cb-primary);
+  color: var(--sk-primary);
   text-decoration: none;
 }
 
@@ -44,7 +44,7 @@ a {
 .num,
 .mono,
 .el-statistic__content {
-  font-family: var(--cb-font-mono);
+  font-family: var(--sk-font-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -55,11 +55,11 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--cb-hairline);
+  background: var(--sk-hairline);
   border-radius: 4px;
 
   &:hover {
-    background: var(--cb-ink-muted);
+    background: var(--sk-ink-muted);
   }
 }
 
@@ -70,7 +70,7 @@ a {
 // Firefox 滚动条
 html {
   scrollbar-width: thin;
-  scrollbar-color: var(--cb-hairline) transparent;
+  scrollbar-color: var(--sk-hairline) transparent;
 }
 
 // ===================== Element Plus Notification 覆盖 =====================
@@ -81,21 +81,21 @@ html {
   font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   width: 400px;
   padding: 20px 28px 20px 20px;
-  border-radius: var(--cb-radius-card);
-  box-shadow: var(--cb-shadow-card-hover);
+  border-radius: var(--sk-radius-card);
+  box-shadow: var(--sk-shadow-card-hover);
 
   // 标题：加大加粗
   .el-notification__title {
-    font-size: var(--cb-font-lg);
-    font-weight: var(--cb-font-weight-bold);
-    color: var(--cb-ink);
+    font-size: var(--sk-font-lg);
+    font-weight: var(--sk-font-weight-bold);
+    color: var(--sk-ink);
   }
 
   // 内容：加大
   .el-notification__content {
     margin-top: 6px;
-    font-size: var(--cb-font-md);
+    font-size: var(--sk-font-md);
     line-height: 1.6;
-    color: var(--cb-ink-secondary);
+    color: var(--sk-ink-secondary);
   }
 }

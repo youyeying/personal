@@ -2,7 +2,7 @@
 /**
  * 后台布局壳（组合层，写法参照 login）：
  * - 两栏布局：左侧导航满高 + 右侧（header + 内容区 router-view）
- * - 在容器上写入 --cb-mod（当前模块主色），导航/header/内容随模块平滑过渡
+ * - 在容器上写入 --sk-mod（当前模块主色），导航/header/内容随模块平滑过渡
  * - 导航三态：导航栏 / 缩导航栏 / 隐藏（宽度过渡动画）；<600 全屏抽屉
  * - 挂载时若已登录但无用户信息（如刷新页面），拉取 /auth/me 填充昵称/头像
  */
@@ -49,7 +49,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="app-layout" :style="{ '--cb-mod': themeStore.module.accent }">
+  <div class="app-layout" :style="{ '--sk-mod': themeStore.module.accent }">
     <!-- 侧栏：常驻渲染，宽度由 store 控制（宽度过渡实现伸缩/隐藏动画） -->
     <SideNav />
 

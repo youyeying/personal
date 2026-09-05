@@ -1,23 +1,23 @@
 /**
  * GroupedChips 分组标签选择样式（饮食食物 / 锻炼动作 chips 复用）
- * 主色引用 --cb-mod（由布局层按路由模块写入），自动跟随当前模块色
+ * 主色引用 --sk-mod（由布局层按路由模块写入），自动跟随当前模块色
  */
 .gc {
   display: flex;
   flex-direction: column;
-  gap: var(--cb-space-2);
+  gap: var(--sk-space-2);
 
   &__label {
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
-    margin: var(--cb-space-3) 0 var(--cb-space-2);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
+    margin: var(--sk-space-3) 0 var(--sk-space-2);
     &:first-child { margin-top: 0; }
   }
 
   &__chips {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--cb-space-2);
+    gap: var(--sk-space-2);
   }
 
   &__chip {
@@ -25,11 +25,11 @@
     align-items: center;
     gap: 6px;
     padding: 7px 14px;
-    border-radius: var(--cb-radius-btn);
-    border: 1px solid var(--cb-hairline);
-    background: var(--cb-canvas);
-    color: var(--cb-ink-secondary);
-    font-size: var(--cb-font-sm);
+    border-radius: var(--sk-radius-btn);
+    border: 1px solid var(--sk-hairline);
+    background: var(--sk-canvas);
+    color: var(--sk-ink-secondary);
+    font-size: var(--sk-font-sm);
     font-family: inherit;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -37,20 +37,20 @@
     i {
       font-style: normal;
       font-size: 11px;
-      color: var(--cb-ink-muted);
+      color: var(--sk-ink-muted);
     }
 
     &.is-on {
-      border-color: var(--cb-mod);
-      color: var(--cb-mod);
-      background: color-mix(in srgb, var(--cb-mod) 10%, var(--cb-surface));
-      font-weight: var(--cb-font-weight-medium);
-      i { color: var(--cb-mod); }
+      border-color: var(--sk-mod);
+      color: var(--sk-mod);
+      background: color-mix(in srgb, var(--sk-mod) 10%, var(--sk-surface));
+      font-weight: var(--sk-font-weight-medium);
+      i { color: var(--sk-mod); }
     }
 
-    &:hover:not(.is-on) { border-color: var(--cb-mod); }
-    &--add { border-style: dashed; color: var(--cb-ink-muted); }
-    &--fav { border-color: color-mix(in srgb, var(--cb-warning) 40%, var(--cb-hairline)); }
+    &:hover:not(.is-on) { border-color: var(--sk-mod); }
+    &--add { border-style: dashed; color: var(--sk-ink-muted); }
+    &--fav { border-color: color-mix(in srgb, var(--sk-warning) 40%, var(--sk-hairline)); }
   }
 
   // 收藏星标（chip 内可点击；扩大触达热区）
@@ -62,11 +62,11 @@
     height: 24px;
     margin: -4px -6px -4px 0;
     padding: 0 4px;
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
     cursor: pointer;
     user-select: none;
-    &:hover { color: var(--cb-warning); }
-    &.is-fav { color: var(--cb-warning); }
+    &:hover { color: var(--sk-warning); }
+    &.is-fav { color: var(--sk-warning); }
   }
 
   // 编辑铅笔（hover chip 时浮现，避免常驻视觉噪音）
@@ -77,11 +77,11 @@
     width: 22px;
     height: 22px;
     margin: -4px -6px -4px 0;
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
     opacity: 0;
     cursor: pointer;
     transition: opacity 0.15s ease, color 0.15s ease;
     .gc__chip:hover & { opacity: 1; }
-    &:hover { color: var(--cb-mod); }
+    &:hover { color: var(--sk-mod); }
   }
 }

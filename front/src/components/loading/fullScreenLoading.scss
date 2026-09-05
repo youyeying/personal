@@ -10,7 +10,7 @@
   inset: 0;
   z-index: 9999;
   // 不透明背景，完全遮住下层页面
-  background: var(--cb-canvas);
+  background: var(--sk-canvas);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,7 +25,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--cb-space-4);
+    gap: var(--sk-space-4);
   }
 
   // ---- 转圈 ----
@@ -40,11 +40,11 @@
   }
 
   &__track {
-    stroke: var(--cb-hairline);
+    stroke: var(--sk-hairline);
   }
 
   &__bar {
-    stroke: var(--cb-primary);
+    stroke: var(--sk-primary);
     // 旋转 + 描边弧度变化，形成流畅转圈
     animation: fsl-rotate 0.9s linear infinite;
     stroke-dasharray: 80 160;
@@ -54,9 +54,9 @@
   &__text {
     margin: 0;
     // 可爱字体（庆科黄油体）
-    font-family: var(--cb-font-cute);
-    font-size: var(--cb-font-lg);
-    color: var(--cb-ink-secondary);
+    font-family: var(--sk-font-cute);
+    font-size: var(--sk-font-lg);
+    color: var(--sk-ink-secondary);
   }
 }
 

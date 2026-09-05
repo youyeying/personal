@@ -1,7 +1,7 @@
 /**
  * 饮食模块样式（独立页面，组合层 + 三子页组件）
  * 类名前缀：组合层 fd__ / 饮食记录 fdi__ / 饮食统计 fds__ / 饮食历史 fdh__
- * 颜色/间距一律来自 --cb-* 令牌；数字等宽
+ * 颜色/间距一律来自 --sk-* 令牌；数字等宽
  */
 
 /* ================= 组合层布局 (Food.vue, .fd) ================= */
@@ -18,52 +18,52 @@
   &__sub {
     display: flex;
     flex-direction: column;
-    gap: var(--cb-space-5);
+    gap: var(--sk-space-5);
   }
 }
 
 /* ================= 饮食记录 (FoodInput, fdi__) ================= */
 .fdi {
   position: relative; // 锚定 LoadingMask 遮罩范围
-  padding: var(--cb-space-5);
+  padding: var(--sk-space-5);
 
   // 今日能量结余横幅（V2：左信息右双环，窄屏环组换行）
   &__balance {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-5);
-    background: color-mix(in srgb, var(--cb-success) 8%, var(--cb-surface));
-    border: 1px solid color-mix(in srgb, var(--cb-success) 30%, transparent);
-    border-radius: var(--cb-radius-btn);
-    padding: var(--cb-space-3) var(--cb-space-4);
-    margin-bottom: var(--cb-space-4);
+    gap: var(--sk-space-5);
+    background: color-mix(in srgb, var(--sk-success) 8%, var(--sk-surface));
+    border: 1px solid color-mix(in srgb, var(--sk-success) 30%, transparent);
+    border-radius: var(--sk-radius-btn);
+    padding: var(--sk-space-3) var(--sk-space-4);
+    margin-bottom: var(--sk-space-4);
     &--over {
-      background: color-mix(in srgb, var(--cb-error) 8%, var(--cb-surface));
-      border-color: color-mix(in srgb, var(--cb-error) 30%, transparent);
+      background: color-mix(in srgb, var(--sk-error) 8%, var(--sk-surface));
+      border-color: color-mix(in srgb, var(--sk-error) 30%, transparent);
     }
-    &-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--cb-space-2); }
-    &-rings { display: flex; gap: var(--cb-space-5); flex-shrink: 0; }
-    &-row { display: flex; align-items: center; gap: var(--cb-space-4); flex-wrap: wrap; }
-    &-label { font-size: var(--cb-font-xs); color: var(--cb-ink-secondary); }
+    &-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sk-space-2); }
+    &-rings { display: flex; gap: var(--sk-space-5); flex-shrink: 0; }
+    &-row { display: flex; align-items: center; gap: var(--sk-space-4); flex-wrap: wrap; }
+    &-label { font-size: var(--sk-font-xs); color: var(--sk-ink-secondary); }
     &-val {
-      font-family: var(--cb-font-mono);
+      font-family: var(--sk-font-mono);
       font-size: 20px;
       font-weight: 600;
-      &--gap { color: var(--cb-success); }
-      &--over { color: var(--cb-error); }
+      &--gap { color: var(--sk-success); }
+      &--over { color: var(--sk-error); }
     }
-    &-sub { font-size: var(--cb-font-xs); color: var(--cb-ink-muted); }
+    &-sub { font-size: var(--sk-font-xs); color: var(--sk-ink-muted); }
   }
 
   // 30 天热力图区块
   &__heat {
-    margin-top: var(--cb-space-5);
-    padding-top: var(--cb-space-4);
-    border-top: 1px solid var(--cb-hairline);
+    margin-top: var(--sk-space-5);
+    padding-top: var(--sk-space-4);
+    border-top: 1px solid var(--sk-hairline);
     &-title {
-      font-size: var(--cb-font-xs);
-      color: var(--cb-ink-muted);
-      margin-bottom: var(--cb-space-2);
+      font-size: var(--sk-font-xs);
+      color: var(--sk-ink-muted);
+      margin-bottom: var(--sk-space-2);
     }
   }
 
@@ -71,15 +71,15 @@
   &__progress {
     height: 6px;
     border-radius: 3px;
-    background: color-mix(in srgb, var(--cb-ink) 8%, transparent);
+    background: color-mix(in srgb, var(--sk-ink) 8%, transparent);
     overflow: hidden;
     &-fill {
       height: 100%;
       border-radius: 3px;
       transition: width 0.4s ease;
-      &.is-ok { background: var(--cb-success); }
-      &.is-warn { background: var(--cb-warning); }
-      &.is-over { background: var(--cb-error); }
+      &.is-ok { background: var(--sk-success); }
+      &.is-warn { background: var(--sk-warning); }
+      &.is-over { background: var(--sk-error); }
     }
   }
 
@@ -93,273 +93,292 @@
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--cb-mod);
-    font-size: var(--cb-font-xs);
+    color: var(--sk-mod);
+    font-size: var(--sk-font-xs);
     font-family: inherit;
     cursor: pointer;
     transition: filter 0.15s ease;
-    svg { color: var(--cb-mod); }
+    svg { color: var(--sk-mod); }
     &:hover { filter: brightness(1.12); }
   }
-  &__gap-tip { font-size: var(--cb-font-xs); color: var(--cb-ink-muted); margin: var(--cb-space-2) 0 0; line-height: 1.7; }
+  &__gap-tip { font-size: var(--sk-font-xs); color: var(--sk-ink-muted); margin: var(--sk-space-2) 0 0; line-height: 1.7; }
   // 编辑食物弹窗内提示（与缺口提示同风格）
-  &__edit-tip { font-size: var(--cb-font-xs); color: var(--cb-ink-muted); margin: var(--cb-space-1) 0 0; line-height: 1.7; }
+  &__edit-tip { font-size: var(--sk-font-xs); color: var(--sk-ink-muted); margin: var(--sk-space-1) 0 0; line-height: 1.7; }
 
   // 餐次分段
   &__meals {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-2);
-    margin-bottom: var(--cb-space-3);
+    gap: var(--sk-space-2);
+    margin-bottom: var(--sk-space-3);
     flex-wrap: wrap;
     button {
       padding: 6px 16px;
-      border-radius: var(--cb-radius-btn);
-      border: 1px solid var(--cb-hairline);
-      background: var(--cb-canvas);
-      color: var(--cb-ink-secondary);
-      font-size: var(--cb-font-sm);
+      border-radius: var(--sk-radius-btn);
+      border: 1px solid var(--sk-hairline);
+      background: var(--sk-canvas);
+      color: var(--sk-ink-secondary);
+      font-size: var(--sk-font-sm);
       cursor: pointer;
       font-family: inherit;
       &.is-on {
-        border-color: var(--cb-mod);
-        background: color-mix(in srgb, var(--cb-mod) 12%, var(--cb-surface));
-        color: var(--cb-mod);
-        font-weight: var(--cb-font-weight-medium);
+        border-color: var(--sk-mod);
+        background: color-mix(in srgb, var(--sk-mod) 12%, var(--sk-surface));
+        color: var(--sk-mod);
+        font-weight: var(--sk-font-weight-medium);
       }
     }
-    &-hint { margin-left: auto; font-size: var(--cb-font-xs); color: var(--cb-ink-muted); }
+    &-hint { margin-left: auto; font-size: var(--sk-font-xs); color: var(--sk-ink-muted); }
+  }
+
+  // 记录日期选择（默认今天；切到过去日期即补记，标签变「补记」）
+  &__date {
+    display: inline-flex; align-items: center; gap: 6px;
+    &-label { font-size: var(--sk-font-xs); color: var(--sk-ink-muted); }
+    input {
+      border: 1px solid var(--sk-hairline);
+      border-radius: var(--sk-radius-btn);
+      background: var(--sk-canvas);
+      color: var(--sk-ink-secondary);
+      font-size: var(--sk-font-sm);
+      font-family: var(--sk-font-mono);
+      padding: 5px 10px;
+      outline: none;
+      cursor: pointer;
+      &:focus { border-color: var(--sk-mod); }
+    }
   }
 
   // 搜索框（带行内放大镜图标）
-  &__search-wrap { position: relative; margin-bottom: var(--cb-space-3); }
+  &__search-wrap { position: relative; margin-bottom: var(--sk-space-3); }
   &__search-icon {
     position: absolute;
     left: 11px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
     pointer-events: none;
   }
   &__search {
     width: 100%;
     padding: 8px 12px 8px 32px;
-    border: 1px solid var(--cb-hairline);
-    border-radius: var(--cb-radius-input);
-    background: var(--cb-canvas);
-    color: var(--cb-ink);
-    font-size: var(--cb-font-sm);
+    border: 1px solid var(--sk-hairline);
+    border-radius: var(--sk-radius-input);
+    background: var(--sk-canvas);
+    color: var(--sk-ink);
+    font-size: var(--sk-font-sm);
     font-family: inherit;
     outline: none;
-    &:focus { border-color: var(--cb-mod); }
+    &:focus { border-color: var(--sk-mod); }
   }
 
   // 食物分组 chips（已抽公共组件 GroupedChips，此处仅控制与下方区块的间距）
-  &__groups { margin-bottom: var(--cb-space-3); }
+  &__groups { margin-bottom: var(--sk-space-3); }
 
   // 份量 + 营养预览
   &__form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--cb-space-3);
-    margin-bottom: var(--cb-space-3);
+    gap: var(--sk-space-3);
+    margin-bottom: var(--sk-space-3);
   }
   &__field {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    span { font-size: var(--cb-font-xs); color: var(--cb-ink-secondary); }
+    span { font-size: var(--sk-font-xs); color: var(--sk-ink-secondary); }
     input, select {
       width: 100%;
       padding: 9px 12px;
-      border: 1px solid var(--cb-hairline);
-      border-radius: var(--cb-radius-input);
-      background: var(--cb-canvas);
-      color: var(--cb-ink);
-      font-size: var(--cb-font-md);
+      border: 1px solid var(--sk-hairline);
+      border-radius: var(--sk-radius-input);
+      background: var(--sk-canvas);
+      color: var(--sk-ink);
+      font-size: var(--sk-font-md);
       font-family: inherit;
       outline: none;
-      &:focus { border-color: var(--cb-mod); }
-      &.num { font-family: var(--cb-font-mono); }
+      &:focus { border-color: var(--sk-mod); }
+      &.num { font-family: var(--sk-font-mono); }
     }
   }
   &__preview {
-    background: color-mix(in srgb, var(--cb-teal) 8%, var(--cb-surface));
-    border-left: 3px solid var(--cb-teal);
-    border-radius: 0 var(--cb-radius-btn) var(--cb-radius-btn) 0;
+    background: color-mix(in srgb, var(--sk-teal) 8%, var(--sk-surface));
+    border-left: 3px solid var(--sk-teal);
+    border-radius: 0 var(--sk-radius-btn) var(--sk-radius-btn) 0;
     padding: 8px 12px;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-secondary);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-secondary);
     line-height: 1.7;
-    b { font-family: var(--cb-font-mono); color: var(--cb-teal); font-weight: 600; font-size: var(--cb-font-lg); }
+    b { font-family: var(--sk-font-mono); color: var(--sk-teal); font-weight: 600; font-size: var(--sk-font-lg); }
   }
   &__nutri {
     display: flex;
-    gap: var(--cb-space-4);
-    background: var(--cb-canvas);
+    gap: var(--sk-space-4);
+    background: var(--sk-canvas);
     border-radius: 8px;
     padding: 6px 12px;
-    margin-top: var(--cb-space-2);
+    margin-top: var(--sk-space-2);
     font-size: 12px;
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
     flex-wrap: wrap;
-    b { font-family: var(--cb-font-mono); color: var(--cb-ink-secondary); font-weight: 600; }
+    b { font-family: var(--sk-font-mono); color: var(--sk-ink-secondary); font-weight: 600; }
   }
   &__save {
-    margin-top: var(--cb-space-3);
+    margin-top: var(--sk-space-3);
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 10px 28px;
     border: 0;
-    border-radius: var(--cb-radius-btn);
-    background: var(--cb-mod);
+    border-radius: var(--sk-radius-btn);
+    background: var(--sk-mod);
     color: #fff;
-    font-size: var(--cb-font-md);
-    font-weight: var(--cb-font-weight-medium);
+    font-size: var(--sk-font-md);
+    font-weight: var(--sk-font-weight-medium);
     font-family: inherit;
     cursor: pointer;
-    &:hover { background: var(--cb-mod-hover, var(--cb-primary-hover)); }
+    &:hover { background: var(--sk-mod-hover, var(--sk-primary-hover)); }
     &:disabled { opacity: 0.6; cursor: not-allowed; }
   }
 
   // 我的模板
   &__tpl {
-    margin-top: var(--cb-space-4);
-    border-top: 1px dashed var(--cb-hairline);
-    padding-top: var(--cb-space-3);
+    margin-top: var(--sk-space-4);
+    border-top: 1px dashed var(--sk-hairline);
+    padding-top: var(--sk-space-3);
   }
-  &__tpl-title { font-size: var(--cb-font-sm); color: var(--cb-ink-secondary); margin-bottom: var(--cb-space-2); display: flex; align-items: center; gap: 6px; }
-  &__tpl-list { display: flex; flex-wrap: wrap; gap: var(--cb-space-2); }
+  &__tpl-title { font-size: var(--sk-font-sm); color: var(--sk-ink-secondary); margin-bottom: var(--sk-space-2); display: flex; align-items: center; gap: 6px; }
+  &__tpl-list { display: flex; flex-wrap: wrap; gap: var(--sk-space-2); }
   &__tpl-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 6px 14px;
-    border-radius: var(--cb-radius-btn);
-    border: 1px solid var(--cb-hairline);
-    background: var(--cb-canvas);
-    color: var(--cb-ink-secondary);
-    font-size: var(--cb-font-xs);
+    border-radius: var(--sk-radius-btn);
+    border: 1px solid var(--sk-hairline);
+    background: var(--sk-canvas);
+    color: var(--sk-ink-secondary);
+    font-size: var(--sk-font-xs);
     cursor: pointer;
     font-family: inherit;
-    &:hover { border-color: var(--cb-mod); color: var(--cb-mod); }
+    &:hover { border-color: var(--sk-mod); color: var(--sk-mod); }
   }
 
   // 今日已记
-  &__today { margin-top: var(--cb-space-5); border-top: 1px dashed var(--cb-hairline); padding-top: var(--cb-space-4); position: relative; min-height: 72px; }
-  &__today-title { font-size: var(--cb-font-sm); color: var(--cb-ink-secondary); margin-bottom: var(--cb-space-3); b { font-family: var(--cb-font-mono); color: var(--cb-teal); } }
-  &__today-list { display: flex; flex-direction: column; gap: var(--cb-space-2); }
+  &__today { margin-top: var(--sk-space-5); border-top: 1px dashed var(--sk-hairline); padding-top: var(--sk-space-4); position: relative; min-height: 72px; }
+  &__today-title { font-size: var(--sk-font-sm); color: var(--sk-ink-secondary); margin-bottom: var(--sk-space-3); b { font-family: var(--sk-font-mono); color: var(--sk-teal); } }
+  &__today-list { display: flex; flex-direction: column; gap: var(--sk-space-2); }
   &__today-item {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
     padding: 9px 14px;
-    background: var(--cb-canvas);
-    border-radius: var(--cb-radius-btn);
-    font-size: var(--cb-font-sm);
+    background: var(--sk-canvas);
+    border-radius: var(--sk-radius-btn);
+    font-size: var(--sk-font-sm);
     flex-wrap: wrap;
   }
-  &__today-name { font-weight: var(--cb-font-weight-medium); min-width: 96px; }
-  &__today-meal { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: color-mix(in srgb, var(--cb-mod) 14%, transparent); color: var(--cb-mod); }
-  &__today-detail { color: var(--cb-ink-secondary); }
-  &__today-kcal { margin-left: auto; font-family: var(--cb-font-mono); color: var(--cb-teal); font-weight: 600; }
-  &__today-del { border: 0; background: transparent; color: var(--cb-ink-muted); cursor: pointer; font-size: 15px; &:hover { color: var(--cb-error); } }
-  &__today-empty { font-size: var(--cb-font-sm); color: var(--cb-ink-muted); }
+  &__today-name { font-weight: var(--sk-font-weight-medium); min-width: 96px; }
+  &__today-meal { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: color-mix(in srgb, var(--sk-mod) 14%, transparent); color: var(--sk-mod); }
+  &__today-detail { color: var(--sk-ink-secondary); }
+  &__today-kcal { margin-left: auto; font-family: var(--sk-font-mono); color: var(--sk-teal); font-weight: 600; }
+  &__today-del { border: 0; background: transparent; color: var(--sk-ink-muted); cursor: pointer; font-size: 15px; &:hover { color: var(--sk-error); } }
+  &__today-empty { font-size: var(--sk-font-sm); color: var(--sk-ink-muted); }
 }
 
 /* ================= 饮食统计 (FoodStats, fds__) ================= */
 .fds {
   position: relative; // 锚定 LoadingMask 遮罩范围
-  padding: var(--cb-space-5);
-  &__metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--cb-space-3); margin-bottom: var(--cb-space-5); }
-  &__panel { margin-bottom: var(--cb-space-5); }
-  &__panel-head { display: flex; align-items: center; gap: var(--cb-space-2); margin-bottom: var(--cb-space-3); svg { color: var(--cb-mod); } }
-  &__panel-title { font-size: var(--cb-font-sm); color: var(--cb-ink-secondary); display: inline-flex; align-items: center; gap: 6px; }
-  &__panel-hint { margin-left: auto; font-size: var(--cb-font-xs); color: var(--cb-ink-muted); }
-  &__chart { width: 100%; height: 200px; }
-  &__legend { display: flex; gap: var(--cb-space-4); font-size: var(--cb-font-xs); color: var(--cb-ink-secondary); margin-top: var(--cb-space-2); i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; } }
-  &__dist-list { display: flex; flex-direction: column; gap: var(--cb-space-2); }
-  // 三列：名称自适应 / 进度条弹性 / 数值列按内容伸展（不固定宽度，长值不换行挤压）
-  &__dist-row { display: grid; grid-template-columns: minmax(64px, max-content) minmax(72px, 1fr) max-content; align-items: center; gap: var(--cb-space-3); font-size: var(--cb-font-sm); }
-  &__dist-name { color: var(--cb-ink-secondary); white-space: nowrap; }
-  &__dist-track { height: 8px; background: var(--cb-canvas); border-radius: 4px; overflow: hidden; min-width: 72px; }
-  &__dist-fill { height: 100%; background: var(--cb-mod); border-radius: 4px; }
-  &__dist-val { text-align: right; font-family: var(--cb-font-mono); color: var(--cb-ink-secondary); white-space: nowrap; }
+  padding: var(--sk-space-5);
+  &__metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sk-space-3); margin-bottom: var(--sk-space-5); }
+  &__panel { margin-bottom: var(--sk-space-5); }
+  &__panel-head { display: flex; align-items: center; gap: var(--sk-space-2); margin-bottom: var(--sk-space-3); svg { color: var(--sk-mod); } }
+  &__panel-title { font-size: var(--sk-font-sm); color: var(--sk-ink-secondary); display: inline-flex; align-items: center; gap: 6px; }
+  &__panel-hint { margin-left: auto; font-size: var(--sk-font-xs); color: var(--sk-ink-muted); }
+  &__chart { width: 100%; height: 200px; overflow: hidden; min-width: 0; }
+  &__legend { display: flex; gap: var(--sk-space-4); font-size: var(--sk-font-xs); color: var(--sk-ink-secondary); margin-top: var(--sk-space-2); i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; } }
+  // 列表整体为共享列轨的网格：名称列 max-content / 进度条弹性 / 数值列按内容伸展。
+  // 行内子元素用 display:contents 参与父级网格，保证多行名称长短不一时进度条轨道起点仍对齐
+  &__dist-list { display: grid; grid-template-columns: max-content minmax(72px, 1fr) max-content; column-gap: var(--sk-space-3); row-gap: var(--sk-space-2); align-items: center; }
+  &__dist-row { display: contents; font-size: var(--sk-font-sm); }
+  &__dist-name { color: var(--sk-ink-secondary); white-space: nowrap; }
+  &__dist-track { height: 8px; background: var(--sk-canvas); border-radius: 4px; overflow: hidden; min-width: 72px; }
+  &__dist-fill { height: 100%; background: var(--sk-mod); border-radius: 4px; }
+  &__dist-val { text-align: right; font-family: var(--sk-font-mono); color: var(--sk-ink-secondary); white-space: nowrap; }
   // V2 营养素固定色（蛋白蓝/脂肪橙/碳水紫/钠红/纤维绿）
   &__fill--protein { background: var(--c-protein); }
   &__fill--fat { background: var(--c-fat); }
   &__fill--carbs { background: var(--c-carb); }
-  &__fill--sodium { background: var(--cb-error); }
-  &__fill--fiber { background: var(--cb-success); }
+  &__fill--sodium { background: var(--sk-error); }
+  &__fill--fiber { background: var(--sk-success); }
   // 营养达标状态：偏低/偏高时进度条降透明度提示（色仍为营养素固定色）
   &__fill.is-low { opacity: 0.55; }
   &__fill.is-high { opacity: 0.75; }
   // 营养达标数值列：日均粗体 + 参考小字同行
-  &__val-daily { font-weight: var(--cb-font-weight-bold); color: var(--cb-ink); }
-  &__dist-val i { font-style: normal; color: var(--cb-ink-muted); font-size: var(--cb-font-xs); margin-left: 2px; }
-  &__dist-fill--teal { background: var(--cb-teal); }
+  &__val-daily { font-weight: var(--sk-font-weight-bold); color: var(--sk-ink); }
+  &__dist-val i { font-style: normal; color: var(--sk-ink-muted); font-size: var(--sk-font-xs); margin-left: 2px; }
+  &__dist-fill--teal { background: var(--sk-teal); }
   // V2 摄入指标数值色
   &__metric-val--intake { color: var(--c-intake); }
-  &__note { margin: var(--cb-space-4) 0 0; font-size: var(--cb-font-xs); color: var(--cb-ink-muted); line-height: 1.8; b { font-family: var(--cb-font-mono); color: var(--cb-ink); } }
+  &__note { margin: var(--sk-space-4) 0 0; font-size: var(--sk-font-xs); color: var(--sk-ink-muted); line-height: 1.8; b { font-family: var(--sk-font-mono); color: var(--sk-ink); } }
   // 范围切换
   &__range { display: inline-flex; gap: 4px; margin-left: auto; }
   &__range-btn {
-    border: 1px solid var(--cb-hairline);
-    background: var(--cb-surface);
-    color: var(--cb-ink-secondary);
+    border: 1px solid var(--sk-hairline);
+    background: var(--sk-surface);
+    color: var(--sk-ink-secondary);
     padding: 4px 13px;
-    border-radius: var(--cb-radius-btn);
-    font-size: var(--cb-font-sm);
+    border-radius: var(--sk-radius-btn);
+    font-size: var(--sk-font-sm);
     cursor: pointer;
     font-family: inherit;
-    &.is-active { border-color: var(--cb-mod); background: color-mix(in srgb, var(--cb-mod) 14%, var(--cb-surface)); color: var(--cb-mod); }
+    &.is-active { border-color: var(--sk-mod); background: color-mix(in srgb, var(--sk-mod) 14%, var(--sk-surface)); color: var(--sk-mod); }
   }
 }
 
 /* ================= 饮食历史 (FoodHistory, fdh__) ================= */
 .fdh {
   position: relative; // 锚定 LoadingMask 遮罩范围
-  padding: var(--cb-space-5);
-  &__bar { display: flex; align-items: center; gap: var(--cb-space-3); margin-bottom: var(--cb-space-4); flex-wrap: wrap; }
-  &__day { border: 1px solid var(--cb-hairline); border-radius: var(--cb-radius-btn); margin-bottom: var(--cb-space-3); overflow: hidden; }
+  padding: var(--sk-space-5);
+  &__bar { display: flex; align-items: center; gap: var(--sk-space-3); margin-bottom: var(--sk-space-4); flex-wrap: wrap; }
+  &__day { border: 1px solid var(--sk-hairline); border-radius: var(--sk-radius-btn); margin-bottom: var(--sk-space-3); overflow: hidden; }
   &__day-head {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
     padding: 8px 14px;
-    background: var(--cb-canvas);
-    font-size: var(--cb-font-sm);
-    .date { font-family: var(--cb-font-mono); color: var(--cb-ink-secondary); font-weight: var(--cb-font-weight-medium); }
-    .total { margin-left: auto; font-family: var(--cb-font-mono); color: var(--cb-teal); font-weight: 600; }
+    background: var(--sk-canvas);
+    font-size: var(--sk-font-sm);
+    .date { font-family: var(--sk-font-mono); color: var(--sk-ink-secondary); font-weight: var(--sk-font-weight-medium); }
+    .total { margin-left: auto; font-family: var(--sk-font-mono); color: var(--sk-teal); font-weight: 600; }
     .ops { display: flex; gap: 4px; }
     button {
-      border: 0; background: transparent; color: var(--cb-ink-muted); cursor: pointer; padding: 4px 6px;
-      font-size: var(--cb-font-xs);
-      &:hover { color: var(--cb-mod); }
+      border: 0; background: transparent; color: var(--sk-ink-muted); cursor: pointer; padding: 4px 6px;
+      font-size: var(--sk-font-xs);
+      &:hover { color: var(--sk-mod); }
     }
   }
   &__item {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
     padding: 8px 14px;
-    border-top: 1px solid var(--cb-hairline);
-    font-size: var(--cb-font-sm);
+    border-top: 1px solid var(--sk-hairline);
+    font-size: var(--sk-font-sm);
     flex-wrap: wrap;
-    .meal { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: color-mix(in srgb, var(--cb-mod) 14%, transparent); color: var(--cb-mod); min-width: 40px; text-align: center; }
-    .name { font-weight: var(--cb-font-weight-medium); min-width: 90px; }
-    .detail { color: var(--cb-ink-secondary); }
-    .kcal { margin-left: auto; font-family: var(--cb-font-mono); color: var(--cb-teal); font-weight: 600; }
-    .op { border: 0; background: transparent; color: var(--cb-ink-muted); cursor: pointer; padding: 4px; &:hover { color: var(--cb-mod); } &--del:hover { color: var(--cb-error); } }
+    .meal { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: color-mix(in srgb, var(--sk-mod) 14%, transparent); color: var(--sk-mod); min-width: 40px; text-align: center; }
+    .name { font-weight: var(--sk-font-weight-medium); min-width: 90px; }
+    .detail { color: var(--sk-ink-secondary); }
+    .kcal { margin-left: auto; font-family: var(--sk-font-mono); color: var(--sk-teal); font-weight: 600; }
+    .op { border: 0; background: transparent; color: var(--sk-ink-muted); cursor: pointer; padding: 4px; &:hover { color: var(--sk-mod); } &--del:hover { color: var(--sk-error); } }
   }
-  &__empty { font-size: var(--cb-font-sm); color: var(--cb-ink-muted); text-align: center; padding: var(--cb-space-5) 0; }
-  &__pager { margin-top: var(--cb-space-4); display: flex; justify-content: flex-end; }
-  &__edit { display: flex; flex-direction: column; gap: var(--cb-space-3); .el-select { width: 100%; } }
-  &__default-tip { font-size: var(--cb-font-xs); color: var(--cb-ink-muted); margin: calc(var(--cb-space-2) * -1) 0 0; line-height: 1.7; }
-  &__field { display: flex; flex-direction: column; gap: 5px; label { font-size: var(--cb-font-xs); color: var(--cb-ink-secondary); } input, select { width: 100%; padding: 9px 12px; border: 1px solid var(--cb-hairline); border-radius: var(--cb-radius-input); background: var(--cb-canvas); color: var(--cb-ink); font-size: var(--cb-font-md); font-family: inherit; outline: none; &.num { font-family: var(--cb-font-mono); } &:focus { border-color: var(--cb-mod); } } }
-  &__optgrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--cb-space-3); }
-  &__link { border: 0; background: transparent; color: var(--cb-mod); cursor: pointer; font-size: var(--cb-font-xs); }
+  &__empty { font-size: var(--sk-font-sm); color: var(--sk-ink-muted); text-align: center; padding: var(--sk-space-5) 0; }
+  &__pager { margin-top: var(--sk-space-4); display: flex; justify-content: flex-end; }
+  &__edit { display: flex; flex-direction: column; gap: var(--sk-space-3); .el-select { width: 100%; } }
+  &__default-tip { font-size: var(--sk-font-xs); color: var(--sk-ink-muted); margin: calc(var(--sk-space-2) * -1) 0 0; line-height: 1.7; }
+  &__field { display: flex; flex-direction: column; gap: 5px; label { font-size: var(--sk-font-xs); color: var(--sk-ink-secondary); } input, select { width: 100%; padding: 9px 12px; border: 1px solid var(--sk-hairline); border-radius: var(--sk-radius-input); background: var(--sk-canvas); color: var(--sk-ink); font-size: var(--sk-font-md); font-family: inherit; outline: none; &.num { font-family: var(--sk-font-mono); } &:focus { border-color: var(--sk-mod); } } }
+  &__optgrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sk-space-3); }
+  &__link { border: 0; background: transparent; color: var(--sk-mod); cursor: pointer; font-size: var(--sk-font-xs); }
 }
 
 /* ================= 响应式 ================= */
@@ -370,7 +389,7 @@
 @media (max-width: 560px) {
   .fdi__form-row { grid-template-columns: 1fr; }
   .fdi__balance { flex-direction: column; align-items: stretch; }
-  .fdi__balance-rings { justify-content: flex-start; gap: var(--cb-space-4); }
+  .fdi__balance-rings { justify-content: flex-start; gap: var(--sk-space-4); }
   .fds__metrics { grid-template-columns: 1fr 1fr; }
   .fdh__optgrid { grid-template-columns: 1fr; }
   // 饮食历史行卡片化：行1 餐次+名称+热量（名称弹性推开），行2 份量+操作按钮

@@ -2,7 +2,7 @@
 /**
  * 公共组件 · ProgressRing 环形进度（V2：Apple Watch 心智，SVG 无依赖）
  * - value/max 决定弧长（超量自动封顶 100%，超预算变红）
- * - label：环下方说明文字；ringColor 缺省跟随模块主色 --cb-mod
+ * - label：环下方说明文字；ringColor 缺省跟随模块主色 --sk-mod
  * - size：直径 px（窄屏 ≤560px 自动缩至 64px，样式层处理）
  */
 import { computed } from 'vue'
@@ -18,7 +18,7 @@ const props = withDefaults(
     overToRed?: boolean
     size?: number
   }>(),
-  { label: '', ringColor: 'var(--cb-mod)', overToRed: true, size: 92 }
+  { label: '', ringColor: 'var(--sk-mod)', overToRed: true, size: 92 }
 )
 
 const RADIUS = 42

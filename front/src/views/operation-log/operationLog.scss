@@ -4,16 +4,16 @@
  */
 .op-log {
   &__action {
-    color: var(--cb-teal);
+    color: var(--sk-teal);
   }
 
   &__content {
-    color: var(--cb-ink);
+    color: var(--sk-ink);
   }
 
   &__pager {
     display: flex;
     justify-content: flex-end;
-    padding: var(--cb-space-4) var(--cb-space-5) var(--cb-space-5);
+    padding: var(--sk-space-4) var(--sk-space-5) var(--sk-space-5);
   }
 }

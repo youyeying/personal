@@ -11,15 +11,15 @@
   align-items: center;
   justify-content: center;
   // 文本 + 图标 + 间距
-  gap: var(--cb-space-2);
+  gap: var(--sk-space-2);
   padding: 10px 20px;
   // 无边框
   border: none;
   // 小圆角（非椭圆胶囊）
   border-radius: 6px;
   font-family: inherit;
-  font-size: var(--cb-font-md);
-  font-weight: var(--cb-font-weight-medium);
+  font-size: var(--sk-font-md);
+  font-weight: var(--sk-font-weight-medium);
   cursor: pointer;
   // hover 抬起动画
   transition:
@@ -34,11 +34,11 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 16px -6px rgba(26, 25, 23, 0.3);
     // 文本与图标间距展开
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--cb-primary);
+    outline: 2px solid var(--sk-primary);
     outline-offset: 2px;
   }
 
@@ -50,22 +50,22 @@
   // ---- 主题 ----
   // 主色：陶土棕
   &--primary {
-    background: var(--cb-primary);
+    background: var(--sk-primary);
     color: #fff;
 
     &:hover:not(:disabled) {
-      background: var(--cb-primary-hover);
+      background: var(--sk-primary-hover);
     }
   }
 
   // 浅色：米白底 + 主色字
   &--plain {
-    background: var(--cb-surface);
-    color: var(--cb-primary);
+    background: var(--sk-surface);
+    color: var(--sk-primary);
     box-shadow: 0 1px 2px rgba(26, 25, 23, 0.06);
 
     &:hover:not(:disabled) {
-      background: var(--cb-canvas);
+      background: var(--sk-canvas);
       box-shadow: 0 8px 16px -6px rgba(26, 25, 23, 0.2);
     }
   }
@@ -73,7 +73,7 @@
   // 纯文字
   &--text {
     background: transparent;
-    color: var(--cb-primary);
+    color: var(--sk-primary);
     padding: 8px 12px;
 
     &:hover:not(:disabled) {

@@ -130,10 +130,10 @@ function renderChart() {
   if (!el) return
   const base = chartEl.value ?? document.documentElement
   const c = {
-    mod: cssVar('--cb-mod', cssVar('--cb-primary'), base),
-    muted: cssVar('--cb-ink-muted'),
-    hairline: cssVar('--cb-hairline'),
-    teal: cssVar('--cb-teal')
+    mod: cssVar('--sk-mod', cssVar('--sk-primary'), base),
+    muted: cssVar('--sk-ink-muted'),
+    hairline: cssVar('--sk-hairline'),
+    teal: cssVar('--sk-teal')
   }
   // 近 14 天（含今天）
   const days: string[] = []

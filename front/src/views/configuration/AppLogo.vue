@@ -3,7 +3,7 @@
  * 公共组件 · 应用 Logo（随模块/路由切换专属图标）
  * 与导航栏菜单图标刻意不同：每个模块一枚独立的线性徽标
  * 父组件可传 kind 指定；不传时按当前模块（theme store）
- * 颜色取 --cb-mod（随模块变色），尺寸由使用方 CSS 控制
+ * 颜色取 --sk-mod（随模块变色），尺寸由使用方 CSS 控制
  */
 import { computed } from 'vue'
 import { useThemeStore } from '@/store/theme'

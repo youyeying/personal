@@ -2,7 +2,7 @@
  * 锻炼模块样式（独立页面，组合层 + 四子页组件）
  * - 布局类 .ex/.ex__sub（v1.35.1 自健康页独立后补齐，原由 .hl/.hl__sub 提供）
  * - 类名前缀：组合层 ex__ / 运动打卡 exi__ / 锻炼统计 exs__ / 锻炼历史 exh__ / 消耗分析 exa__
- * - 颜色/间距一律来自 --cb-* 令牌；数字等宽
+ * - 颜色/间距一律来自 --sk-* 令牌；数字等宽
  */
 
 /* ================= 组合层布局 (Exercise.vue, .ex) ================= */
@@ -20,7 +20,7 @@
   &__sub {
     display: flex;
     flex-direction: column;
-    gap: var(--cb-space-5);
+    gap: var(--sk-space-5);
   }
 }
 
@@ -29,36 +29,36 @@
   // 卡片需 position:relative 锚定 LoadingMask 遮罩范围（否则 absolute 脱离卡片盖满视口）
   position: relative;
   // 与健康页其余子页卡一致：全局 .card 不带 padding，由各卡根补 24px
-  padding: var(--cb-space-5);
+  padding: var(--sk-space-5);
   // 动作分组 chips（已抽公共组件 GroupedChips，此处仅控制与下方区块的间距）
   &__groups {
-    margin-bottom: var(--cb-space-4);
+    margin-bottom: var(--sk-space-4);
   }
   &__last {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-2);
-    background: color-mix(in srgb, var(--cb-teal) 8%, var(--cb-surface));
-    border: 1px solid color-mix(in srgb, var(--cb-teal) 25%, transparent);
-    color: var(--cb-teal);
-    border-radius: var(--cb-radius-btn);
+    gap: var(--sk-space-2);
+    background: color-mix(in srgb, var(--sk-teal) 8%, var(--sk-surface));
+    border: 1px solid color-mix(in srgb, var(--sk-teal) 25%, transparent);
+    color: var(--sk-teal);
+    border-radius: var(--sk-radius-btn);
     padding: 8px 12px;
-    font-size: var(--cb-font-xs);
-    margin: var(--cb-space-3) 0;
+    font-size: var(--sk-font-xs);
+    margin: var(--sk-space-3) 0;
     b {
-      font-family: var(--cb-font-mono);
+      font-family: var(--sk-font-mono);
       font-weight: 600;
     }
   }
   &__form {
     display: flex;
     flex-direction: column;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
   }
   &__row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
     &--note {
       grid-template-columns: 2fr 1fr;
     }
@@ -68,43 +68,43 @@
     flex-direction: column;
     gap: 5px;
     span {
-      font-size: var(--cb-font-xs);
-      color: var(--cb-ink-secondary);
+      font-size: var(--sk-font-xs);
+      color: var(--sk-ink-secondary);
     }
     input, select {
       width: 100%;
       padding: 9px 12px;
-      border: 1px solid var(--cb-hairline);
-      border-radius: var(--cb-radius-input);
-      background: var(--cb-canvas);
-      color: var(--cb-ink);
-      font-size: var(--cb-font-md);
+      border: 1px solid var(--sk-hairline);
+      border-radius: var(--sk-radius-input);
+      background: var(--sk-canvas);
+      color: var(--sk-ink);
+      font-size: var(--sk-font-md);
       font-family: inherit;
       outline: none;
       &:focus {
-        border-color: var(--cb-mod);
+        border-color: var(--sk-mod);
       }
-      &.num { font-family: var(--cb-font-mono); }
+      &.num { font-family: var(--sk-font-mono); }
     }
-    select { font-family: var(--cb-font-mono); }
+    select { font-family: var(--sk-font-mono); }
   }
   &__calc {
-    background: color-mix(in srgb, var(--cb-teal) 8%, var(--cb-surface));
-    border-left: 3px solid var(--cb-teal);
-    border-radius: 0 var(--cb-radius-btn) var(--cb-radius-btn) 0;
+    background: color-mix(in srgb, var(--sk-teal) 8%, var(--sk-surface));
+    border-left: 3px solid var(--sk-teal);
+    border-radius: 0 var(--sk-radius-btn) var(--sk-radius-btn) 0;
     padding: 8px 12px;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-secondary);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-secondary);
     line-height: 1.7;
     b {
-      font-family: var(--cb-font-mono);
-      color: var(--cb-teal);
+      font-family: var(--sk-font-mono);
+      color: var(--sk-teal);
       font-weight: 600;
-      font-size: var(--cb-font-lg);
+      font-size: var(--sk-font-lg);
     }
   }
   &__calc-sub {
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
   }
   &__save {
     align-self: flex-start;
@@ -113,16 +113,16 @@
     gap: 6px;
     padding: 10px 28px;
     border: 0;
-    border-radius: var(--cb-radius-btn);
-    background: var(--cb-mod);
+    border-radius: var(--sk-radius-btn);
+    background: var(--sk-mod);
     color: #fff;
-    font-size: var(--cb-font-md);
-    font-weight: var(--cb-font-weight-medium);
+    font-size: var(--sk-font-md);
+    font-weight: var(--sk-font-weight-medium);
     font-family: inherit;
     cursor: pointer;
     svg { color: #fff; }
     &:hover {
-      background: var(--cb-mod-hover, var(--cb-primary-hover));
+      background: var(--sk-mod-hover, var(--sk-primary-hover));
     }
     &:disabled {
       opacity: 0.6;
@@ -130,26 +130,26 @@
     }
   }
   &__today {
-    margin-top: var(--cb-space-5);
-    border-top: 1px dashed var(--cb-hairline);
-    padding-top: var(--cb-space-4);
+    margin-top: var(--sk-space-5);
+    border-top: 1px dashed var(--sk-hairline);
+    padding-top: var(--sk-space-4);
     // 供今日列表 LoadingMask 不透明覆盖
     position: relative;
     min-height: 72px;
   }
   &__today-title {
-    font-size: var(--cb-font-sm);
-    color: var(--cb-ink-secondary);
-    margin-bottom: var(--cb-space-3);
+    font-size: var(--sk-font-sm);
+    color: var(--sk-ink-secondary);
+    margin-bottom: var(--sk-space-3);
     b {
-      font-family: var(--cb-font-mono);
-      color: var(--cb-teal);
+      font-family: var(--sk-font-mono);
+      color: var(--sk-teal);
     }
   }
   &__today-list {
     display: flex;
     flex-direction: column;
-    gap: var(--cb-space-2);
+    gap: var(--sk-space-2);
   }
   // 新增条目入场（下滑淡入）、删除离场（淡出）、兄弟位移
   &__today-list-enter-active,
@@ -170,78 +170,78 @@
   &__today-item {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
     padding: 9px 14px;
-    background: var(--cb-canvas);
-    border-radius: var(--cb-radius-btn);
-    font-size: var(--cb-font-sm);
+    background: var(--sk-canvas);
+    border-radius: var(--sk-radius-btn);
+    font-size: var(--sk-font-sm);
     flex-wrap: wrap;
   }
   &__today-name {
-    font-weight: var(--cb-font-weight-medium);
+    font-weight: var(--sk-font-weight-medium);
     min-width: 96px;
   }
   &__today-detail {
-    color: var(--cb-ink-secondary);
+    color: var(--sk-ink-secondary);
   }
   &__today-hand {
     font-size: 12px;
     padding: 2px 8px;
     border-radius: 10px;
-    background: color-mix(in srgb, var(--cb-mod) 14%, transparent);
-    color: var(--cb-mod);
+    background: color-mix(in srgb, var(--sk-mod) 14%, transparent);
+    color: var(--sk-mod);
   }
   &__today-kcal {
     margin-left: auto;
-    font-family: var(--cb-font-mono);
-    color: var(--cb-teal);
+    font-family: var(--sk-font-mono);
+    color: var(--sk-teal);
     font-weight: 600;
   }
   &__today-copy {
     border: 0;
     background: transparent;
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
     cursor: pointer;
     padding: 4px;
     display: inline-flex;
     align-items: center;
     &:hover {
-      color: var(--cb-mod);
+      color: var(--sk-mod);
     }
   }
   &__today-del {
     border: 0;
     background: transparent;
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
     cursor: pointer;
     font-size: 15px;
-    &:hover { color: var(--cb-error); }
+    &:hover { color: var(--sk-error); }
   }
   &__today-empty {
-    font-size: var(--cb-font-sm);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-font-sm);
+    color: var(--sk-ink-muted);
   }
   &__add {
     display: flex;
     flex-direction: column;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
     .exi__field {
       display: flex;
       flex-direction: column;
       gap: 5px;
       span {
-        font-size: var(--cb-font-xs);
-        color: var(--cb-ink-secondary);
+        font-size: var(--sk-font-xs);
+        color: var(--sk-ink-secondary);
       }
       input,
       select {
         padding: 9px 12px;
-        border: 1px solid var(--cb-hairline);
-        border-radius: var(--cb-radius-input);
-        background: var(--cb-canvas);
-        color: var(--cb-ink);
-        font-family: var(--cb-font-mono);
-        font-size: var(--cb-font-md);
+        border: 1px solid var(--sk-hairline);
+        border-radius: var(--sk-radius-input);
+        background: var(--sk-canvas);
+        color: var(--sk-ink);
+        font-family: var(--sk-font-mono);
+        font-size: var(--sk-font-md);
       }
     }
   }
@@ -250,157 +250,159 @@
 /* ================= 锻炼统计 (ExerciseStats, exs__) ================= */
 .exs {
   position: relative; // 锚定 LoadingMask 遮罩范围
-  padding: var(--cb-space-5);
+  padding: var(--sk-space-5);
   &__metrics {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--cb-space-3);
-    margin-bottom: var(--cb-space-5);
+    gap: var(--sk-space-3);
+    margin-bottom: var(--sk-space-5);
   }
   &__panel {
-    margin-bottom: var(--cb-space-5);
+    margin-bottom: var(--sk-space-5);
   }
   &__panel-head {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-2);
-    margin-bottom: var(--cb-space-3);
-    svg { color: var(--cb-mod); }
+    gap: var(--sk-space-2);
+    margin-bottom: var(--sk-space-3);
+    svg { color: var(--sk-mod); }
   }
   &__panel-title {
-    font-size: var(--cb-font-sm);
-    color: var(--cb-ink-secondary);
+    font-size: var(--sk-font-sm);
+    color: var(--sk-ink-secondary);
     display: inline-flex;
     align-items: center;
     gap: 6px;
   }
   &__panel-hint {
     margin-left: auto;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
   }
   &__chart {
     width: 100%;
     height: 180px;
+    overflow: hidden;
+    min-width: 0;
   }
   &__dist-list {
     display: flex;
     flex-direction: column;
-    gap: var(--cb-space-2);
+    gap: var(--sk-space-2);
   }
   &__dist-row {
     display: grid;
     grid-template-columns: 120px 1fr 100px;
     align-items: center;
-    gap: var(--cb-space-3);
-    font-size: var(--cb-font-sm);
+    gap: var(--sk-space-3);
+    font-size: var(--sk-font-sm);
   }
   &__dist-name {
-    color: var(--cb-ink-secondary);
+    color: var(--sk-ink-secondary);
   }
   &__dist-track {
     height: 8px;
-    background: var(--cb-canvas);
+    background: var(--sk-canvas);
     border-radius: 4px;
     overflow: hidden;
   }
   &__dist-fill {
     height: 100%;
-    background: var(--cb-mod);
+    background: var(--sk-mod);
     border-radius: 4px;
   }
   &__dist-val {
     text-align: right;
-    font-family: var(--cb-font-mono);
-    color: var(--cb-ink-secondary);
+    font-family: var(--sk-font-mono);
+    color: var(--sk-ink-secondary);
   }
 }
 
 /* ================= 锻炼历史 (ExerciseHistory, exh__) ================= */
 .exh {
   position: relative; // 锚定 LoadingMask 遮罩范围
-  padding: var(--cb-space-5);
+  padding: var(--sk-space-5);
   &__bar {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-3);
-    margin-bottom: var(--cb-space-4);
+    gap: var(--sk-space-3);
+    margin-bottom: var(--sk-space-4);
     flex-wrap: wrap;
   }
   &__link {
     border: 0;
     background: transparent;
-    color: var(--cb-mod);
+    color: var(--sk-mod);
     cursor: pointer;
-    font-size: var(--cb-font-xs);
+    font-size: var(--sk-font-xs);
   }
   &__empty {
-    font-size: var(--cb-font-sm);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-font-sm);
+    color: var(--sk-ink-muted);
     text-align: center;
-    padding: var(--cb-space-5) 0;
+    padding: var(--sk-space-5) 0;
   }
   &__pager {
-    margin-top: var(--cb-space-4);
+    margin-top: var(--sk-space-4);
   }
   &__action {
-    font-weight: var(--cb-font-weight-medium);
+    font-weight: var(--sk-font-weight-medium);
   }
   &__param {
-    color: var(--cb-ink-secondary);
+    color: var(--sk-ink-secondary);
   }
   &__hand {
     display: inline-block;
     font-size: 12px;
     padding: 1px 8px;
     border-radius: 10px;
-    background: color-mix(in srgb, var(--cb-mod) 14%, transparent);
-    color: var(--cb-mod);
+    background: color-mix(in srgb, var(--sk-mod) 14%, transparent);
+    color: var(--sk-mod);
     margin-left: 6px;
-    &.is-hand { font-family: var(--cb-font-mono); }
+    &.is-hand { font-family: var(--sk-font-mono); }
   }
   &__kcal {
-    color: var(--cb-teal);
+    color: var(--sk-teal);
     font-weight: 600;
     small {
       display: block;
       font-size: 11px;
-      color: var(--cb-ink-muted);
+      color: var(--sk-ink-muted);
       font-weight: 400;
     }
   }
   &__op {
     border: 0;
     background: transparent;
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
     cursor: pointer;
     padding: 4px;
-    &:hover { color: var(--cb-mod); }
-    &--del:hover { color: var(--cb-error); }
+    &:hover { color: var(--sk-mod); }
+    &--del:hover { color: var(--sk-error); }
   }
   &__edit {
     display: flex;
     flex-direction: column;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
     .el-select { width: 100%; }
     label {
-      font-size: var(--cb-font-xs);
-      color: var(--cb-ink-secondary);
+      font-size: var(--sk-font-xs);
+      color: var(--sk-ink-secondary);
     }
     input, select {
       width: 100%;
       padding: 9px 12px;
-      border: 1px solid var(--cb-hairline);
-      border-radius: var(--cb-radius-input);
-      background: var(--cb-canvas);
-      color: var(--cb-ink);
-      font-size: var(--cb-font-md);
+      border: 1px solid var(--sk-hairline);
+      border-radius: var(--sk-radius-input);
+      background: var(--sk-canvas);
+      color: var(--sk-ink);
+      font-size: var(--sk-font-md);
       font-family: inherit;
       outline: none;
-      &.num { font-family: var(--cb-font-mono); }
-      &:focus { border-color: var(--cb-mod); }
+      &.num { font-family: var(--sk-font-mono); }
+      &:focus { border-color: var(--sk-mod); }
     }
-    select { font-family: var(--cb-font-mono); }
+    select { font-family: var(--sk-font-mono); }
   }
   &__field {
     display: flex;
@@ -410,114 +412,116 @@
   &__optgrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
   }
 }
 
 /* ================= 锻炼消耗分析 (ExerciseAnalysis, exa__) ================= */
 .exa {
   position: relative; // 锚定 LoadingMask 遮罩范围
-  padding: var(--cb-space-5);
+  padding: var(--sk-space-5);
   &__bar {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-3);
-    margin-bottom: var(--cb-space-5);
+    gap: var(--sk-space-3);
+    margin-bottom: var(--sk-space-5);
     flex-wrap: wrap;
   }
   &__presets {
     display: flex;
-    gap: var(--cb-space-2);
+    gap: var(--sk-space-2);
     flex-wrap: wrap;
   }
   &__preset {
     padding: 6px 14px;
-    border-radius: var(--cb-radius-btn);
-    border: 1px solid var(--cb-hairline);
-    background: var(--cb-canvas);
-    color: var(--cb-ink-secondary);
-    font-size: var(--cb-font-xs);
+    border-radius: var(--sk-radius-btn);
+    border: 1px solid var(--sk-hairline);
+    background: var(--sk-canvas);
+    color: var(--sk-ink-secondary);
+    font-size: var(--sk-font-xs);
     font-family: inherit;
     cursor: pointer;
     transition: all 0.15s ease;
     &:hover {
-      border-color: var(--cb-mod);
-      color: var(--cb-mod);
+      border-color: var(--sk-mod);
+      color: var(--sk-mod);
     }
   }
   &__metrics {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--cb-space-3);
-    margin-bottom: var(--cb-space-5);
+    gap: var(--sk-space-3);
+    margin-bottom: var(--sk-space-5);
   }
   &__panel {
-    margin-bottom: var(--cb-space-5);
+    margin-bottom: var(--sk-space-5);
   }
   &__panel-head {
     display: flex;
     align-items: center;
-    gap: var(--cb-space-2);
-    margin-bottom: var(--cb-space-3);
-    svg { color: var(--cb-mod); }
+    gap: var(--sk-space-2);
+    margin-bottom: var(--sk-space-3);
+    svg { color: var(--sk-mod); }
   }
   &__panel-title {
-    font-size: var(--cb-font-sm);
-    color: var(--cb-ink-secondary);
+    font-size: var(--sk-font-sm);
+    color: var(--sk-ink-secondary);
     display: inline-flex;
     align-items: center;
     gap: 6px;
   }
   &__panel-hint {
     margin-left: auto;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
   }
   &__chart {
     width: 100%;
     height: 180px;
+    overflow: hidden;
+    min-width: 0;
   }
   &__table {
-    border: 1px solid var(--cb-hairline);
-    border-radius: var(--cb-radius-btn);
+    border: 1px solid var(--sk-hairline);
+    border-radius: var(--sk-radius-btn);
     overflow: hidden;
   }
   &__table-head {
-    background: var(--cb-canvas);
-    color: var(--cb-ink-muted);
-    font-size: var(--cb-font-xs);
+    background: var(--sk-canvas);
+    color: var(--sk-ink-muted);
+    font-size: var(--sk-font-xs);
   }
   &__table-row {
     display: grid;
     grid-template-columns: 1.2fr 0.6fr 1fr 1fr;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
     padding: 9px 14px;
-    border-top: 1px solid var(--cb-hairline);
-    font-size: var(--cb-font-sm);
+    border-top: 1px solid var(--sk-hairline);
+    font-size: var(--sk-font-sm);
     &:first-child { border-top: 0; }
     span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   }
   &__date {
-    color: var(--cb-ink-secondary);
-    font-family: var(--cb-font-mono);
+    color: var(--sk-ink-secondary);
+    font-family: var(--sk-font-mono);
   }
   &__count {
-    color: var(--cb-ink-secondary);
+    color: var(--sk-ink-secondary);
   }
   &__net {
-    color: var(--cb-teal);
+    color: var(--sk-teal);
     font-weight: 600;
-    small { font-size: 11px; color: var(--cb-ink-muted); font-weight: 400; margin-left: 2px; }
+    small { font-size: 11px; color: var(--sk-ink-muted); font-weight: 400; margin-left: 2px; }
   }
   &__actual {
-    color: var(--cb-ink);
+    color: var(--sk-ink);
     font-weight: 600;
-    small { font-size: 11px; color: var(--cb-ink-muted); font-weight: 400; margin-left: 2px; }
+    small { font-size: 11px; color: var(--sk-ink-muted); font-weight: 400; margin-left: 2px; }
   }
   &__note {
-    margin: var(--cb-space-4) 0 0;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
+    margin: var(--sk-space-4) 0 0;
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
   }
 }
 
