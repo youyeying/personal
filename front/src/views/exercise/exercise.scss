@@ -1,64 +1,38 @@
 /**
- * 健康 · 锻炼子页专用样式（ExerciseInput / ExerciseStats / ExerciseHistory）
- * 类名前缀：运动打卡 exi__ / 锻炼统计 exs__ / 锻炼历史 exh__（与组件模板一致）
- * 颜色/间距一律来自 --cb-* 令牌；数字等宽
+ * 锻炼模块样式（独立页面，组合层 + 四子页组件）
+ * - 布局类 .ex/.ex__sub（v1.35.1 自健康页独立后补齐，原由 .hl/.hl__sub 提供）
+ * - 类名前缀：组合层 ex__ / 运动打卡 exi__ / 锻炼统计 exs__ / 锻炼历史 exh__ / 消耗分析 exa__
+ * - 颜色/间距一律来自 --cb-* 令牌；数字等宽
  */
+
+/* ================= 组合层布局 (Exercise.vue, .ex) ================= */
+.ex {
+  max-width: 1500px;
+  width: 100%;
+  min-width: 450px;
+  margin: 0 auto;
+  padding: clamp(0.75rem, 2vw, 2rem);
+  gap: clamp(0.75rem, 1.1vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+
+  // 子页容器（v-show 切换；flex 纵排 + 卡间距）
+  &__sub {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-5);
+  }
+}
 
 /* ================= 锻炼打卡 (ExerciseInput, exi__) ================= */
 .exi {
+  // 卡片需 position:relative 锚定 LoadingMask 遮罩范围（否则 absolute 脱离卡片盖满视口）
+  position: relative;
   // 与健康页其余子页卡一致：全局 .card 不带 padding，由各卡根补 24px
   padding: var(--cb-space-5);
+  // 动作分组 chips（已抽公共组件 GroupedChips，此处仅控制与下方区块的间距）
   &__groups {
-    display: flex;
-    flex-direction: column;
-    gap: var(--cb-space-2);
     margin-bottom: var(--cb-space-4);
-  }
-  &__group-label {
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
-    margin: var(--cb-space-3) 0 var(--cb-space-2);
-    &:first-child {
-      margin-top: 0;
-    }
-  }
-  &__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--cb-space-2);
-  }
-  &__chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    border-radius: var(--cb-radius-btn);
-    border: 1px solid var(--cb-hairline);
-    background: var(--cb-canvas);
-    color: var(--cb-ink-secondary);
-    font-size: var(--cb-font-sm);
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    i {
-      font-style: normal;
-      font-size: 11px;
-      color: var(--cb-ink-muted);
-    }
-    &.is-on {
-      border-color: var(--cb-mod);
-      color: var(--cb-mod);
-      background: color-mix(in srgb, var(--cb-mod) 10%, var(--cb-surface));
-      font-weight: var(--cb-font-weight-medium);
-      i { color: var(--cb-mod); }
-    }
-    &:hover:not(.is-on) {
-      border-color: var(--cb-mod);
-    }
-    &--add {
-      border-style: dashed;
-      color: var(--cb-ink-muted);
-    }
   }
   &__last {
     display: flex;
@@ -159,6 +133,9 @@
     margin-top: var(--cb-space-5);
     border-top: 1px dashed var(--cb-hairline);
     padding-top: var(--cb-space-4);
+    // 供今日列表 LoadingMask 不透明覆盖
+    position: relative;
+    min-height: 72px;
   }
   &__today-title {
     font-size: var(--cb-font-sm);
@@ -272,6 +249,7 @@
 
 /* ================= 锻炼统计 (ExerciseStats, exs__) ================= */
 .exs {
+  position: relative; // 锚定 LoadingMask 遮罩范围
   padding: var(--cb-space-5);
   &__metrics {
     display: grid;
@@ -340,6 +318,7 @@
 
 /* ================= 锻炼历史 (ExerciseHistory, exh__) ================= */
 .exh {
+  position: relative; // 锚定 LoadingMask 遮罩范围
   padding: var(--cb-space-5);
   &__bar {
     display: flex;
@@ -403,6 +382,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--cb-space-3);
+    .el-select { width: 100%; }
     label {
       font-size: var(--cb-font-xs);
       color: var(--cb-ink-secondary);
@@ -432,28 +412,112 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--cb-space-3);
   }
-  &__detail {
+}
+
+/* ================= 锻炼消耗分析 (ExerciseAnalysis, exa__) ================= */
+.exa {
+  position: relative; // 锚定 LoadingMask 遮罩范围
+  padding: var(--cb-space-5);
+  &__bar {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: var(--cb-space-3);
+    margin-bottom: var(--cb-space-5);
+    flex-wrap: wrap;
   }
-  &__drow {
+  &__presets {
     display: flex;
-    align-items: baseline;
-    gap: var(--cb-space-3);
-    span.num { font-family: var(--cb-font-mono); }
+    gap: var(--cb-space-2);
+    flex-wrap: wrap;
   }
-  &__dlabel {
-    flex: 0 0 64px;
+  &__preset {
+    padding: 6px 14px;
+    border-radius: var(--cb-radius-btn);
+    border: 1px solid var(--cb-hairline);
+    background: var(--cb-canvas);
+    color: var(--cb-ink-secondary);
+    font-size: var(--cb-font-xs);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    &:hover {
+      border-color: var(--cb-mod);
+      color: var(--cb-mod);
+    }
+  }
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--cb-space-3);
+    margin-bottom: var(--cb-space-5);
+  }
+  &__panel {
+    margin-bottom: var(--cb-space-5);
+  }
+  &__panel-head {
+    display: flex;
+    align-items: center;
+    gap: var(--cb-space-2);
+    margin-bottom: var(--cb-space-3);
+    svg { color: var(--cb-mod); }
+  }
+  &__panel-title {
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  &__panel-hint {
+    margin-left: auto;
     font-size: var(--cb-font-xs);
     color: var(--cb-ink-muted);
   }
-  &__drow--note {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    border-top: 1px dashed var(--cb-hairline);
-    padding-top: var(--cb-space-3);
+  &__chart {
+    width: 100%;
+    height: 180px;
+  }
+  &__table {
+    border: 1px solid var(--cb-hairline);
+    border-radius: var(--cb-radius-btn);
+    overflow: hidden;
+  }
+  &__table-head {
+    background: var(--cb-canvas);
+    color: var(--cb-ink-muted);
+    font-size: var(--cb-font-xs);
+  }
+  &__table-row {
+    display: grid;
+    grid-template-columns: 1.2fr 0.6fr 1fr 1fr;
+    gap: var(--cb-space-3);
+    padding: 9px 14px;
+    border-top: 1px solid var(--cb-hairline);
+    font-size: var(--cb-font-sm);
+    &:first-child { border-top: 0; }
+    span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+  &__date {
+    color: var(--cb-ink-secondary);
+    font-family: var(--cb-font-mono);
+  }
+  &__count {
+    color: var(--cb-ink-secondary);
+  }
+  &__net {
+    color: var(--cb-teal);
+    font-weight: 600;
+    small { font-size: 11px; color: var(--cb-ink-muted); font-weight: 400; margin-left: 2px; }
+  }
+  &__actual {
+    color: var(--cb-ink);
+    font-weight: 600;
+    small { font-size: 11px; color: var(--cb-ink-muted); font-weight: 400; margin-left: 2px; }
+  }
+  &__note {
+    margin: var(--cb-space-4) 0 0;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
   }
 }
 
@@ -461,6 +525,7 @@
 @media (max-width: 900px) {
   .exs__metrics { grid-template-columns: repeat(2, 1fr); }
   .exi__row { grid-template-columns: 1fr 1fr; }
+  .exa__metrics { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 560px) {
   .exi__row,

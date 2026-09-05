@@ -2,7 +2,7 @@
 /**
  * 健康 · 锻炼统计子页组件
  * 四指标（今日/本周/本月净消耗 + 连续天数）+ 近 14 天净消耗柱状图 + 动作消耗分布
- * 消耗基于「最新体重记录」按 MET 公式前端计算（utils/exercise.ts）
+ * 消耗基于「记录时体重快照」按 MET 公式前端计算（utils/exercise.ts）
  */
 import { computed, markRaw, onMounted, ref, watch } from 'vue'
 import { Flame, CalendarDays, TrendingUp, Repeat } from '@lucide/vue'
@@ -12,7 +12,7 @@ import { listWeightRecords } from '@/api/health'
 import { formatDate } from '@/utils/format'
 import { useECharts } from '@/utils/useECharts'
 import { cssVar } from '@/utils/theme'
-import { walkSpeedKmh, walkMet, strengthMet, calcKcal, totalSeconds } from '@/utils/exercise'
+import { walkSpeedKmh, walkMet, cyclingMet, speedMet, stairsMet, repsEffectiveMinutes, calcKcal, totalSeconds } from '@/utils/exercise'
 import MetricCard from '@/components/MetricCard/MetricCard.vue'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
 import EmptyState from '@/components/EmptyState/EmptyState.vue'
@@ -40,16 +40,19 @@ const rows = ref<KcalRow[]>([])
 function computeRow(r: ExerciseRecord, item: ExerciseItem, w: number): KcalRow {
   let met = item.baseMet
   let minutes = 0
-  if (item.type === 'strength' && r.reps) {
-    const secTotal = totalSeconds(r.minutes, r.seconds)
-    if (secTotal <= 0) return { rec: r, net: 0, total: 0, item, date: r.recordDate }
-    minutes = secTotal / 60
-    met = strengthMet(item.baseMet, r.reps / minutes, item.refSpeed ?? 12)
-  } else if (item.type === 'walk' && r.distance && r.minutes) {
-    met = walkMet(walkSpeedKmh(Number(r.distance), Number(r.minutes))).met
+  if ((item.type === 'strength' || item.type === 'cardio') && r.reps) {
+    // v2 模型：速度→MET 强度 + 等效分钟总量
+    minutes = repsEffectiveMinutes(r.reps, item.refSpeed)
+    met = speedMet(item.baseMet, r.reps, totalSeconds(r.minutes, r.seconds), item.refSpeed, item.maxSpeed)
+  } else if ((item.type === 'walk' || item.type === 'cycling') && r.distance && r.minutes) {
+    const kmh = walkSpeedKmh(Number(r.distance), Number(r.minutes))
+    met = (item.type === 'cycling' ? cyclingMet(kmh) : walkMet(kmh)).met
     minutes = Number(r.minutes)
   } else if (item.type === 'stairs' && r.floors && r.times) {
-    minutes = totalSeconds(r.minutes, r.seconds) / 60
+    // 秒/层 → MET 档（快爬 8.8 ~ 慢爬 4.2）
+    const secTotal = totalSeconds(r.minutes, r.seconds)
+    met = stairsMet(Number(r.floors), Number(r.times), secTotal).met
+    minutes = secTotal / 60
   } else if (item.type === 'plank' && r.seconds) {
     minutes = r.seconds / 60
   }
@@ -69,14 +72,15 @@ async function load(silent = false) {
     records.value = recs.records
     items.value = itms
     weightKg.value = wres.records?.[0]?.weight != null ? Number(wres.records[0].weight) : null
-    rows.value = weightKg.value
-      ? records.value
-          .map((r) => {
-            const item = items.value.find((i) => i.id === r.exerciseId)
-            return item ? computeRow(r, item, weightKg.value!) : null
-          })
-          .filter((x): x is KcalRow => x !== null)
-      : []
+    rows.value = records.value
+      .map((r) => {
+        const item = items.value.find((i) => i.id === r.exerciseId)
+        if (!item) return null
+        // 优先用记录时体重快照，历史消耗固定；为空回退当前体重
+        const w = r.bodyWeight ?? weightKg.value
+        return w ? computeRow(r, item, w) : null
+      })
+      .filter((x): x is KcalRow => x !== null)
     renderChart()
   } finally {
     if (!silent) loading.value = false

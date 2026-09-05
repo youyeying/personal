@@ -36,7 +36,12 @@ public class OverviewService {
         Map<String, Object> todayStat = buildTodayStat(userId, today);
         Map<String, Object> monthStat = buildMonthStat(userId, today, monthStart);
 
-        return Map.of("today", todayStat, "month", monthStat);
+        // 全量可支配余额：所有历史收入 − 所有历史支出（发薪入账自动累加，随记账实时变化）
+        List<ExpenseRecord> allExpenses = expenseRecordMapper.selectList(
+                new LambdaQueryWrapper<ExpenseRecord>().eq(ExpenseRecord::getUserId, userId));
+        BigDecimal disposable = sumByType(allExpenses, 2).subtract(sumByType(allExpenses, 1));
+
+        return Map.of("today", todayStat, "month", monthStat, "disposable", disposable);
     }
 
     /** 今日：收支/笔数、体重、学习、四模块完成度 */

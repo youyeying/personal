@@ -1,0 +1,76 @@
+/**
+ * RecordHeatmap 记录热力图样式（V2）
+ * - 格色 = --hm-color（模块主色）按 level 用 color-mix 派生深浅，明暗主题自动适配
+ * - 窄屏 ≤560px 截断为最近 21 格（用户约定）
+ */
+.hm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-space-2);
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: var(--cb-space-2);
+  }
+
+  &__label {
+    width: 56px;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  &__cells {
+    display: flex;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  &__cell {
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    transition: transform 0.12s ease;
+    &:hover { transform: scale(1.15); }
+
+    // 五档色阶：0=空、1~4=主题色渐深（color-mix 派生，禁硬编码）
+    &--l0 { background: rgba(28, 30, 26, 0.06); }
+    &--l1 { background: color-mix(in srgb, var(--hm-color, var(--cb-mod)) 28%, var(--cb-surface)); }
+    &--l2 { background: color-mix(in srgb, var(--hm-color, var(--cb-mod)) 50%, var(--cb-surface)); }
+    &--l3 { background: color-mix(in srgb, var(--hm-color, var(--cb-mod)) 75%, var(--cb-surface)); }
+    &--l4 { background: var(--hm-color, var(--cb-mod)); }
+  }
+
+  &__legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 64px;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+    flex-wrap: wrap;
+
+    .hm__cell { width: 11px; height: 11px; }
+    &-t { margin: 0 2px; }
+  }
+}
+
+// 暗色空档提可见性
+html.dark .hm__cell--l0 {
+  background: rgba(236, 229, 214, 0.08);
+}
+
+// 窄屏：截断为最近 21 格（隐藏更早的格子），行标签缩窄
+@media (max-width: 560px) {
+  .hm {
+    &__label { width: 40px; }
+    // 每行 cells 只保留最后 21 个（nth-last-child 反选）
+    &__cells .hm__cell:nth-last-child(n + 22) {
+      display: none;
+    }
+    &__legend { margin-left: 48px; }
+  }
+}

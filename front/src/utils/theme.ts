@@ -25,3 +25,16 @@ export function watchTheme(cb: () => void): () => void {
   observer.observe(target, { attributes: true, attributeFilter: ['class'] })
   return () => observer.disconnect()
 }
+
+/** 当前是否夜间模式（读 html class） */
+export function isDarkTheme(): boolean {
+  return document.documentElement.classList.contains('dark')
+}
+
+/** 切换白天/黑夜（与 ThemeToggle 组件同一套逻辑，供命令面板等复用） */
+export function toggleDarkTheme(): boolean {
+  const next = !isDarkTheme()
+  document.documentElement.classList.toggle('dark', next)
+  localStorage.setItem('theme-dark', next ? '1' : '0')
+  return next
+}

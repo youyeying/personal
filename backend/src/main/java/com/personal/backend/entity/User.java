@@ -45,8 +45,11 @@ public class User {
     /** 身高 cm（BMR 二期用） */
     private BigDecimal height;
 
-    /** 性别：male男 / female女（BMR 二期用） */
+    /** 性别：male男 / female女 */
     private String gender;
+
+    /** 每日目标热量缺口 kcal/天（饮食预算 = 1.2BMR + 锻炼净 − 缺口；0=维持，负=增肌，用户自定义） */
+    private Integer dietTargetGap;
 
     /** 上次修改密码时间（首次为空可免限修改，改后开始一月冷却） */
     private LocalDateTime passwordUpdatedAt;

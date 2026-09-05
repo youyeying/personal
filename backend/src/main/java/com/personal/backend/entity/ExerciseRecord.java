@@ -64,6 +64,9 @@ public class ExerciseRecord {
     /** 备注 */
     private String note;
 
+    /** 记录时体重快照 kg（历史消耗固定，不随当前体重变化） */
+    private BigDecimal bodyWeight;
+
     /** 创建时间：由 MybatisPlusMetaHandler 自动填充 */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;

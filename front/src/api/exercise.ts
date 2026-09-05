@@ -4,8 +4,8 @@
 import { requestApi } from './request'
 import type { PageResult } from './types'
 
-/** 动作类型：strength 力量 / plank 平板 / walk 散步 / stairs 爬楼梯 */
-export type ExerciseType = 'strength' | 'plank' | 'walk' | 'stairs'
+/** 动作类型：strength 力量 / cardio 有氧计数 / plank 平板 / walk 散步 / cycling 骑行 / stairs 爬楼梯 */
+export type ExerciseType = 'strength' | 'cardio' | 'plank' | 'walk' | 'cycling' | 'stairs'
 
 /** 锻炼动作（字典） */
 export interface ExerciseItem {
@@ -15,8 +15,10 @@ export interface ExerciseItem {
   type: ExerciseType
   /** 基础 MET（0=动态计算，如散步按速度定档） */
   baseMet: number
-  /** 参考速度（个/分钟，强度系数基准；非力量类为空） */
+  /** 参考速度（个/分钟，用户平均节奏=中等强度基准；非计数类为空） */
   refSpeed: number | null
+  /** 速度上限（个/分钟，世界纪录封顶防 MET 爆炸；缺省参考速度×3） */
+  maxSpeed: number | null
   /** 是否记重量 */
   hasWeight: boolean
   /** 是否记左右手 */
@@ -47,6 +49,8 @@ export interface ExerciseRecord {
   /** 左右手：left/right/both */
   hand: string | null
   note: string | null
+  /** 记录时体重快照 kg（历史消耗固定，不随当前体重变；为空回退当前体重） */
+  bodyWeight: number | null
   createdAt: string
 }
 

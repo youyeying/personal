@@ -14,7 +14,7 @@ import {
 } from '@/api/learn'
 import type { LearnRecord } from '@/api/learn'
 import { formatDate } from '@/utils/format'
-import InlineLoading from '@/components/loading/InlineLoading.vue'
+import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
 import { WAYS, durationParts } from '../learnShared'
 
@@ -198,12 +198,7 @@ watch(() => props.tick, loadRecent)
             <button class="lr__link" type="button" @click="emit('navigate', 'history')">查看全部</button>
           </template>
         </BlockTitle>
-        <template v-if="recentLoading">
-          <div class="lr__recent-loading">
-            <InlineLoading :size="22" text="加载最近记录…" color="var(--cb-mod)" />
-          </div>
-        </template>
-        <template v-else-if="recentRecords.length">
+        <template v-if="recentRecords.length">
           <div v-for="r in recentRecords" :key="r.id" class="lr__row">
             <span class="lr__row-icon">
               <component :is="WAYS.find((w) => w.key === r.way)?.icon ?? Sparkles" :size="15" />
@@ -221,7 +216,8 @@ watch(() => props.tick, loadRecent)
             <span class="lr__row-min num">{{ durationParts(r.duration).h }}<i>h</i> {{ durationParts(r.duration).m }}<i>m</i></span>
           </div>
         </template>
-        <p v-else class="lr__empty">还没有学习记录，先在上面记一笔吧</p>
+        <p v-else-if="!recentLoading" class="lr__empty">还没有学习记录，先在上面记一笔吧</p>
+        <LoadingMask :show="recentLoading" :size="22" text="加载最近记录…" />
       </div>
     </div>
     <el-button type="primary" size="large" :loading="saving" class="lr__save" @click="onSave">保存记录</el-button>

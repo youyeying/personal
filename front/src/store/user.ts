@@ -15,8 +15,10 @@ export interface UserInfo {
   age: number | null
   /** 身高 cm（BMR 二期用） */
   height: number | null
-  /** 性别 male/female（BMR 二期用） */
+  /** 性别 male/female */
   gender: string | null
+  /** 每日目标热量缺口 kcal/天（饮食预算 = 1.2BMR + 锻炼 − 缺口，用户自定义） */
+  dietTargetGap: number | null
   passwordUpdatedAt: string | null
   createdAt: string
 }

@@ -5,6 +5,10 @@
  *   每条功能以 `### [类型] 模块 标题` 开头，标题下 `1.` / `-` 列表项合并为描述。
  *   类型限 新增/修改/删除/修复；模块任意（弹窗内可再改）。
  *   非功能节（## 会话 / ## 本次功能 / ## 待办 / ### 待办 / # 大标题 / > 说明）一律跳过。
+ *
+ * 转义兼容（2026-09-03）：部分编辑器/工具保存时会把 md 元字符转义（`[→\[`、`_→\_`、`~→\~`），
+ * 导致标题 `### [修复]` 变成 `### \[修复]` 而解析失败。标题正则允许可选反斜杠、
+ * 描述行统一反转义，两种格式都能导入。
  */
 
 /** 功能变更类型 */
@@ -52,8 +56,8 @@ export function parseMdDraft(md: string): FeatureDraft[] {
         cur = null
         continue
       }
-      // 规范格式：### [类型] 模块 标题
-      const m = body.match(/^\[(新增|修改|删除|修复)\]\s*(\S+)\s*(.*)$/)
+      // 规范格式：### [类型] 模块 标题（兼容被编辑器转义的 \[类型\]）
+      const m = body.match(/^\\?\[(新增|修改|删除|修复)\\?\]\s*(\S+)\s*(.*)$/)
       if (m && TYPE_SET.has(m[1])) {
         cur = { type: m[1], module: m[2], content: m[3] }
         drafts.push(cur)
@@ -70,6 +74,8 @@ export function parseMdDraft(md: string): FeatureDraft[] {
         .replace(/^[-*]\s+/, '')
         .replace(/^\d+[.)]\s+/, '')
         .replace(/^\[[ x]\]\s*/, '')
+        // 反转义被编辑器转义的 md 元字符（\_ \[ \] \~ \* \#）
+        .replace(/\\([_[\]~*#])/g, '$1')
         .trim()
       if (!item) continue
       cur.content += (cur.content ? '\n' : '') + item

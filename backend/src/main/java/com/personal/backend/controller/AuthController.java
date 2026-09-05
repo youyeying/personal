@@ -1,5 +1,6 @@
 package com.personal.backend.controller;
 
+import com.personal.backend.common.RateLimit;
 import com.personal.backend.common.Result;
 import com.personal.backend.dto.*;
 import com.personal.backend.service.AuthService;
@@ -21,13 +22,15 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /** 注册 */
+    /** 注册（限流：每 IP 每分钟 3 次） */
+    @RateLimit(maxPerMinute = 3)
     @PostMapping("/register")
     public Result<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
         return Result.ok(authService.register(request), "注册成功");
     }
 
-    /** 登录（写 refresh Cookie + 返回 accessToken） */
+    /** 登录（写 refresh Cookie + 返回 accessToken；限流防暴力试密码） */
+    @RateLimit(maxPerMinute = 5)
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@Valid @RequestBody LoginRequest request,
                                              HttpServletRequest httpRequest,

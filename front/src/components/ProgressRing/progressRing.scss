@@ -1,0 +1,54 @@
+/**
+ * ProgressRing 环形进度样式（V2）
+ * - 尺寸由 --pr-size 变量控制（父组件按需传 size，窄屏自动缩 64px）
+ * - 颜色引用主题令牌，明暗主题自动适配
+ */
+.pr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cb-space-2);
+
+  &__svg {
+    width: var(--pr-size, 92px);
+    height: var(--pr-size, 92px);
+  }
+
+  &__cap {
+    stroke: rgba(28, 30, 26, 0.08);
+    stroke-width: 9;
+    fill: none;
+  }
+
+  &__val {
+    stroke-width: 9;
+    fill: none;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.7, 0.3, 1), stroke 0.3s ease;
+  }
+
+  &__label {
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-secondary);
+    font-family: var(--cb-font-mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}
+
+// 窄屏：环缩小（用户约定 ≤560px 环 64px）
+@media (max-width: 560px) {
+  .pr {
+    &__svg {
+      width: 64px;
+      height: 64px;
+    }
+  }
+}
+
+// 暗色轨道提可见性
+html.dark .pr__cap {
+  stroke: rgba(236, 229, 214, 0.12);
+}

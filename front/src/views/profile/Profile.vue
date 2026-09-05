@@ -9,9 +9,10 @@
 import { computed, markRaw, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { User, LogOut, Camera, PenLine, Phone, Lock, Target, ShieldCheck, ChevronRight, CalendarRange } from '@lucide/vue'
+import { User, LogOut, Camera, PenLine, Phone, Lock, Target, ShieldCheck, ChevronRight, CalendarRange, Download } from '@lucide/vue'
 import { getMe, updateProfileApi, changePasswordApi, uploadAvatar, logout as logoutApi } from '@/api/auth'
 import { listWeightRecords } from '@/api/health'
+import { EXPORT_MODULES, exportModuleCsv, exportAllJson } from '@/api/export'
 import { useUserStore, type UserInfo } from '@/store/user'
 import { formatDate } from '@/utils/format'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
@@ -155,9 +156,13 @@ async function onClearTarget() {
   }
 }
 
-/* ================= 弹窗：身体数据（年龄/身高/性别，BMR 二期用） ================= */
+/* ================= 弹窗：身体数据 + 基础代谢（Katch-McArdle） ================= */
 const bodyDialog = ref(false)
-const bodyInput = ref({ age: '', height: '', gender: 'male' as string })
+const bodyInput = ref({
+  age: '',
+  height: '',
+  gender: 'male' as string
+})
 const savingBody = ref(false)
 
 /** 身体数据摘要 */
@@ -273,6 +278,34 @@ async function onSaveAvatar() {
     ElMessage.success('头像已更新')
   } finally {
     savingAvatar.value = false
+  }
+}
+
+/* ================= 弹窗：数据导出（CSV 分模块 / JSON 全量备份） ================= */
+const exportDialog = ref(false)
+const exporting = ref(false)
+
+async function doExportCsv(module: string, label: string) {
+  exporting.value = true
+  try {
+    await exportModuleCsv(module, label)
+    ElMessage.success(`${label} CSV 已开始下载`)
+  } catch {
+    ElMessage.error(`${label} 导出失败，请重试`)
+  } finally {
+    exporting.value = false
+  }
+}
+
+async function doExportAll() {
+  exporting.value = true
+  try {
+    await exportAllJson()
+    ElMessage.success('全量备份已开始下载')
+  } catch {
+    ElMessage.error('备份导出失败，请重试')
+  } finally {
+    exporting.value = false
   }
 }
 
@@ -415,8 +448,37 @@ async function onChangePwd() {
           </span>
           <component :is="markRaw(ChevronRight)" :size="16" class="ppf__arrow" />
         </button>
+
+        <!-- 数据导出 -->
+        <button class="ppf__item" type="button" @click="exportDialog = true">
+          <span class="ppf__icon"><component :is="markRaw(Download)" :size="18" /></span>
+          <span class="ppf__item-body">
+            <span class="ppf__item-title">数据导出</span>
+            <span class="ppf__item-desc">CSV 分模块导出 / JSON 全量备份</span>
+          </span>
+          <component :is="markRaw(ChevronRight)" :size="16" class="ppf__arrow" />
+        </button>
       </div>
     </section>
+
+    <!-- ===== 弹窗：数据导出 ===== -->
+    <el-dialog v-model="exportDialog" title="数据导出" width="min(440px,92vw)">
+      <div class="ppf__dialog-body">
+        <label class="ppf__label">分模块导出 CSV（Excel 可直接打开）</label>
+        <div class="ppf__export-grid">
+          <button
+            v-for="m in EXPORT_MODULES" :key="m.key"
+            class="ppf__export-btn" type="button"
+            :disabled="exporting"
+            @click="doExportCsv(m.key, m.label)"
+          >{{ m.label }}</button>
+        </div>
+        <div class="ppf__export-sep"></div>
+        <label class="ppf__label">全量备份（JSON，含记录与字典）</label>
+        <el-button type="primary" :loading="exporting" style="width: 100%" @click="doExportAll">下载完整备份</el-button>
+        <p class="ppf__export-tip">备份文件包含全部模块的原始记录与食物/动作字典，可用于本地留存或迁移。</p>
+      </div>
+    </el-dialog>
 
     <!-- ===== 弹窗：目标体重 ===== -->
     <el-dialog v-model="targetDialog" title="设置目标体重" width="420px">
@@ -462,7 +524,6 @@ async function onChangePwd() {
             <option value="female">女</option>
           </select>
         </div>
-        <p class="ppf__tip">用于基础代谢（BMR）估算与热量管理，二期开放。</p>
         <div class="ppf__dialog-actions">
           <button class="ppf__btn ppf__btn--primary" type="button" :disabled="savingBody" @click="onSaveBody">
             {{ savingBody ? '保存中…' : '保存' }}

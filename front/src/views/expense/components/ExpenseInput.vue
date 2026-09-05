@@ -10,7 +10,6 @@ import { listExpenseRecords, createExpenseRecord } from '@/api/expense'
 import type { ExpenseCategory, ExpenseRecord } from '@/api/expense'
 import { formatDate, formatShortTime, formatMoney } from '@/utils/format'
 import { catIcon } from '@/utils/category'
-import InlineLoading from '@/components/loading/InlineLoading.vue'
 import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
 
@@ -160,12 +159,7 @@ watch(() => props.tick, loadRecent)
         <button class="exp__link exp__recent-all" type="button" @click="emit('navigate', 'detail')">查看全部</button>
       </template>
     </BlockTitle>
-    <template v-if="recentLoading">
-      <div class="exp__recent-loading">
-        <InlineLoading :size="22" text="加载最近记录…" color="var(--cb-mod)" />
-      </div>
-    </template>
-    <template v-else-if="recentRecords.length">
+    <template v-if="recentRecords.length">
       <div v-for="r in recentRecords" :key="r.id" class="exp__row">
         <span class="exp__row-icon"><component :is="markRaw(catIcon(r.categoryName))" :size="16" /></span>
         <span class="exp__row-cat">{{ r.categoryName }}</span>
@@ -174,7 +168,8 @@ watch(() => props.tick, loadRecent)
         <span class="exp__row-amt num" :class="r.type === 1 ? 'exp__row-amt--err' : 'exp__row-amt--ok'">{{ r.type === 1 ? '-' : '+' }}{{ formatMoney(r.amount) }}</span>
       </div>
     </template>
-    <p v-else class="exp__empty">还没有记录，先在上面记一笔吧</p>
+    <p v-else-if="!recentLoading" class="exp__empty">还没有记录，先在上面记一笔吧</p>
+    <LoadingMask :show="recentLoading" :size="22" text="加载最近记录…" />
   </section>
 </template>
 

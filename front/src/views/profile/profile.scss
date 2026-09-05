@@ -205,10 +205,34 @@
     flex-direction: column;
     gap: var(--cb-space-3);
   }
+  /* ===== 数据导出弹窗 ===== */
+  &__export-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--cb-space-2);
+    @media (max-width: 560px) { grid-template-columns: repeat(2, 1fr); }
+  }
+  &__export-btn {
+    padding: 8px 0;
+    border: 1px solid var(--cb-hairline);
+    border-radius: var(--cb-radius-btn);
+    background: var(--cb-canvas);
+    color: var(--cb-ink-secondary);
+    font-family: inherit;
+    font-size: var(--cb-font-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    &:hover:not(:disabled) { border-color: var(--cb-mod); color: var(--cb-mod); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+  &__export-sep { height: 1px; background: var(--cb-hairline); margin: var(--cb-space-2) 0; }
+  &__export-tip { font-size: var(--cb-font-xs); color: var(--cb-ink-muted); line-height: 1.7; margin: 0; }
   &__field {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    // 供活动系数推荐档 LoadingMask 不透明覆盖
+    position: relative;
   }
   &__label {
     font-size: var(--cb-font-xs);
@@ -237,6 +261,31 @@
   &__line {
     font-size: var(--cb-font-xs);
     color: var(--cb-ink-muted);
+  }
+
+  /* 活动系数来源分段（自动推荐 / 手动） */
+  &__source {
+    display: inline-flex;
+    padding: 2px;
+    border-radius: var(--cb-radius-btn);
+    background: color-mix(in srgb, var(--cb-mod) 10%, var(--cb-surface));
+    align-self: flex-start;
+  }
+  &__source-btn {
+    padding: 5px 14px;
+    border: 0;
+    border-radius: calc(var(--cb-radius-btn) - 2px);
+    background: transparent;
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    &.is-on {
+      background: var(--cb-surface);
+      color: var(--cb-mod);
+      font-weight: var(--cb-font-weight-bold);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
   }
 
   /* 目标体重弹窗：最新体重对比 */
@@ -357,6 +406,7 @@
       color: var(--cb-success);
     }
   }
+  /* 基础代谢展示区已移至首页（v1.32.0），此处不再使用 */
   &__tip {
     margin: var(--cb-space-2) 0 0;
     font-size: var(--cb-font-xs);

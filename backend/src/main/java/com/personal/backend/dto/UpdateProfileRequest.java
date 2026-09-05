@@ -38,4 +38,7 @@ public class UpdateProfileRequest {
     /** 性别：male男 / female女 */
     @Pattern(regexp = "^(male|female)?$", message = "性别仅支持 male / female")
     private String gender;
+
+    /** 每日目标热量缺口 kcal/天（饮食预算用，用户自定义；0=维持，负=增肌） */
+    private Integer dietTargetGap;
 }

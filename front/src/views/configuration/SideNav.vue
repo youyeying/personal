@@ -6,7 +6,7 @@
  * - 行右侧 tag：概览=LIVE、记账=存钱余额；操作日志=实时「共 N 条」；开发日志=今日时长或「休息」
  * - fullscreen 模式（<600 全屏抽屉）：占满宿主，右上关闭按钮关闭抽屉
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Expand, Fold, Close } from '@element-plus/icons-vue'
 import { MODULES, useThemeStore } from '@/store/theme'
@@ -43,14 +43,8 @@ function displayTag(m: ModuleTheme): string {
   return m.tag
 }
 
-/** 拉取动态 tag 数据（静默，失败不影响布局） */
-async function loadDynamicTags() {
-  try {
-    const res = await listOperationLogs({ page: 1, size: 1, silent: true })
-    opLogTotal.value = res.total
-  } catch {
-    opLogTotal.value = null
-  }
+/** 拉取今日开发时长（tag 用，静默，失败不影响布局）——单独拆出以便轮询只刷它 */
+async function loadDevDuration() {
   try {
     const sum = await getDevSummary(undefined, true)
     const m = sum?.durationMinutes ?? 0
@@ -60,9 +54,40 @@ async function loadDynamicTags() {
   }
 }
 
-onMounted(loadDynamicTags)
-// 切换路由时刷新（如刚记了日志/开发时长有变化）
-watch(() => route.path, loadDynamicTags)
+/** 拉取动态 tag 数据（初始 / 路由切换时全量刷新） */
+async function loadDynamicTags() {
+  try {
+    const res = await listOperationLogs({ page: 1, size: 1, silent: true })
+    opLogTotal.value = res.total
+  } catch {
+    opLogTotal.value = null
+  }
+  await loadDevDuration()
+}
+
+/** 开发会话进行中时今日时长持续增长：每 60s 静默轮询一次 */
+let tagTimer: ReturnType<typeof setInterval> | null = null
+function startTagPolling() {
+  stopTagPolling()
+  tagTimer = setInterval(loadDevDuration, 60_000)
+}
+function stopTagPolling() {
+  if (tagTimer) {
+    clearInterval(tagTimer)
+    tagTimer = null
+  }
+}
+
+onMounted(() => {
+  loadDynamicTags()
+  startTagPolling()
+})
+// 切换路由时刷新（如刚记了日志/开发时长有变化），并重启轮询
+watch(() => route.path, () => {
+  loadDynamicTags()
+  startTagPolling()
+})
+onBeforeUnmount(stopTagPolling)
 
 /**
  * 点击左上角 Logo 的行为（替代原右边框按钮）：

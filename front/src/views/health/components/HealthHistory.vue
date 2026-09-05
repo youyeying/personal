@@ -20,6 +20,8 @@ import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
 import DateRangePicker from '@/components/DateRangePicker/DateRangePicker.vue'
 import DataList from '@/components/DataList/DataList.vue'
+import RecordDetailDialog from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
+import type { DetailRow } from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
 import type { DataListColumn } from '@/components/DataList/DataList.vue'
 
 const props = defineProps<{
@@ -84,6 +86,20 @@ function onRowClick(item: WeightRecord) {
 function onDialogClose() {
   detail.value = null
 }
+
+/** 详情弹窗行 */
+const detailRows = computed<DetailRow[]>(() => {
+  const d = detail.value
+  if (!d) return []
+  return [
+    { key: 'date', label: '日期', value: d.recordDate, mono: true },
+    { key: 'weight', label: '体重', value: `${d.weight} kg`, mono: true },
+    { key: 'bodyFat', label: '体脂率', value: d.bodyFat != null ? `${d.bodyFat}%` : '未记录', mono: true },
+    { key: 'waist', label: '腰围', value: d.waist != null ? `${d.waist} cm` : '未记录', mono: true },
+    { key: 'time', label: '记录时间', value: formatShortTime(d.createdAt), mono: true },
+    { key: 'note', label: '备注', value: d.note || '—', wide: true }
+  ]
+})
 
 /* ---------- 修改弹窗 ---------- */
 const editVisible = ref(false)
@@ -220,37 +236,7 @@ watch(() => props.tick, () => loadList(true))
   </el-dialog>
 
   <!-- 行详情（只读） -->
-  <el-dialog :model-value="dialogVisible" title="体重记录详情" width="420px" @close="onDialogClose">
-    <div v-if="detail" class="hl__detail">
-      <div class="hl__drow">
-        <span class="hl__dlabel">日期</span>
-        <span class="num">{{ detail.recordDate }}</span>
-      </div>
-      <div class="hl__drow">
-        <span class="hl__dlabel">体重</span>
-        <span class="hl__dweight num">{{ detail.weight }}<i>kg</i></span>
-      </div>
-      <div class="hl__drow">
-        <span class="hl__dlabel">体脂率</span>
-        <span class="num">{{ detail.bodyFat != null ? detail.bodyFat + '%' : '未记录' }}</span>
-      </div>
-      <div class="hl__drow">
-        <span class="hl__dlabel">腰围</span>
-        <span class="num">{{ detail.waist != null ? detail.waist + 'cm' : '未记录' }}</span>
-      </div>
-      <div class="hl__drow">
-        <span class="hl__dlabel">记录时间</span>
-        <span class="num">{{ formatShortTime(detail.createdAt) }}</span>
-      </div>
-      <div class="hl__drow hl__drow--note">
-        <span class="hl__dlabel">备注</span>
-        <span>{{ detail.note || '—' }}</span>
-      </div>
-    </div>
-    <template #footer>
-      <el-button @click="onDialogClose">关闭</el-button>
-    </template>
-  </el-dialog>
+  <RecordDetailDialog :model-value="dialogVisible" title="体重记录详情" width="420px" :rows="detailRows" @update:model-value="onDialogClose" />
 </template>
 
 <style lang="scss" scoped>

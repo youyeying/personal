@@ -15,6 +15,10 @@ import {
   getDailySummary
 } from '@/api/dailyNote'
 import type { DailyNote, DailySummary } from '@/api/dailyNote'
+import { listExerciseItems } from '@/api/exercise'
+import type { ExerciseItem } from '@/api/exercise'
+import { listWeightRecords } from '@/api/health'
+import { recordNetKcal } from '@/utils/exercise'
 import { getShifts, saveShiftsBatch, parseShiftFile } from '@/api/shift'
 import { formatDate } from '@/utils/format'
 import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
@@ -48,6 +52,26 @@ const selectedDate = ref('')
 const summary = ref<DailySummary | null>(null)
 /** 保存小结 loading */
 const saving = ref(false)
+
+/* ---- 当日锻炼净消耗计算所需：动作字典 + 最新体重（回退） ---- */
+const items = ref<ExerciseItem[]>([])
+const weightKg = ref<number | null>(null)
+/** 当日锻炼净消耗（收入非每日有，汇总用锻炼消耗替代） */
+const exerciseKcal = ref(0)
+async function loadExerciseDict() {
+  try {
+    const [itms, wres] = await Promise.all([
+      listExerciseItems(),
+      listWeightRecords({ page: 1, size: 1 })
+    ])
+    items.value = itms
+    const w = wres.records?.[0]?.weight
+    weightKg.value = w != null ? Number(w) : null
+  } catch {
+    items.value = []
+    weightKg.value = null
+  }
+}
 
 /** 班表编辑弹窗 */
 const shiftDialog = ref(false)
@@ -96,8 +120,15 @@ async function loadCycle(silent = false) {
 async function selectDate(date: string) {
   selectedDate.value = date
   summary.value = null
+  exerciseKcal.value = 0
   try {
-    summary.value = await getDailySummary(date)
+    const s = await getDailySummary(date)
+    summary.value = s
+    // 当日锻炼净消耗：按 MET 公式前端算（体重快照优先，缺失回退最新体重）
+    exerciseKcal.value = (s.exerciseRecords ?? []).reduce((acc, r) => {
+      const item = items.value.find((i) => i.id === r.exerciseId)
+      return item ? acc + recordNetKcal(r, item, weightKg.value) : acc
+    }, 0)
   } catch {
     summary.value = null
   }
@@ -194,6 +225,7 @@ onMounted(() => {
     colsObserver.observe(rootEl.value)
   }
   loadCycle()
+  loadExerciseDict()
 })
 onBeforeUnmount(() => colsObserver?.disconnect())
 /** 日历网格列数样式（表头与日期共用列数） */
@@ -238,6 +270,7 @@ const columnsTemplate = computed(() => `repeat(${cols.value}, 1fr)`)
           :date="selectedDate"
           :mood="noteMap[selectedDate]?.mood ?? null"
           :summary="summary"
+          :exercise-kcal="exerciseKcal"
         />
 
         <!-- 心情 + 小结编辑 -->

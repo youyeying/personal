@@ -1,0 +1,79 @@
+/**
+ * 周报/月报样式（独立复盘页）
+ * 类名前缀 rp__
+ */
+.rp {
+  position: relative; // 锚定 LoadingMask
+  padding: var(--cb-space-5);
+  max-width: 1200px;
+  width: 100%;
+  min-width: 430px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-space-5);
+
+  &__range {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  &__range-btn {
+    border: 1px solid var(--cb-hairline);
+    background: var(--cb-surface);
+    color: var(--cb-ink-secondary);
+    padding: 4px 13px;
+    border-radius: var(--cb-radius-btn);
+    font-size: var(--cb-font-sm);
+    cursor: pointer;
+    font-family: inherit;
+    &.is-active {
+      border-color: var(--cb-mod);
+      background: color-mix(in srgb, var(--cb-mod) 14%, var(--cb-surface));
+      color: var(--cb-mod);
+    }
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-3);
+  }
+
+  &__group-title {
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+    border-bottom: 1px solid var(--cb-hairline);
+    padding-bottom: var(--cb-space-1);
+  }
+
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--cb-space-3);
+  }
+
+  // 体重下降绿 / 上升红（与减脂目标语义一致）
+  &__good { color: var(--cb-success); }
+  &__bad { color: var(--cb-error); }
+
+  // 心情 chips
+  &__mood { font-size: var(--cb-font-lg); }
+  &__mood-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cb-space-2);
+  }
+  &__mood-chip {
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-secondary);
+    background: var(--cb-canvas);
+    border: 1px solid var(--cb-hairline);
+    border-radius: var(--cb-radius-btn);
+    padding: 3px 12px;
+  }
+}
+
+@media (max-width: 560px) {
+  .rp__metrics { grid-template-columns: 1fr 1fr; }
+}

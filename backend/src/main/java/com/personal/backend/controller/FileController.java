@@ -1,5 +1,6 @@
 package com.personal.backend.controller;
 
+import com.personal.backend.common.RateLimit;
 import com.personal.backend.common.Result;
 import com.personal.backend.entity.NoteFile;
 import com.personal.backend.service.FileService;

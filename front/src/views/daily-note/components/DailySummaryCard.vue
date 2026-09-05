@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 每日总结 · 当日小汇总卡（纯展示）
- * - date：选中日期；mood：该日心情 emoji；summary：当日汇总（可空=加载中）
+ * - date：选中日期；mood：该日心情 emoji；summary：当日汇总（可空=加载中）；exerciseKcal：当日锻炼净消耗
  */
 import type { DailySummary } from '@/api/dailyNote'
 import InlineLoading from '@/components/loading/InlineLoading.vue'
@@ -11,6 +11,7 @@ defineProps<{
   date: string
   mood: string | null
   summary: DailySummary | null
+  exerciseKcal?: number
 }>()
 </script>
 
@@ -26,8 +27,8 @@ defineProps<{
         <span class="daily-note__stat-value num">¥{{ summary.expense.toFixed(2) }}</span>
       </div>
       <div class="daily-note__stat">
-        <span class="daily-note__stat-label">收入</span>
-        <span class="daily-note__stat-value num">¥{{ summary.income.toFixed(2) }}</span>
+        <span class="daily-note__stat-label">锻炼</span>
+        <span class="daily-note__stat-value num">{{ exerciseKcal ?? 0 }} kcal</span>
       </div>
       <div class="daily-note__stat">
         <span class="daily-note__stat-label">体重</span>

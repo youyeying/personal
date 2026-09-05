@@ -97,7 +97,9 @@ public class DataInitializer implements CommandLineRunner {
                 {"臂力棒", "strength", "3.0", 10, true, false},
                 {"平板支撑", "plank", "4.0", null, false, false},
                 {"散步", "walk", "0.0", null, false, false},
-                {"爬楼梯", "stairs", "8.0", null, false, false}
+                {"骑行", "cycling", "0.0", null, false, false},
+                {"爬楼梯", "stairs", "8.0", null, false, false},
+                {"高抬腿击掌", "cardio", "6.0", "60", false, false}
         };
         int order = 1;
         for (Object[] row : rows) {

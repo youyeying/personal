@@ -45,6 +45,18 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '健康' }
       },
       {
+        path: 'exercise',
+        name: 'exercise',
+        component: () => import('@/views/exercise/Exercise.vue'),
+        meta: { title: '锻炼' }
+      },
+      {
+        path: 'food',
+        name: 'food',
+        component: () => import('@/views/food/Food.vue'),
+        meta: { title: '饮食' }
+      },
+      {
         path: 'learn',
         name: 'learn',
         component: () => import('@/views/learn/Learn.vue'),
@@ -55,6 +67,12 @@ const routes: RouteRecordRaw[] = [
         name: 'daily-note',
         component: () => import('@/views/daily-note/DailyNote.vue'),
         meta: { title: '每日总结' }
+      },
+      {
+        path: 'report',
+        name: 'report',
+        component: () => import('@/views/report/Report.vue'),
+        meta: { title: '周报' }
       },
       {
         path: 'operation-log',

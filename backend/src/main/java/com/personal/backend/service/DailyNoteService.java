@@ -29,6 +29,7 @@ public class DailyNoteService {
     private final WeightRecordMapper weightRecordMapper;
     private final LearnRecordMapper learnRecordMapper;
     private final DevelopmentSessionMapper developmentSessionMapper;
+    private final ExerciseRecordMapper exerciseRecordMapper;
 
     /** 某天的总结（无则返回 null） */
     public DailyNote getByDate(LocalDate date) {
@@ -148,10 +149,17 @@ public class DailyNoteService {
                     : (int) Math.max(1, Duration.between(dev.getStartTime(), LocalDateTime.now()).toMinutes());
         }
 
+        // 当日锻炼记录（供前端按 MET 公式算净消耗；收入非每日有，汇总不再强调收入）
+        List<ExerciseRecord> exercises = exerciseRecordMapper.selectList(
+                new LambdaQueryWrapper<ExerciseRecord>()
+                        .eq(ExerciseRecord::getUserId, userId)
+                        .eq(ExerciseRecord::getRecordDate, date));
+
         Map<String, Object> res = new HashMap<>();
         res.put("date", date.toString());
         res.put("expense", expense);
         res.put("income", income);
+        res.put("exerciseRecords", exercises);
         res.put("weight", weightValue);
         res.put("weightChange", weightChange);
         res.put("learnCount", learnCount);

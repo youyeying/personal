@@ -36,8 +36,11 @@ public class ExerciseItem {
     /** 基础 MET（0=动态计算） */
     private BigDecimal baseMet;
 
-    /** 参考速度（个/分钟，强度系数基准；非力量类为空） */
+    /** 参考速度（个/分钟，用户平均节奏=中等强度基准；非计数类为空） */
     private Integer refSpeed;
+
+    /** 速度上限（个/分钟，世界纪录封顶防 MET 爆炸；缺省参考速度×3） */
+    private Integer maxSpeed;
 
     /** 是否记重量 */
     private Boolean hasWeight;

@@ -374,6 +374,10 @@
     gap: 8px;
     max-height: 50vh;
     overflow-y: auto;
+    // 窄屏：弹窗内两列班表挤压，降为单列（其余区块日历 JS 列数自适应 + flex-wrap 天然适配）
+    @media (max-width: 560px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &__shift-row {

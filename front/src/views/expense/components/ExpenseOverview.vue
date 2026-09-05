@@ -33,15 +33,18 @@ const emit = defineEmits<{
 
 /* ---------- 概览数据 ---------- */
 type RangeKey = '7' | '30' | 'all'
-const range = ref<RangeKey>('30')
+// 默认「全部」：收入非每日有，默认看全量概览（可支配余额随范围不变）
+const range = ref<RangeKey>('all')
 const ovRangeOptions: RangeTabItem[] = [
-  { key: '7', label: '7 天' },
-  { key: '30', label: '30 天' },
+  { key: '7', label: '本周' },
+  { key: '30', label: '本月' },
   { key: 'all', label: '全部' }
 ]
 const overviewCollapsed = ref(false)
 const overviewLoading = ref(false)
 const todayExpense = ref(0)
+/** 可支配余额：全量历史累计（收入−支出），随记账实时变化，发薪日自动 +工资——不随所选范围变化 */
+const disposableBalance = ref(0)
 const stat = ref<ExpenseStatistics>({
   totalExpense: 0,
   totalIncome: 0,
@@ -54,9 +57,15 @@ const trend = ref<{ dates: string[]; amounts: number[] }>({ dates: [], amounts: 
 function rangeBounds(key: RangeKey): { start?: string; end?: string } {
   const end = new Date()
   if (key === 'all') return { end: formatDate(end) }
-  const days = Number(key)
   const start = new Date(end)
-  start.setDate(start.getDate() - (days - 1))
+  if (key === '7') {
+    // 本周：周一 → 今天（getDay 0=周日按 7 处理），跨月时 setDate 自动进位
+    const day = end.getDay() === 0 ? 7 : end.getDay()
+    start.setDate(end.getDate() - (day - 1))
+  } else {
+    // 本月：月初 1 号 → 今天（自然月，自动适配 28/29/30/31 天，不按固定 30 天推）
+    start.setDate(1)
+  }
   return { start: formatDate(start), end: formatDate(end) }
 }
 
@@ -73,6 +82,21 @@ const metricLabel = (key: 'expense' | 'income' | 'balance') => {
   const map = { expense: '支出', income: '收入', balance: '结余' }
   return `${prefix}${map[key]}`
 }
+
+/** 发薪日 = 每月最后一个工作日（月底最后 1-2 天若逢周六日，提前到最近的工作日发放） */
+const isPayday = computed(() => {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = now.getMonth()
+  // 从当月最后一天往前找第一个工作日（周一~周五）
+  let d = new Date(y, m + 1, 0).getDate()
+  while (d > 0) {
+    const w = new Date(y, m, d).getDay()
+    if (w !== 0 && w !== 6) break
+    d--
+  }
+  return now.getDate() === d
+})
 
 /** 拉取某范围内全部支出记录（翻页），用于按天聚合趋势 */
 async function fetchAllExpense(start?: string, end?: string): Promise<ExpenseRecord[]> {
@@ -92,11 +116,14 @@ async function loadOverview() {
   overviewLoading.value = true
   try {
     const { start, end } = rangeBounds(range.value)
-    const [st, below] = await Promise.all([
+    const [st, below, allStat] = await Promise.all([
       getExpenseStatistics({ startDate: start, endDate: end }),
-      fetchAllExpense(start, end)
+      fetchAllExpense(start, end),
+      // 全量累计（不传日期），取「可支配余额」
+      getExpenseStatistics({})
     ])
     stat.value = st
+    disposableBalance.value = allStat.balance
     const today = formatDate(new Date())
     todayExpense.value = below
       .filter((r) => r.recordDate === today)
@@ -291,15 +318,20 @@ watch(range, () => {
     </BlockTitle>
 
     <CollapseBox :collapsed="overviewCollapsed" @expand-end="onOverviewExpand">
+      <!-- 发薪日提醒（每月最后一个工作日；月底遇周末提前发放） -->
+      <div v-if="isPayday" class="exp__payday">
+        💰 今天是发薪日（每月最后一个工作日），记一笔工资收入后「可支配余额」会更新
+      </div>
+
       <div class="exp__metrics">
+        <MetricCard label="可支配余额" :tone="disposableBalance < 0 ? 'err' : 'ok'">
+          <template #default><span class="num">{{ formatMoney(disposableBalance, true) }}</span></template>
+        </MetricCard>
         <MetricCard :label="metricLabel('expense')" tone="err">
           <template #default><span class="num">{{ formatMoney(stat.totalExpense) }}</span></template>
         </MetricCard>
         <MetricCard :label="metricLabel('income')" tone="ok">
           <template #default><span class="num">{{ formatMoney(stat.totalIncome) }}</span></template>
-        </MetricCard>
-        <MetricCard :label="metricLabel('balance')" :tone="stat.balance < 0 ? 'err' : ''">
-          <template #default><span class="num">{{ formatMoney(stat.balance, true) }}</span></template>
         </MetricCard>
         <MetricCard label="今日支出" tone="accent">
           <template #default><span class="num">{{ formatMoney(todayExpense) }}</span></template>
@@ -347,6 +379,8 @@ watch(range, () => {
         </div>
       </div>
     </div>
+    <!-- 与概览同组接口，共用 overviewLoading 不透明遮罩 -->
+    <LoadingMask :show="overviewLoading" :size="22" text="加载构成…" />
   </section>
 </template>
 

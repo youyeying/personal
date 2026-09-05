@@ -21,6 +21,12 @@
     padding: var(--cb-space-5);
   }
 
+  // 最近记录速览容器：供 LoadingMask 不透明覆盖
+  &__recent {
+    position: relative;
+    min-height: 96px;
+  }
+
   &__block-title {
     display: flex;
     align-items: center;
@@ -542,29 +548,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--cb-space-3);
-  }
-
-  /* ===== 行详情（只读） ===== */
-  &__detail {
-    display: flex;
-    flex-direction: column;
-    gap: var(--cb-space-3);
-  }
-  &__drow {
-    display: flex;
-    align-items: baseline;
-    gap: var(--cb-space-4);
-    font-size: var(--cb-font-mg);
-    color: var(--cb-ink);
-    &--note {
-      align-items: flex-start;
-    }
-  }
-  &__dlabel {
-    flex-shrink: 0;
-    width: 76px;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
   }
   &__dfiles {
     display: flex;

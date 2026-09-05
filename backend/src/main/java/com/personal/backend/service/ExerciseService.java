@@ -8,14 +8,20 @@ import com.personal.backend.dto.ExerciseRecordQuery;
 import com.personal.backend.dto.ExerciseRecordSaveRequest;
 import com.personal.backend.entity.ExerciseItem;
 import com.personal.backend.entity.ExerciseRecord;
+import com.personal.backend.entity.WeightRecord;
 import com.personal.backend.mapper.ExerciseItemMapper;
 import com.personal.backend.mapper.ExerciseRecordMapper;
+import com.personal.backend.mapper.WeightRecordMapper;
 import com.personal.backend.utils.OwnedUtil;
 import com.personal.backend.utils.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +36,11 @@ public class ExerciseService {
 
     private final ExerciseItemMapper itemMapper;
     private final ExerciseRecordMapper recordMapper;
+    private final WeightRecordMapper weightRecordMapper;
     private final OperationLogService operationLogService;
 
-    /** 查询我的动作字典（按 sort_order 升序） */
+    /** 查询我的动作字典（按 sort_order 升序）；@Cacheable 本地缓存 5 分钟，写操作 @CacheEvict 立即失效 */
+    @Cacheable(cacheNames = "exerciseItems", key = "T(com.personal.backend.common.UserContext).requireUserId()")
     public List<ExerciseItem> listItems() {
         Long userId = UserContext.requireUserId();
         return itemMapper.selectList(new LambdaQueryWrapper<ExerciseItem>()
@@ -41,6 +49,7 @@ public class ExerciseService {
     }
 
     /** 新增动作（自定义） */
+    @CacheEvict(cacheNames = "exerciseItems", allEntries = true)
     public ExerciseItem createItem(ExerciseItem item) {
         Long userId = UserContext.requireUserId();
         if (!StringUtils.hasText(item.getName())) {
@@ -52,6 +61,10 @@ public class ExerciseService {
         item.setId(null);
         item.setUserId(userId);
         if (item.getSortOrder() == null) item.setSortOrder(0);
+        // 速度上限缺省 = 参考速度 × 3（防自定义动作速度比爆炸）
+        if (item.getMaxSpeed() == null && item.getRefSpeed() != null && item.getRefSpeed() > 0) {
+            item.setMaxSpeed(item.getRefSpeed() * 3);
+        }
         itemMapper.insert(item);
 
         operationLogService.record("EXERCISE", "CREATE", item.getId(),
@@ -76,6 +89,7 @@ public class ExerciseService {
     }
 
     /** 删除动作（软删；不影响已有记录） */
+    @CacheEvict(cacheNames = "exerciseItems", allEntries = true)
     public void deleteItem(Long id) {
         Long userId = UserContext.requireUserId();
         OwnedUtil.requireOwned(itemMapper, id, userId,
@@ -132,6 +146,18 @@ public class ExerciseService {
                 .last("LIMIT 1"));
     }
 
+    /** 记录日期当天或之前的最新体重（锻炼记录体重快照，历史消耗固定不随当前体重变） */
+    private BigDecimal latestWeightBefore(LocalDate date) {
+        Long userId = UserContext.requireUserId();
+        WeightRecord w = weightRecordMapper.selectOne(new LambdaQueryWrapper<WeightRecord>()
+                .eq(WeightRecord::getUserId, userId)
+                .le(WeightRecord::getRecordDate, date)
+                .orderByDesc(WeightRecord::getRecordDate)
+                .orderByDesc(WeightRecord::getId)
+                .last("LIMIT 1"));
+        return w == null ? null : w.getWeight();
+    }
+
     /** 新增锻炼记录 */
     public ExerciseRecord create(ExerciseRecordSaveRequest req) {
         Long userId = UserContext.requireUserId();
@@ -154,6 +180,8 @@ public class ExerciseService {
         record.setSeconds(req.getSeconds());
         record.setHand(req.getHand());
         record.setNote(req.getNote());
+        // 体重快照：按记录日期取当时最新体重，历史消耗固定
+        record.setBodyWeight(latestWeightBefore(req.getRecordDate()));
         recordMapper.insert(record);
 
         operationLogService.record("EXERCISE", "CREATE", record.getId(),
@@ -186,6 +214,8 @@ public class ExerciseService {
         record.setSeconds(req.getSeconds());
         record.setHand(req.getHand());
         record.setNote(req.getNote());
+        // 体重快照：改日期后按新日期重新取当时最新体重
+        record.setBodyWeight(latestWeightBefore(req.getRecordDate()));
         recordMapper.updateById(record);
 
         operationLogService.record("EXERCISE", "UPDATE", id, "修改锻炼记录：" + item.getName());
@@ -205,7 +235,7 @@ public class ExerciseService {
     /** 按类型校验必填字段 */
     private void validateByType(ExerciseItem item, ExerciseRecordSaveRequest req) {
         switch (item.getType()) {
-            case "strength" -> {
+            case "strength", "cardio" -> {
                 if (req.getReps() == null || req.getReps() <= 0) throw new BizException("请输入个数");
                 // 时长：前端将「分钟+秒」合并为总秒数存 seconds（兼容旧数据 minutes）
                 boolean hasDuration = (req.getSeconds() != null && req.getSeconds() > 0)
@@ -218,6 +248,10 @@ public class ExerciseService {
             case "walk" -> {
                 if (req.getDistance() == null || req.getDistance().signum() <= 0) throw new BizException("请输入走了多远");
                 if (req.getMinutes() == null || req.getMinutes().signum() <= 0) throw new BizException("请输入花了多久");
+            }
+            case "cycling" -> {
+                if (req.getDistance() == null || req.getDistance().signum() <= 0) throw new BizException("请输入骑了多远");
+                if (req.getMinutes() == null || req.getMinutes().signum() <= 0) throw new BizException("请输入骑了多久");
             }
             case "stairs" -> {
                 if (req.getFloors() == null || req.getFloors() <= 0) throw new BizException("请输入一次爬几层");
