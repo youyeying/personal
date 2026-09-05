@@ -74,17 +74,17 @@ const donutC = useECharts(donutChartEl, { redraw: () => renderDonutChart() })
 const masteryC = useECharts(masteryChartEl, { redraw: () => renderMasteryChart() })
 
 function chartColors() {
-  // --cb-mod 定义在 .app-layout 容器上（非 <html>），从图表容器读取继承值
+  // --sk-mod 定义在 .app-layout 容器上（非 <html>），从图表容器读取继承值
   const el = trendChartEl.value ?? document.documentElement
   return {
-    muted: cssVar('--cb-ink-muted'),
-    hairline: cssVar('--cb-hairline'),
-    text: cssVar('--cb-ink-secondary'),
-    mod: cssVar('--cb-mod', cssVar('--cb-primary'), el),
-    surface: cssVar('--cb-surface'),
-    teal: cssVar('--cb-teal'),
-    warning: cssVar('--cb-warning'),
-    error: cssVar('--cb-error')
+    muted: cssVar('--sk-ink-muted'),
+    hairline: cssVar('--sk-hairline'),
+    text: cssVar('--sk-ink-secondary'),
+    mod: cssVar('--sk-mod', cssVar('--sk-primary'), el),
+    surface: cssVar('--sk-surface'),
+    teal: cssVar('--sk-teal'),
+    warning: cssVar('--sk-warning'),
+    error: cssVar('--sk-error')
   }
 }
 

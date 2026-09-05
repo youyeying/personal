@@ -9,7 +9,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: color-mix(in srgb, var(--cb-mod) 82%, #191512);
+  background: color-mix(in srgb, var(--sk-mod) 82%, #191512);
   color: rgba(255, 255, 255, 0.92);
   transition: width 0.3s ease, background-color 0.9s ease;
 
@@ -51,7 +51,7 @@
     width: 39px; // 当前尺寸（52px）的 0.75 倍
     height: 39px;
     border-radius: 10px;
-    background: color-mix(in srgb, var(--cb-mod) 58%, #fff);
+    background: color-mix(in srgb, var(--sk-mod) 58%, #fff);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -60,8 +60,8 @@
   }
 
   &__brand-name {
-    font-family: var(--cb-font-cute);
-    font-size: var(--cb-font-2xl); // 当前 3xl（约40px）的 0.75 倍 → 2xl（约30px）
+    font-family: var(--sk-font-cute);
+    font-size: var(--sk-font-2xl); // 当前 3xl（约40px）的 0.75 倍 → 2xl（约30px）
     letter-spacing: 1px;
     white-space: nowrap;
   }
@@ -78,7 +78,7 @@
     border: none;
     background: transparent;
     color: rgba(255, 255, 255, 0.78);
-    border-radius: var(--cb-radius-btn);
+    border-radius: var(--sk-radius-btn);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -107,10 +107,10 @@
     justify-content: space-between;
     gap: 8px;
     padding: 11px 14px;
-    border-radius: var(--cb-radius-btn);
+    border-radius: var(--sk-radius-btn);
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
-    font-size: var(--cb-font-md);
+    font-size: var(--sk-font-md);
     white-space: nowrap;
     transition: background-color 0.2s ease, color 0.2s ease;
 
@@ -120,9 +120,9 @@
     }
 
     &--active {
-      background: color-mix(in srgb, var(--cb-mod) 58%, #fff);
+      background: color-mix(in srgb, var(--sk-mod) 58%, #fff);
       color: #2c312f;
-      font-weight: var(--cb-font-weight-medium);
+      font-weight: var(--sk-font-weight-medium);
       transition: background-color 0.9s ease;
     }
 
@@ -146,9 +146,9 @@
     // 行右侧小字标注（如 LIVE / 存钱余额）
     &-tag {
       flex-shrink: 0;
-      font-family: var(--cb-font-mono);
+      font-family: var(--sk-font-mono);
       font-variant-numeric: tabular-nums;
-      font-size: var(--cb-font-xs);
+      font-size: var(--sk-font-xs);
       color: rgba(255, 255, 255, 0.5);
       max-width: 90px;
       overflow: hidden;
@@ -172,9 +172,9 @@
   }
 
   &__version {
-    font-family: var(--cb-font-mono);
+    font-family: var(--sk-font-mono);
     font-variant-numeric: tabular-nums;
-    font-size: var(--cb-font-sm);
+    font-size: var(--sk-font-sm);
     color: rgba(255, 255, 255, 0.55);
     white-space: nowrap;
   }

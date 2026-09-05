@@ -11,7 +11,7 @@
   position: relative;
   width: 100%;
   // 组件整体高度：随卡片尺寸缩放（卡片 600px → 92px，卡片 400px → 76px）
-  height: var(--cb-input-height);
+  height: var(--sk-input-height);
 
   // ---- 浮动标签 ----
   &__label {
@@ -21,8 +21,8 @@
     top: 55%;
     transform: translateY(-50%);
     // 输入框文字字号（随卡片缩放）
-    font-size: var(--cb-input-font);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-input-font);
+    color: var(--sk-ink-muted);
     pointer-events: none;
     white-space: nowrap;
     // 上移动画
@@ -35,15 +35,15 @@
 
   // 上移状态：label 浮到组件顶部（空间充足，不再压框）
   &--floated &__label {
-    top: calc(var(--cb-input-height) * 0.13);
+    top: calc(var(--sk-input-height) * 0.13);
     transform: none;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-secondary);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-secondary);
   }
 
   // 聚焦时标签用主色
   &--focused &__label {
-    color: var(--cb-primary);
+    color: var(--sk-primary);
   }
 
   // ---- 输入框（定位在组件中下部，与顶部浮动标签分离） ----
@@ -51,19 +51,19 @@
     position: absolute;
     left: 0;
     // 顶部留出浮动标签空间（约 1/3）
-    top: calc(var(--cb-input-height) * 0.36);
+    top: calc(var(--sk-input-height) * 0.36);
     width: 100%;
-    height: calc(var(--cb-input-height) * 0.42);
+    height: calc(var(--sk-input-height) * 0.42);
     padding: 0 2px;
     // 密码框右侧留出切换按钮空间
     padding-right: 36px;
     // 字体跟随主题字号（随卡片缩放）
-    font-size: var(--cb-input-font);
-    color: var(--cb-ink);
+    font-size: var(--sk-input-font);
+    color: var(--sk-ink);
     background: transparent;
     // 下划线风格：只有底部一条横线
     border: none;
-    border-bottom: 2px solid var(--cb-hairline);
+    border-bottom: 2px solid var(--sk-hairline);
     outline: none;
     transition:
       border-color 0.2s ease,
@@ -71,7 +71,7 @@
 
     // hover：只在下方产生轻投影（微微抬起感），非整体阴影
     &:hover:not(:focus) {
-      border-bottom-color: var(--cb-ink-muted);
+      border-bottom-color: var(--sk-ink-muted);
       // 负 spread 收缩阴影范围：只在底部下方出现投影，不扩散到整框
       box-shadow: 0 8px 12px -8px rgba(44, 49, 47, 0.18);
     }
@@ -82,9 +82,9 @@
     }
 
     &:disabled {
-      color: var(--cb-ink-muted);
+      color: var(--sk-ink-muted);
       cursor: not-allowed;
-      border-bottom-color: var(--cb-hairline);
+      border-bottom-color: var(--sk-hairline);
       box-shadow: none;
     }
   }
@@ -95,10 +95,10 @@
     position: absolute;
     left: 0;
     // 对齐输入框底线（输入框 top + 高度）
-    bottom: calc(var(--cb-input-height) * 0.22);
+    bottom: calc(var(--sk-input-height) * 0.22);
     width: 100%;
     height: 2px;
-    background: var(--cb-primary);
+    background: var(--sk-primary);
     // 默认缩放为 0（不可见），从中心向两边展开
     transform: scaleX(0);
     transform-origin: center;
@@ -114,15 +114,15 @@
   // ---- 错误态 ----
   // 下划线变红（聚焦下划线也变红）
   &--error &__field {
-    border-bottom-color: var(--cb-error);
+    border-bottom-color: var(--sk-error);
   }
 
   &--error::after {
-    background: var(--cb-error);
+    background: var(--sk-error);
   }
 
   &--error &__label {
-    color: var(--cb-error);
+    color: var(--sk-error);
   }
 
   // 错误提示区：位于输入框下方，始终占位（无错误也留空间）
@@ -130,7 +130,7 @@
     position: absolute;
     left: 0;
     // 输入框底线下方
-    top: calc(var(--cb-input-height) * 0.78);
+    top: calc(var(--sk-input-height) * 0.78);
     min-height: 16px;
     display: flex;
     align-items: flex-start;
@@ -139,8 +139,8 @@
   // 错误提示文字
   &__error {
     margin: 0;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-error);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-error);
     line-height: 1.3;
   }
 
@@ -157,16 +157,16 @@
     justify-content: center;
     border: none;
     background: transparent;
-    color: var(--cb-ink-muted);
+    color: var(--sk-ink-muted);
     cursor: pointer;
     transition: color 0.2s ease;
 
     &:hover {
-      color: var(--cb-ink-secondary);
+      color: var(--sk-ink-secondary);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--cb-primary);
+      outline: 2px solid var(--sk-primary);
       outline-offset: 2px;
     }
   }

@@ -2,7 +2,7 @@
 /**
  * 公共组件 · GroupedChips 分组标签选择（饮食食物 / 锻炼动作选择复用）
  * - groups：[{ label: 分组名, items: [{ id, label, sub(小字), favorite }] }]
- * - activeId：当前选中项 id（is-on 高亮，随模块主色 --cb-mod）
+ * - activeId：当前选中项 id（is-on 高亮，随模块主色 --sk-mod）
  * - showFav：显示收藏星标（点击 emit toggle-fav，父级处理切换）
  * - showEdit：chip 内显示编辑铅笔（hover 浮现，点击 emit edit，父级处理编辑）
  * - addLabel：尾部「自定义」虚线入口文字；空则不显示（点击 emit add）

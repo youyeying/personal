@@ -33,7 +33,7 @@ import type { DevSummary, DevRangeStats, DevelopmentSession } from '@/api/dev'
 import { useECharts } from '@/utils/useECharts'
 import { cssVar } from '@/utils/theme'
 import { formatDate, formatDateTime } from '@/utils/format'
-import { parseMdDraft, FEATURE_TYPES, type FeatureDraft } from '@/utils/mdDraft'
+import { parseMdDraft, draftPrecheck, FEATURE_TYPES, type FeatureDraft } from '@/utils/mdDraft'
 
 /** 合并后的按天功能行 */
 interface DevFeatureRow {
@@ -178,19 +178,23 @@ function removeDraft(i: number) {
   drafts.value.splice(i, 1)
 }
 
-/** 导入 md 文件：解析规范格式预填草稿 */
-function onImportMd(f: { raw?: File }) {
+/** 导入 md 文件：解析规范格式预填草稿（自动过滤当天已录入的重复条目） */
+async function onImportMd(f: { raw?: File }) {
   if (!f.raw) return
   const reader = new FileReader()
-  reader.onload = () => {
+  reader.onload = async () => {
     const text = String(reader.result ?? '')
     const parsed = parseMdDraft(text)
-    if (parsed.length) {
-      drafts.value = parsed
-      ElMessage.success(`已从 md 导入 ${parsed.length} 条功能，可继续编辑`)
-    } else {
-      ElMessage.warning('未解析到有效功能条目（格式：### [新增] 模块 标题）')
-    }
+    if (!parsed.length) return ElMessage.warning('未解析到有效功能条目（格式：### [新增] 模块 标题）')
+    // 去重：当天已录入的 content 跳过，避免重复导入
+    const sum = await getDevSummary().catch(() => null)
+    const existing = new Set(sum?.features?.map((x) => x.content) ?? [])
+    const fresh = parsed.filter((d) => !existing.has(d.content.trim()))
+    const dup = parsed.length - fresh.length
+    drafts.value = fresh
+    ElMessage.success(dup > 0
+      ? `已从 md 导入 ${fresh.length} 条，跳过 ${dup} 条已录入的重复内容，可继续编辑`
+      : `已从 md 导入 ${fresh.length} 条功能，可继续编辑`)
   }
   reader.readAsText(f.raw)
 }
@@ -198,24 +202,47 @@ function onImportMd(f: { raw?: File }) {
 /** 有内容待录入的功能条数 */
 const validCount = computed(() => drafts.value.filter((d) => d.content.trim()).length)
 
-/** 确认结束：先批量录入功能，再结束会话；无论成败都刷新列表 */
+/** 确认结束：逐条录入功能（预检 + 失败不中断 + 逐条回执），全部成功才结束会话 */
 async function onEndConfirm() {
   ending.value = true
+  let okCount = 0
+  let failCount = 0
   try {
-    // 1) 逐条记录功能变更（空描述跳过）
     for (const d of drafts.value) {
+      if (d.ok) continue // 已录入成功，重试时跳过
       const c = d.content.trim()
       if (!c) continue
-      await addFeature({ type: d.type, module: d.module, content: c })
+      // 1) 本地预检：类型/模块/超长，命中即标红并跳过，不请求
+      const err = draftPrecheck({ type: d.type, module: d.module, content: c })
+      if (err) {
+        d.error = err
+        failCount++
+        continue
+      }
+      // 2) 逐条提交：失败不中断后续条目，失败条标红保留供修正重试
+      try {
+        await addFeature({ type: d.type, module: d.module, content: c })
+        d.ok = true
+        d.error = ''
+        okCount++
+      } catch {
+        d.error = '服务端提交失败（请缩短描述或检查网络后重试）'
+        failCount++
+      }
     }
-    // 2) 结束会话
+    if (failCount > 0) {
+      // 有失败：不结束会话、不关弹窗，保留失败条供修正后点击「结束开发并记录」仅补录失败项
+      ElMessage.warning(`已录入 ${okCount} 条，${failCount} 条未成功（已标红，修正后重新点击结束即可只补录失败项）`)
+      return
+    }
+    // 3) 全部成功 → 结束会话
     await endDevSession()
-    ElMessage.success('功能已记录，开发已结束')
+    ElMessage.success(`已录入 ${okCount} 条功能，开发已结束`)
     endDialog.value = false
   } catch {
     /* requestApi 已弹错 */
   } finally {
-    // 3) 无论成败都刷新列表（避免写库成功但列表未刷新的视觉错觉）
+    // 4) 无论成败都刷新列表（避免写库成功但列表未刷新的视觉错觉）
     try {
       await load(true)
     } catch {
@@ -303,9 +330,9 @@ function renderDayChart() {
   dayChartRetry = 0
   const base = dayChartEl.value ?? document.documentElement
   const c = {
-    mod: cssVar('--cb-mod', cssVar('--cb-primary'), base),
-    muted: cssVar('--cb-ink-muted'),
-    hairline: cssVar('--cb-hairline')
+    mod: cssVar('--sk-mod', cssVar('--sk-primary'), base),
+    muted: cssVar('--sk-ink-muted'),
+    hairline: cssVar('--sk-hairline')
   }
   const byDay = stats.value?.byDay ?? {}
   const dates = Object.keys(byDay)
@@ -558,15 +585,19 @@ onBeforeUnmount(stopSessionTimer)
       </el-upload>
       <span class="dev-log__end-import-hint">格式：### [新增] 模块 标题 + 列表项明细</span>
     </div>
-    <div v-for="(d, i) in drafts" :key="i" class="dev-log__end-row">
-      <el-select v-model="d.type" style="width: 92px">
+    <div v-for="(d, i) in drafts" :key="i" class="dev-log__end-row" :class="{ 'is-ok': d.ok, 'is-err': d.error }">
+      <el-select v-model="d.type" style="width: 92px" :disabled="d.ok">
         <el-option v-for="t in FEATURE_TYPES" :key="t" :label="t" :value="t" />
       </el-select>
-      <el-select v-model="d.module" style="width: 120px" filterable allow-create default-first-option>
+      <el-select v-model="d.module" style="width: 120px" filterable allow-create default-first-option :disabled="d.ok">
         <el-option v-for="m in FEATURE_MODULES" :key="m" :label="m" :value="m" />
       </el-select>
-      <el-input v-model="d.content" type="textarea" :autosize="{ minRows: 1, maxRows: 4 }" placeholder="描述本次功能变更…" />
-      <el-button class="dev-log__end-del" text type="danger" :disabled="drafts.length === 1" @click="removeDraft(i)">删除</el-button>
+      <div class="dev-log__end-field">
+        <el-input v-model="d.content" type="textarea" :autosize="{ minRows: 1, maxRows: 4 }" placeholder="描述本次功能变更…（≤500 字，已录入的不可再改）" :disabled="d.ok" />
+        <p v-if="d.ok" class="dev-log__end-ok">✓ 已录入</p>
+        <p v-if="d.error" class="dev-log__end-err">⚠ {{ d.error }}</p>
+      </div>
+      <el-button class="dev-log__end-del" text type="danger" :disabled="drafts.length === 1 || d.ok" @click="removeDraft(i)">删除</el-button>
     </div>
     <el-button class="dev-log__end-add" plain @click="addDraft">＋ 添加一条</el-button>
 

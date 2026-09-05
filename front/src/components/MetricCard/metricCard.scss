@@ -5,45 +5,45 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: var(--cb-space-4) var(--cb-space-5);
-  border: 1px solid var(--cb-hairline);
-  border-radius: var(--cb-radius-btn);
-  background: var(--cb-canvas);
+  padding: var(--sk-space-4) var(--sk-space-5);
+  border: 1px solid var(--sk-hairline);
+  border-radius: var(--sk-radius-btn);
+  background: var(--sk-canvas);
 
   &--accent {
-    border-color: var(--cb-mod);
-    background: color-mix(in srgb, var(--cb-mod) 14%, var(--cb-surface));
+    border-color: var(--sk-mod);
+    background: color-mix(in srgb, var(--sk-mod) 14%, var(--sk-surface));
   }
 
   &__label {
-    font-size: var(--cb-font-sm);
-    color: var(--cb-ink-secondary);
+    font-size: var(--sk-font-sm);
+    color: var(--sk-ink-secondary);
   }
 
   &__value {
-    font-family: var(--cb-font-mono);
+    font-family: var(--sk-font-mono);
     font-size: 22px;
     font-weight: 600;
 
     &.is-ok {
-      color: var(--cb-success);
+      color: var(--sk-success);
     }
     &.is-err {
-      color: var(--cb-error);
+      color: var(--sk-error);
     }
 
     // 单位（全局 .num 内的 <i>）相对缩小
     :deep(i) {
       font-style: normal;
-      font-size: var(--cb-font-xs);
-      color: var(--cb-ink-muted);
+      font-size: var(--sk-font-xs);
+      color: var(--sk-ink-muted);
       margin-left: 3px;
       font-weight: 400;
     }
   }
 
   &__sub {
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
   }
 }

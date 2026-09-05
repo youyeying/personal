@@ -9,7 +9,7 @@ import { cssVar } from './theme'
 
 /** 图表色板（canvas 不解析 CSS 变量，渲染前取实际值） */
 export interface ChartPalette {
-  mod: string      // 模块主色（--cb-mod，随路由模块变化）
+  mod: string      // 模块主色（--sk-mod，随路由模块变化）
   muted: string    // 弱化文本
   ink2: string     // 次要文本
   hairline: string // 分隔线
@@ -42,11 +42,11 @@ export function useTrendChart(redraw: () => void) {
   function palette(): ChartPalette {
     const base = el.value ?? document.documentElement
     return {
-      mod: cssVar('--cb-mod', cssVar('--cb-primary'), base),
-      muted: cssVar('--cb-ink-muted'),
-      ink2: cssVar('--cb-ink-secondary'),
-      hairline: cssVar('--cb-hairline'),
-      teal: cssVar('--cb-teal'),
+      mod: cssVar('--sk-mod', cssVar('--sk-primary'), base),
+      muted: cssVar('--sk-ink-muted'),
+      ink2: cssVar('--sk-ink-secondary'),
+      hairline: cssVar('--sk-hairline'),
+      teal: cssVar('--sk-teal'),
       intake: cssVar('--c-intake'),
       burn: cssVar('--c-burn'),
       gap: cssVar('--c-gap'),

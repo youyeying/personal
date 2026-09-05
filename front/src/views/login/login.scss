@@ -16,7 +16,7 @@
   min-height: max(100vh, 450px);
   // 最小宽度：保证布局稳定
   min-width: 450px;
-  padding: var(--cb-space-5);
+  padding: var(--sk-space-5);
   // 页面最外层背景：暂时改为白色
   background: #ffffff;
   position: relative;
@@ -27,27 +27,27 @@
   // ---- 右上角主题切换 ----
   &__theme-toggle {
     position: absolute;
-    top: var(--cb-space-5);
-    right: var(--cb-space-5);
+    top: var(--sk-space-5);
+    right: var(--sk-space-5);
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--cb-hairline);
+    border: 1px solid var(--sk-hairline);
     border-radius: 50%;
-    background: var(--cb-surface);
-    color: var(--cb-ink);
+    background: var(--sk-surface);
+    color: var(--sk-ink);
     cursor: pointer;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
-      border-color: var(--cb-primary);
-      box-shadow: var(--cb-shadow-card-hover);
+      border-color: var(--sk-primary);
+      box-shadow: var(--sk-shadow-card-hover);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--cb-primary);
+      outline: 2px solid var(--sk-primary);
       outline-offset: 2px;
     }
   }
@@ -60,19 +60,19 @@
   // 面板：左右两个内容半区（注册左 / 登录右）固定不动，壁纸浮空层在其上左右滑动
   &__cards {
     position: relative;
-    width: calc(var(--cb-login-card-size) * 2);
-    height: var(--cb-login-card-size);
+    width: calc(var(--sk-login-card-size) * 2);
+    height: var(--sk-login-card-size);
     overflow: hidden;
-    border: 1px solid var(--cb-hairline);
-    border-radius: var(--cb-radius-card);
+    border: 1px solid var(--sk-hairline);
+    border-radius: var(--sk-radius-card);
     box-shadow:
       0 8px 24px rgba(26, 25, 23, 0.08),
       0 2px 6px rgba(26, 25, 23, 0.06);
 
     // 单卡状态：容器收窄到单卡宽度
     &--single {
-      width: var(--cb-login-card-size);
-      max-width: var(--cb-login-card-size);
+      width: var(--sk-login-card-size);
+      max-width: var(--sk-login-card-size);
     }
 
     // 单卡状态：渲染的内容层占满整个面板（v-if 保证只有当前 mode 一个层）
@@ -91,7 +91,7 @@
   position: absolute;
   top: 0;
   // 每层占一个半区（单卡宽）
-  width: var(--cb-login-card-size);
+  width: var(--sk-login-card-size);
   height: 100%;
 
   &__placeholder {
@@ -99,22 +99,22 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: var(--cb-ink-muted);
-    font-size: var(--cb-font-sm);
+    color: var(--sk-ink-muted);
+    font-size: var(--sk-font-sm);
   }
 }
 
 // ---- 注册内容层（固定在左半区，v-if 渲染） ----
 .login-card--register {
   left: 0;
-  background: var(--cb-surface);
+  background: var(--sk-surface);
 }
 
 // ---- 登录内容层（固定在右半区，v-if 渲染） ----
 .login-card--login {
   left: 50%;
-  background: var(--cb-surface);
-  border-left: 1px solid var(--cb-hairline);
+  background: var(--sk-surface);
+  border-left: 1px solid var(--sk-hairline);
 }
 
 // ---- 内容层切换动画（渐隐渐现，配合壁纸移动） ----
@@ -166,23 +166,23 @@
 // 壁纸卡上的品牌文字（氛围层）
 .login-card__brand {
   position: absolute;
-  left: var(--cb-space-5);
-  right: var(--cb-space-5);
-  bottom: var(--cb-space-5);
+  left: var(--sk-space-5);
+  right: var(--sk-space-5);
+  bottom: var(--sk-space-5);
   color: #fff;
   text-align: left;
 
   &-title {
-    margin: 0 0 var(--cb-space-1);
-    font-size: var(--cb-font-xl);
-    font-weight: var(--cb-font-weight-bold);
+    margin: 0 0 var(--sk-space-1);
+    font-size: var(--sk-font-xl);
+    font-weight: var(--sk-font-weight-bold);
     text-shadow: 0 1px 4px rgba(26, 25, 23, 0.4);
   }
 
   &-sub {
     margin: 0;
-    font-size: var(--cb-font-sm);
-    font-weight: var(--cb-font-weight-regular);
+    font-size: var(--sk-font-sm);
+    font-weight: var(--sk-font-weight-regular);
     opacity: 0.9;
   }
 }
@@ -195,17 +195,17 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: var(--cb-space-6);
+  padding: var(--sk-space-6);
 }
 
 // 表单标题：位于卡片顶部，不堵着输入框
 .login-card__auth-title {
   display: flex;
-  gap: var(--cb-space-2);
-  margin: 0 0 var(--cb-space-5);
-  font-size: var(--cb-font-2xl);
-  font-weight: var(--cb-font-weight-bold);
-  color: var(--cb-ink);
+  gap: var(--sk-space-2);
+  margin: 0 0 var(--sk-space-5);
+  font-size: var(--sk-font-2xl);
+  font-weight: var(--sk-font-weight-bold);
+  color: var(--sk-ink);
 
   // 每个字独立 span，可分别着色
   &-char {
@@ -214,7 +214,7 @@
 
   // 强调字用主色
   &-char--accent {
-    color: var(--cb-primary);
+    color: var(--sk-primary);
   }
 }
 
@@ -222,8 +222,8 @@
 .login-card--register .login-card__auth-title,
 .login-card--login .login-card__auth-title {
   position: absolute;
-  top: var(--cb-space-6);
-  right: var(--cb-space-6);
+  top: var(--sk-space-6);
+  right: var(--sk-space-6);
   margin: 0;
 }
 
@@ -249,27 +249,27 @@
 // 登录/注册提交按钮：在表单内全宽
 .login-card__submit {
   width: 100%;
-  margin-top: var(--cb-space-5);
+  margin-top: var(--sk-space-5);
 }
 
 // 切换链接（登录 ↔ 注册）
 .login-card__switch-link {
-  margin-top: var(--cb-space-3);
+  margin-top: var(--sk-space-3);
   padding: 0;
   border: none;
   background: none;
   font-family: inherit;
-  font-size: var(--cb-font-sm);
-  color: var(--cb-primary);
+  font-size: var(--sk-font-sm);
+  color: var(--sk-primary);
   cursor: pointer;
   transition: color 0.2s ease;
 
   &:hover {
-    color: var(--cb-primary-active);
+    color: var(--sk-primary-active);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--cb-primary);
+    outline: 2px solid var(--sk-primary);
     outline-offset: 2px;
   }
 }
@@ -292,11 +292,11 @@
 }
 
 .login-page ::-webkit-scrollbar-thumb {
-  background: var(--cb-hairline);
+  background: var(--sk-hairline);
   border-radius: 4px;
 
   &:hover {
-    background: var(--cb-ink-muted);
+    background: var(--sk-ink-muted);
   }
 }
 

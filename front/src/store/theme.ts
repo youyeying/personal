@@ -1,7 +1,7 @@
 /**
  * 模块主题 store：每个业务模块拥有独立主色
  * - 布局按当前路由匹配模块，导航栏 / header 平滑过渡到对应主色
- * - 主色由 Home.vue 写入容器 CSS 变量 `--cb-mod`，供各组件经 color-mix 派生深浅值
+ * - 主色由 Home.vue 写入容器 CSS 变量 `--sk-mod`，供各组件经 color-mix 派生深浅值
  */
 import { defineStore } from 'pinia'
 import { computed, markRaw } from 'vue'

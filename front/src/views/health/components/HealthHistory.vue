@@ -43,9 +43,9 @@ const dateRange = ref<[string, string] | null>(null)
 
 /** 列定义：日期/体重/体脂腰围备注(自适应)/操作 */
 const columns: DataListColumn[] = [
-  // 日期/体重同为 mono 定宽（随 --cb-font-md 缩放），避免大屏字号下被省略号截断
-  { key: 'date', label: '日期', width: 'calc(6.8 * var(--cb-font-md) + 2 * var(--cb-space-3) + 4px)' },
-  { key: 'weight', label: '体重', width: 'calc(4.8 * var(--cb-font-md) + 2 * var(--cb-space-3) + 4px)' },
+  // 日期/体重同为 mono 定宽（随 --sk-font-md 缩放），避免大屏字号下被省略号截断
+  { key: 'date', label: '日期', width: 'calc(6.8 * var(--sk-font-md) + 2 * var(--sk-space-3) + 4px)' },
+  { key: 'weight', label: '体重', width: 'calc(4.8 * var(--sk-font-md) + 2 * var(--sk-space-3) + 4px)' },
   { key: 'extra', label: '体脂 / 腰围 / 备注', ratio: 5 },
   { key: 'ops', label: '操作', width: 88, ops: true }
 ]

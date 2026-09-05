@@ -4,14 +4,14 @@
  */
 .rp {
   position: relative; // 锚定 LoadingMask
-  padding: var(--cb-space-5);
+  padding: var(--sk-space-5);
   max-width: 1200px;
   width: 100%;
   min-width: 430px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--cb-space-5);
+  gap: var(--sk-space-5);
 
   &__range {
     display: inline-flex;
@@ -19,57 +19,57 @@
   }
 
   &__range-btn {
-    border: 1px solid var(--cb-hairline);
-    background: var(--cb-surface);
-    color: var(--cb-ink-secondary);
+    border: 1px solid var(--sk-hairline);
+    background: var(--sk-surface);
+    color: var(--sk-ink-secondary);
     padding: 4px 13px;
-    border-radius: var(--cb-radius-btn);
-    font-size: var(--cb-font-sm);
+    border-radius: var(--sk-radius-btn);
+    font-size: var(--sk-font-sm);
     cursor: pointer;
     font-family: inherit;
     &.is-active {
-      border-color: var(--cb-mod);
-      background: color-mix(in srgb, var(--cb-mod) 14%, var(--cb-surface));
-      color: var(--cb-mod);
+      border-color: var(--sk-mod);
+      background: color-mix(in srgb, var(--sk-mod) 14%, var(--sk-surface));
+      color: var(--sk-mod);
     }
   }
 
   &__group {
     display: flex;
     flex-direction: column;
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
   }
 
   &__group-title {
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
-    border-bottom: 1px solid var(--cb-hairline);
-    padding-bottom: var(--cb-space-1);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
+    border-bottom: 1px solid var(--sk-hairline);
+    padding-bottom: var(--sk-space-1);
   }
 
   &__metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: var(--cb-space-3);
+    gap: var(--sk-space-3);
   }
 
   // 体重下降绿 / 上升红（与减脂目标语义一致）
-  &__good { color: var(--cb-success); }
-  &__bad { color: var(--cb-error); }
+  &__good { color: var(--sk-success); }
+  &__bad { color: var(--sk-error); }
 
   // 心情 chips
-  &__mood { font-size: var(--cb-font-lg); }
+  &__mood { font-size: var(--sk-font-lg); }
   &__mood-list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--cb-space-2);
+    gap: var(--sk-space-2);
   }
   &__mood-chip {
-    font-size: var(--cb-font-sm);
-    color: var(--cb-ink-secondary);
-    background: var(--cb-canvas);
-    border: 1px solid var(--cb-hairline);
-    border-radius: var(--cb-radius-btn);
+    font-size: var(--sk-font-sm);
+    color: var(--sk-ink-secondary);
+    background: var(--sk-canvas);
+    border: 1px solid var(--sk-hairline);
+    border-radius: var(--sk-radius-btn);
     padding: 3px 12px;
   }
 }

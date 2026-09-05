@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--cb-space-2);
+  gap: var(--sk-space-2);
 
   &__svg {
     width: var(--pr-size, 92px);
@@ -30,9 +30,9 @@
   }
 
   &__label {
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-secondary);
-    font-family: var(--cb-font-mono);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-secondary);
+    font-family: var(--sk-font-mono);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }

@@ -2,7 +2,7 @@
 /**
  * 公共组件 · RecordHeatmap 记录热力图（V2：GitHub 式格点，把「记录」变成可看见的坚持）
  * - rows：每行一个维度（如 饮食/锻炼），cells 按日期升序（level 0-4 五档，0=无记录）
- * - color：格点主题色（默认 --cb-mod 模块主色，色阶 color-mix 派生深浅）
+ * - color：格点主题色（默认 --sk-mod 模块主色，色阶 color-mix 派生深浅）
  * - cells.tip：hover 时原生 title 提示（如「09-05 · 3 条记录」）
  * - 窄屏 ≤560px 自动截断为最近 21 格（样式层处理）
  */
@@ -27,7 +27,7 @@ withDefaults(
     /** 图例/统计小字（如「连续 4 天 · 本月 21 天」） */
     legendText?: string
   }>(),
-  { color: 'var(--cb-mod)', showLegend: true, legendText: '' }
+  { color: 'var(--sk-mod)', showLegend: true, legendText: '' }
 )
 </script>
 

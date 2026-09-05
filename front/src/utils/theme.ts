@@ -1,12 +1,12 @@
 /**
  * 主题工具：读取 CSS 变量实际色值
- * 背景：ECharts 等 canvas 渲染不解析 `var(--cb-xxx)` 字符串，需取实际值传入
+ * 背景：ECharts 等 canvas 渲染不解析 `var(--sk-xxx)` 字符串，需取实际值传入
  */
 
 /**
- * 读取 CSS 变量（如 '--cb-ink-muted'）的当前解析值，缺省回退 fallback
+ * 读取 CSS 变量（如 '--sk-ink-muted'）的当前解析值，缺省回退 fallback
  * @param element 可选；默认从 <html> 读，传具体元素可读该元素及其继承的自定义属性
- *               （如 --cb-mod 由布局在 .app-layout 容器上定义，需传图表容器读取）
+ *               （如 --sk-mod 由布局在 .app-layout 容器上定义，需传图表容器读取）
  */
 export function cssVar(name: string, fallback = '#000', element?: Element | null): string {
   if (typeof document === 'undefined') return fallback

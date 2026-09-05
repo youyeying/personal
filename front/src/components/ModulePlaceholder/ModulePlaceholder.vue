@@ -2,7 +2,7 @@
 /**
  * 公共组件 · 模块占位页（各业务主页未实现前的统一空态）
  * 父组件可传入 title / desc / icon；不传时回退为当前模块（theme store）
- * 主色随模块 --cb-mod 变化
+ * 主色随模块 --sk-mod 变化
  */
 import { computed } from 'vue'
 import type { Component } from 'vue'

@@ -3,29 +3,29 @@
  */
 
 // ---- 间距工具 ----
-.mt-1 { margin-top: var(--cb-space-1); }
-.mt-2 { margin-top: var(--cb-space-2); }
-.mt-3 { margin-top: var(--cb-space-3); }
-.mt-4 { margin-top: var(--cb-space-4); }
-.mb-1 { margin-bottom: var(--cb-space-1); }
-.mb-2 { margin-bottom: var(--cb-space-2); }
-.mb-3 { margin-bottom: var(--cb-space-3); }
-.mb-4 { margin-bottom: var(--cb-space-4); }
+.mt-1 { margin-top: var(--sk-space-1); }
+.mt-2 { margin-top: var(--sk-space-2); }
+.mt-3 { margin-top: var(--sk-space-3); }
+.mt-4 { margin-top: var(--sk-space-4); }
+.mb-1 { margin-bottom: var(--sk-space-1); }
+.mb-2 { margin-bottom: var(--sk-space-2); }
+.mb-3 { margin-bottom: var(--sk-space-3); }
+.mb-4 { margin-bottom: var(--sk-space-4); }
 
 // ---- 文本工具 ----
 // 三级对比度：主要(ink) / 次要(secondary) / 弱化(muted)
-// 主要文字可直接用默认 body 色（--cb-ink），无需加 class
-.text-secondary { color: var(--cb-ink-secondary); } // 次要信息
-.text-muted { color: var(--cb-ink-muted); }         // 提示/占位符
-.text-error { color: var(--cb-error); }
-.text-success { color: var(--cb-success); }
-.text-warning { color: var(--cb-warning); }
-.text-teal { color: var(--cb-teal); }
+// 主要文字可直接用默认 body 色（--sk-ink），无需加 class
+.text-secondary { color: var(--sk-ink-secondary); } // 次要信息
+.text-muted { color: var(--sk-ink-muted); }         // 提示/占位符
+.text-error { color: var(--sk-error); }
+.text-success { color: var(--sk-success); }
+.text-warning { color: var(--sk-warning); }
+.text-teal { color: var(--sk-teal); }
 
 // 文字粗细
-.font-regular { font-weight: var(--cb-font-weight-regular); }
-.font-medium { font-weight: var(--cb-font-weight-medium); }
-.font-bold { font-weight: var(--cb-font-weight-bold); }
+.font-regular { font-weight: var(--sk-font-weight-regular); }
+.font-medium { font-weight: var(--sk-font-weight-medium); }
+.font-bold { font-weight: var(--sk-font-weight-bold); }
 
 .text-center { text-align: center; }
 .text-left { text-align: left; }
@@ -44,13 +44,13 @@
 
 // ---- 卡片通用 ----
 .card {
-  background: var(--cb-surface);
-  border: 1px solid var(--cb-hairline);
-  border-radius: var(--cb-radius-card);
-  box-shadow: var(--cb-shadow-card);
+  background: var(--sk-surface);
+  border: 1px solid var(--sk-hairline);
+  border-radius: var(--sk-radius-card);
+  box-shadow: var(--sk-shadow-card);
   transition: box-shadow 0.2s ease;
 
   &:hover {
-    box-shadow: var(--cb-shadow-card-hover);
+    box-shadow: var(--sk-shadow-card-hover);
   }
 }

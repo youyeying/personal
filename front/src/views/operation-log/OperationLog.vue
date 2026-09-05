@@ -33,7 +33,7 @@ const dateRange = ref<[string, string] | null>(null)
  * 不启用 hideBelow：三个字段始终完整呈现 */
 const columns: DataListColumn[] = [
   // 时间文本固定 11 个 mono 字符（MM-dd HH:mm），mono 字宽≈0.6em；列宽按 mono 实际宽度算，随响应式字号缩放，各字号下均完整显示
-  { key: 'time', label: '时间', width: 'calc(7.2 * var(--cb-font-md) + 2 * var(--cb-space-3) + 4px)' },
+  { key: 'time', label: '时间', width: 'calc(7.2 * var(--sk-font-md) + 2 * var(--sk-space-3) + 4px)' },
   { key: 'module', label: '模块', width: 110 },
   { key: 'action', label: '动作', width: 90 },
   { key: 'content', label: '内容', ratio: 15 }

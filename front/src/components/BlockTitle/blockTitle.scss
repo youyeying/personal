@@ -1,23 +1,23 @@
 /**
  * 公共组件 · BlockTitle 区块标题样式
- * 主色随模块 --cb-mod；hint 灰字；aside 操作区靠右
+ * 主色随模块 --sk-mod；hint 灰字；aside 操作区靠右
  */
 .block-title {
   display: flex;
   align-items: center;
-  gap: var(--cb-space-3);
-  margin-bottom: var(--cb-space-4);
+  gap: var(--sk-space-3);
+  margin-bottom: var(--sk-space-4);
 
   &__heading {
     margin: 0;
-    font-size: var(--cb-font-lg);
-    font-weight: var(--cb-font-weight-medium);
-    color: var(--cb-mod);
+    font-size: var(--sk-font-lg);
+    font-weight: var(--sk-font-weight-medium);
+    color: var(--sk-mod);
   }
 
   &__hint {
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
   }
 
   &__aside {

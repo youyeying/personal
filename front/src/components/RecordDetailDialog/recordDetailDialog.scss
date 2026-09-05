@@ -1,12 +1,12 @@
 .rdd {
   display: flex;
   flex-direction: column;
-  gap: var(--cb-space-3);
+  gap: var(--sk-space-3);
 
   &__row {
     display: flex;
-    gap: var(--cb-space-4);
-    font-size: var(--cb-font-md);
+    gap: var(--sk-space-4);
+    font-size: var(--sk-font-md);
 
     &--note {
       align-items: flex-start;
@@ -16,11 +16,11 @@
   &__label {
     flex-shrink: 0;
     width: 72px;
-    color: var(--cb-ink-secondary);
+    color: var(--sk-ink-secondary);
   }
 
   &__value {
-    color: var(--cb-ink);
+    color: var(--sk-ink);
     min-width: 0;
     word-break: break-word;
 

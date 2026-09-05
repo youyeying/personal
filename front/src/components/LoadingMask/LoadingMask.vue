@@ -28,7 +28,7 @@ withDefaults(
 
 <template>
   <div v-if="show" class="loading-mask">
-    <InlineLoading :size="size" :text="text" :mode="mode" color="var(--cb-mod)" />
+    <InlineLoading :size="size" :text="text" :mode="mode" color="var(--sk-mod)" />
   </div>
 </template>
 

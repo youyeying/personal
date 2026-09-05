@@ -7,7 +7,7 @@
 .app-layout {
   height: 100%;
   display: flex;
-  background: var(--cb-canvas);
+  background: var(--sk-canvas);
 
   // 右侧：横向滚动容器（header 与内容区一起左右滚动）
   &__side {

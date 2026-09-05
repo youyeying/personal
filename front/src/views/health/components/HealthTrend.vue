@@ -99,11 +99,11 @@ const waistC = useECharts(waistEl2, { redraw: () => renderCharts() })
 function lineColors() {
   const el = chartEl.value ?? document.documentElement
   return {
-    muted: cssVar('--cb-ink-muted'),
-    hairline: cssVar('--cb-hairline'),
-    mod: cssVar('--cb-mod', cssVar('--cb-primary'), el),
-    surface: cssVar('--cb-surface'),
-    warn: cssVar('--cb-warning')
+    muted: cssVar('--sk-ink-muted'),
+    hairline: cssVar('--sk-hairline'),
+    mod: cssVar('--sk-mod', cssVar('--sk-primary'), el),
+    surface: cssVar('--sk-surface'),
+    warn: cssVar('--sk-warning')
   }
 }
 

@@ -4,25 +4,25 @@
 
 :root {
   // ---- 画布（从登录页壁纸提取：暖米白 + 陶土棕 + 墨绿灰） ----
-  --cb-canvas: #f2ede4;          // 页面背景（暖米白）
-  --cb-surface: #faf7f0;         // 卡片/面板背景
-  --cb-hairline: #e0d8ca;        // 分隔线
+  --sk-canvas: #f2ede4;          // 页面背景（暖米白）
+  --sk-surface: #faf7f0;         // 卡片/面板背景
+  --sk-hairline: #e0d8ca;        // 分隔线
 
   // ---- 主色（陶土棕，取自壁纸暖棕红） ----
-  --cb-primary: #a8765a;
-  --cb-primary-hover: #b88a6e;
-  --cb-primary-active: #94664c;
+  --sk-primary: #a8765a;
+  --sk-primary-hover: #b88a6e;
+  --sk-primary-active: #94664c;
 
   // ---- 文本（V2 暖灰阶：暖纸墨，从「冷墨绿黑」变「暖近黑」） ----
-  --cb-ink: rgba(28, 30, 26, 0.88);            // 主文本
-  --cb-ink-secondary: rgba(28, 30, 26, 0.62);  // 次要文本
-  --cb-ink-muted: rgba(28, 30, 26, 0.42);      // 弱化文本
+  --sk-ink: rgba(28, 30, 26, 0.88);            // 主文本
+  --sk-ink-secondary: rgba(28, 30, 26, 0.62);  // 次要文本
+  --sk-ink-muted: rgba(28, 30, 26, 0.42);      // 弱化文本
 
   // ---- 语义色（克制稳定，暖色系协调） ----
-  --cb-error: #b04a3a;
-  --cb-warning: #a8821f;
-  --cb-teal: #3f7a72;
-  --cb-success: #3d7a55;
+  --sk-error: #b04a3a;
+  --sk-warning: #a8821f;
+  --sk-teal: #3f7a72;
+  --sk-success: #3d7a55;
 
   // ---- V2 图表维度语义色（全站一致：同一维度同一色，dark 自动提亮） ----
   --c-intake: #7a8c3e;    // 摄入（暖黄绿，饮食主色）
@@ -37,84 +37,84 @@
   // 正常页面：霞鹜文楷 Screen（手写楷体，书卷气，unicode-range 按需加载）
   // 装饰/加载场景：站酷庆科黄油体（圆润可爱卡通风）
   // 数字/数据：等宽字体（科幻/数据感）
-  --cb-font-family: 'LXGW WenKai Screen', 'ZCOOL XiaoWei', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --cb-font-cute: 'ZCOOL QingKe HuangYou', 'LXGW WenKai Screen', -apple-system, 'PingFang SC', sans-serif;
-  --cb-font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  --sk-font-family: 'LXGW WenKai Screen', 'ZCOOL XiaoWei', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --sk-font-cute: 'ZCOOL QingKe HuangYou', 'LXGW WenKai Screen', -apple-system, 'PingFang SC', sans-serif;
+  --sk-font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
 
   // ---- 字号（响应式：手机最小 16px → 34 寸最小 26px 为基础） ----
-  // 以 --cb-font-md 为基准：手机 16px、34 寸 26px
+  // 以 --sk-font-md 为基准：手机 16px、34 寸 26px
   // 其余层级在此基础上按比例缩放，标题与基础差距保持在 1.6 倍以内（层级紧凑）
-  --cb-font-xs: clamp(14px, 0.9rem, 22px);      // 手机 14 / 34寸 22
-  --cb-font-sm: clamp(15px, 0.97rem, 24px);     // 手机 15 / 34寸 24
-  --cb-font-md: clamp(16px, 1.08rem, 26px);     // 手机 16 / 34寸 26（基础基准）
-  --cb-font-lg: clamp(17px, 1.18rem, 28px);     // 手机 17 / 34寸 28
-  --cb-font-xl: clamp(18px, 1.3rem, 30px);      // 手机 18 / 34寸 30
-  --cb-font-2xl: clamp(20px, 1.5rem, 34px);     // 手机 20 / 34寸 34
-  --cb-font-3xl: clamp(22px, 1.75rem, 40px);    // 手机 22 / 34寸 40（标题上限）
+  --sk-font-xs: clamp(14px, 0.9rem, 22px);      // 手机 14 / 34寸 22
+  --sk-font-sm: clamp(15px, 0.97rem, 24px);     // 手机 15 / 34寸 24
+  --sk-font-md: clamp(16px, 1.08rem, 26px);     // 手机 16 / 34寸 26（基础基准）
+  --sk-font-lg: clamp(17px, 1.18rem, 28px);     // 手机 17 / 34寸 28
+  --sk-font-xl: clamp(18px, 1.3rem, 30px);      // 手机 18 / 34寸 30
+  --sk-font-2xl: clamp(20px, 1.5rem, 34px);     // 手机 20 / 34寸 34
+  --sk-font-3xl: clamp(22px, 1.75rem, 40px);    // 手机 22 / 34寸 40（标题上限）
 
   // ---- 文字粗细 ----
-  --cb-font-weight-regular: 400;   // 正文常规
-  --cb-font-weight-medium: 500;    // 强调（label / 重要信息）
-  --cb-font-weight-bold: 600;      // 标题 / 按钮 / 关键数字
+  --sk-font-weight-regular: 400;   // 正文常规
+  --sk-font-weight-medium: 500;    // 强调（label / 重要信息）
+  --sk-font-weight-bold: 600;      // 标题 / 按钮 / 关键数字
 
   // ---- 圆角 ----
-  --cb-radius-btn: 8px;
-  --cb-radius-card: 12px;
-  --cb-radius-input: 8px;
+  --sk-radius-btn: 8px;
+  --sk-radius-card: 12px;
+  --sk-radius-input: 8px;
 
   // ---- 登录页卡片尺寸 ----
   // 宽高 = 页面宽度 30%，最大 600px，最小 400px（严格执行最小）
-  --cb-login-card-size: clamp(400px, 30vw, 600px);
+  --sk-login-card-size: clamp(400px, 30vw, 600px);
   // 输入框组件高度：随卡片尺寸缩放（卡片大输入框高，卡片小输入框矮）
-  --cb-input-height: clamp(76px, calc(var(--cb-login-card-size) * 0.17), 92px);
+  --sk-input-height: clamp(76px, calc(var(--sk-login-card-size) * 0.17), 92px);
   // 输入框内文字与浮动标签字号（跟随卡片缩放）
-  --cb-input-font: clamp(14px, calc(var(--cb-login-card-size) * 0.032), 17px);
+  --sk-input-font: clamp(14px, calc(var(--sk-login-card-size) * 0.032), 17px);
 
   // ---- 阴影（V2 耳语阴影：2 层极轻，纸叠纸不产生戏剧性投影） ----
-  --cb-shadow-card: 0 1px 2px rgba(28, 30, 26, 0.04), 0 2px 8px rgba(28, 30, 26, 0.05);
-  --cb-shadow-card-hover: 0 2px 4px rgba(28, 30, 26, 0.06), 0 4px 12px rgba(28, 30, 26, 0.07);
+  --sk-shadow-card: 0 1px 2px rgba(28, 30, 26, 0.04), 0 2px 8px rgba(28, 30, 26, 0.05);
+  --sk-shadow-card-hover: 0 2px 4px rgba(28, 30, 26, 0.06), 0 4px 12px rgba(28, 30, 26, 0.07);
 
   // ---- 间距 ----
-  --cb-space-1: 4px;
-  --cb-space-2: 8px;
-  --cb-space-3: 12px;
-  --cb-space-4: 16px;
-  --cb-space-5: 24px;
-  --cb-space-6: 32px;
-  --cb-space-7: 40px;
+  --sk-space-1: 4px;
+  --sk-space-2: 8px;
+  --sk-space-3: 12px;
+  --sk-space-4: 16px;
+  --sk-space-5: 24px;
+  --sk-space-6: 32px;
+  --sk-space-7: 40px;
 
   // ---- Element Plus 主色覆盖为陶土棕 ----
-  --el-color-primary: var(--cb-primary);
-  --el-color-primary-light-3: var(--cb-primary-hover);
+  --el-color-primary: var(--sk-primary);
+  --el-color-primary-light-3: var(--sk-primary-hover);
   --el-color-primary-light-5: #d8c0ae;
   --el-color-primary-light-7: #e9dbd0;
   --el-color-primary-light-8: #f1e7de;
   --el-color-primary-light-9: #f9f3ee;
-  --el-color-primary-dark-2: var(--cb-primary-active);
+  --el-color-primary-dark-2: var(--sk-primary-active);
 }
 
 // ===================== 暗色模式（html.dark） =====================
 // 白天/黑夜切换（公共组件 ThemeToggle）通过给 <html> 加/去 .dark 触发
 // 仅覆盖核心令牌即可整体换肤，其余组件均引用这些变量自动跟随
 html.dark {
-  --cb-canvas: #1d1b17;            // 深暖墨画布
-  --cb-surface: #272420;           // 深卡片
-  --cb-hairline: #3b372f;          // 暗分隔线
+  --sk-canvas: #1d1b17;            // 深暖墨画布
+  --sk-surface: #272420;           // 深卡片
+  --sk-hairline: #3b372f;          // 暗分隔线
 
   // 主色提亮一级，暗底上更好读（仍是暖陶土系）
-  --cb-primary: #c08563;
-  --cb-primary-hover: #d09471;
-  --cb-primary-active: #a8765a;
+  --sk-primary: #c08563;
+  --sk-primary-hover: #d09471;
+  --sk-primary-active: #a8765a;
 
-  --cb-ink: rgba(236, 229, 214, 0.92);          // 主文本换浅暖白（V2 灰阶）
-  --cb-ink-secondary: rgba(236, 229, 214, 0.64);
-  --cb-ink-muted: rgba(236, 229, 214, 0.44);
+  --sk-ink: rgba(236, 229, 214, 0.92);          // 主文本换浅暖白（V2 灰阶）
+  --sk-ink-secondary: rgba(236, 229, 214, 0.64);
+  --sk-ink-muted: rgba(236, 229, 214, 0.44);
 
   // 语义色微提亮，保证暗底识别度
-  --cb-error: #d06a55;
-  --cb-warning: #c99a3a;
-  --cb-teal: #54a095;
-  --cb-success: #57a06b;
+  --sk-error: #d06a55;
+  --sk-warning: #c99a3a;
+  --sk-teal: #54a095;
+  --sk-success: #57a06b;
 
   // V2 图表语义色暗底提亮
   --c-intake: #94a85c;
@@ -126,12 +126,12 @@ html.dark {
   --c-carb: #a580b8;
 
   // 耳语阴影（暗底加深一档保可见性）
-  --cb-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.25);
-  --cb-shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --sk-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --sk-shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.3);
 
   // Element Plus 深色派生
-  --el-color-primary: var(--cb-primary);
-  --el-color-primary-light-3: var(--cb-primary-hover);
+  --el-color-primary: var(--sk-primary);
+  --el-color-primary-light-3: var(--sk-primary-hover);
   --el-color-primary-light-5: #6b5a4a;
   --el-color-primary-light-7: #51463c;
   --el-color-primary-light-8: #463c33;
