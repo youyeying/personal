@@ -4,14 +4,16 @@
  * 大号体重输入 + 可选体脂/腰围 + 日期 + 备注 + 保存 + 体重速览（最近 5 条）
  * 数据变更时 emit('changed') → 父级递增 tick，联动 趋势/历史 刷新
  */
-import { markRaw, onMounted, ref, watch } from 'vue'
+import { markRaw, computed, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Weight, Percent, Ruler } from '@lucide/vue'
 import { listWeightRecords, createWeightRecord } from '@/api/health'
 import type { WeightRecord } from '@/api/health'
 import { formatDate } from '@/utils/format'
-import InlineLoading from '@/components/loading/InlineLoading.vue'
+import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
+import RecordHeatmap from '@/components/RecordHeatmap/RecordHeatmap.vue'
+import type { HeatmapRow } from '@/components/RecordHeatmap/RecordHeatmap.vue'
 
 const props = defineProps<{
   tick: number
@@ -70,14 +72,35 @@ async function onSave() {
   }
 }
 
-/* ---------- 体重速览（最近 5 条） ---------- */
+/* ---------- 体重速览（最近 5 条）+ 30 天打卡热力图 ---------- */
 const recentLoading = ref(false)
 const recentRecords = ref<WeightRecord[]>([])
+/** 近 30 天打卡日期 → 是否含体脂（热力档：0 无 / 1 打卡 / 3 含体脂；ref 保证 computed 响应） */
+const checkinMap = ref(new Map<string, boolean>())
+
+const heatRows = computed<HeatmapRow[]>(() => {
+  const cells: { date: string; level: number; tip: string }[] = []
+  const today = new Date()
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(today)
+    d.setDate(d.getDate() - i)
+    const key = formatDate(d)
+    const has = checkinMap.value.has(key)
+    const hasFat = checkinMap.value.get(key) === true
+    cells.push({ date: key, level: hasFat ? 3 : has ? 1 : 0, tip: hasFat ? `${key} · 已打卡（含体脂）` : has ? `${key} · 已打卡` : `${key} · 未打卡` })
+  }
+  return [{ label: '体重', cells }]
+})
+
 async function loadRecent() {
   recentLoading.value = true
   try {
-    const res = await listWeightRecords({ page: 1, size: 5 })
-    recentRecords.value = res.records
+    // 拉最近 30 条记录（size 30 覆盖每日一记场景，含补打卡）
+    const res = await listWeightRecords({ page: 1, size: 30 })
+    recentRecords.value = res.records.slice(0, 5)
+    const map = new Map<string, boolean>()
+    for (const r of res.records) map.set(r.recordDate, r.bodyFat != null)
+    checkinMap.value = map
   } finally {
     recentLoading.value = false
   }
@@ -138,12 +161,7 @@ watch(() => props.tick, loadRecent)
         <button class="hl__link" type="button" @click="emit('navigate', 'history')">查看全部</button>
       </template>
     </BlockTitle>
-    <template v-if="recentLoading">
-      <div class="hl__recent-loading">
-        <InlineLoading :size="22" text="加载最近记录…" color="var(--cb-mod)" />
-      </div>
-    </template>
-    <template v-else-if="recentRecords.length">
+    <template v-if="recentRecords.length">
       <div v-for="r in recentRecords" :key="r.id" class="hl__row">
         <span class="hl__row-icon"><component :is="markRaw(Weight)" :size="15" /></span>
         <span class="hl__row-date num">{{ r.recordDate }}</span>
@@ -152,7 +170,14 @@ watch(() => props.tick, loadRecent)
         <span class="hl__row-val num">{{ r.weight }}<i>kg</i></span>
       </div>
     </template>
-    <p v-else class="hl__empty">还没有记录，先在上面打卡吧</p>
+    <p v-else-if="!recentLoading" class="hl__empty">还没有记录，先在上面打卡吧</p>
+    <LoadingMask :show="recentLoading" :size="22" text="加载最近记录…" />
+  </section>
+
+  <!-- V2 30 天打卡热力图（打卡即点亮，色随健康主色） -->
+  <section class="card hl__heat">
+    <BlockTitle title="最近 30 天" hint="打卡即点亮 · 含体脂更深一格" />
+    <RecordHeatmap :rows="heatRows" :legend-text="''" />
   </section>
 </template>
 

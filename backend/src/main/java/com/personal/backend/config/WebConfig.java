@@ -1,6 +1,7 @@
 package com.personal.backend.config;
 
 import com.personal.backend.interceptor.AuthInterceptor;
+import com.personal.backend.interceptor.RateLimitInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +20,12 @@ import java.nio.file.Paths;
 public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
+    private final RateLimitInterceptor rateLimitInterceptor;
 
     @Value("${app.upload-path}")
     private String uploadPath;
 
-    /** 注册认证拦截器，白名单接口不校验 */
+    /** 注册认证拦截器（白名单接口不校验）+ 限流拦截器（@RateLimit 注解方法按 IP 限流） */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
@@ -34,6 +36,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/auth/refresh",
                         "/api/auth/logout"
                 );
+        // 限流拦截器：登录/注册/上传等注解方法生效（/api/** 内）
+        registry.addInterceptor(rateLimitInterceptor)
+                .addPathPatterns("/api/**");
     }
 
     /** 本地文件存储映射：/uploads/** -> 磁盘 uploads 目录 */

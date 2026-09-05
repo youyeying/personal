@@ -9,6 +9,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--cb-space-5);
+  // 供页面级 LoadingMask 不透明覆盖
+  position: relative;
+  min-height: 60vh;
 
   // ---- 1. 问候区 ----
   .ov-greet {
@@ -84,6 +87,79 @@
       color: var(--cb-warning);
       font-weight: var(--cb-font-weight-bold);
     }
+  }
+
+  // ---- 2.5 每日消耗（两块） ----
+  .ov-tdee-wrap {
+    position: relative;
+    min-height: 108px;
+  }
+  .ov-tdee-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--cb-space-4);
+  }
+  .ov-tdee-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cb-space-2);
+    padding: var(--cb-space-4);
+    border-radius: var(--cb-radius-card, 12px);
+    background: var(--cb-surface);
+    border: 1px solid var(--cb-hairline);
+
+    &__label {
+      font-size: var(--cb-font-sm);
+      color: var(--cb-ink-secondary);
+    }
+    // V2：块头（大数字左 + 摄入进度环右，窄屏环缩至 64px 由组件层处理）
+    &__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--cb-space-3);
+      flex-wrap: wrap;
+    }
+    &__value {
+      font-size: var(--cb-font-2xl);
+      font-weight: var(--cb-font-weight-bold);
+      color: var(--cb-mod);
+      i {
+        margin-left: 6px;
+        font-style: normal;
+        font-size: var(--cb-font-xs);
+        color: var(--cb-ink-muted);
+        font-weight: var(--cb-font-weight-normal);
+      }
+    }
+    &__rows {
+      display: flex;
+      flex-direction: column;
+      gap: var(--cb-space-1);
+      margin-top: auto;
+    }
+    &__row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--cb-space-3);
+      font-size: var(--cb-font-xs);
+      color: var(--cb-ink-muted);
+      b {
+        color: var(--cb-ink-secondary);
+        font-weight: var(--cb-font-weight-bold);
+      }
+    }
+  }
+  .ov-tdee-hint {
+    margin: var(--cb-space-2) 0 0;
+    font-size: var(--cb-font-xs);
+    color: var(--cb-ink-muted);
+  }
+  .ov-tdee--empty {
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-muted);
+    padding: var(--cb-space-3) var(--cb-space-4);
   }
 
   // ---- 3. 本月两卡 ----
@@ -311,6 +387,9 @@
       grid-template-columns: repeat(2, 1fr);
     }
     .ov-month-grid {
+      grid-template-columns: 1fr;
+    }
+    .ov-tdee-grid {
       grid-template-columns: 1fr;
     }
   }

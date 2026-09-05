@@ -7,7 +7,7 @@
  * - 结束开发：弹窗收集当天功能变更（多条：类型/模块/描述）→ 批量录入 → 再结束会话
  * - 支持一天多次开始/结束：每日时长 = 当天所有段时长累计
  */
-import { computed, markRaw, onMounted, ref, watch } from 'vue'
+import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { VideoPlay, VideoPause } from '@element-plus/icons-vue'
 import { ChartBar, List as ListIcon } from '@lucide/vue'
@@ -18,6 +18,8 @@ import DateRangePicker from '@/components/DateRangePicker/DateRangePicker.vue'
 import RangeTabs, { type RangeTabItem } from '@/components/RangeTabs/RangeTabs.vue'
 import MetricCard from '@/components/MetricCard/MetricCard.vue'
 import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
+import RecordDetailDialog from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
+import type { DetailRow } from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
 import type { DataListColumn } from '@/components/DataList/DataList.vue'
 import {
   addFeature,
@@ -233,6 +235,19 @@ function onDialogClose() {
   detail.value = null
 }
 
+/** 详情弹窗行（类型走 #cell-type 自定义，复用 dev-log__type 徽标） */
+const detailRows = computed<DetailRow[]>(() => {
+  const d = detail.value
+  if (!d) return []
+  return [
+    { key: 'date', label: '日期', value: d.date, mono: true },
+    { key: 'time', label: '时间', value: d.time, mono: true },
+    { key: 'type', label: '类型', value: d.type },
+    { key: 'module', label: '模块', value: d.module },
+    { key: 'content', label: '内容', value: d.content, wide: true }
+  ]
+})
+
 /* ================= 汇总 Tab ================= */
 type ViewMode = 'detail' | 'summary'
 const viewMode = ref<ViewMode>('detail')
@@ -272,9 +287,20 @@ const typeDist = computed(() =>
 const dayChartEl = ref<HTMLDivElement | null>(null)
 const dayChart = useECharts(dayChartEl, { redraw: () => renderDayChart() })
 
+/** 容器未布局完成（宽为 0）时的短重试计数，成功后清零 */
+let dayChartRetry = 0
+
 function renderDayChart() {
   const chart = dayChart.ensure()
-  if (!chart) return
+  if (!chart) {
+    // 容器宽高为 0（v-if 刚挂载/主题重绘时）：短暂重试，避免图表被跳过而永久不显示
+    if (dayChartRetry < 3) {
+      dayChartRetry++
+      setTimeout(renderDayChart, 250)
+    }
+    return
+  }
+  dayChartRetry = 0
   const base = dayChartEl.value ?? document.documentElement
   const c = {
     mod: cssVar('--cb-mod', cssVar('--cb-primary'), base),
@@ -322,6 +348,8 @@ async function loadStats(silent = false) {
   if (!silent) statsLoading.value = true
   try {
     stats.value = await getDevStatsRange(rangeDays.value)
+    // 汇总视图 v-if 挂载/布局完成后才 init：避免接口过快返回时容器宽高为 0、图表被跳过（偶发不显示）
+    await nextTick()
     renderDayChart()
   } finally {
     if (!silent) statsLoading.value = false
@@ -331,14 +359,40 @@ async function loadStats(silent = false) {
 function switchMode(mode: ViewMode) {
   viewMode.value = mode
   if (mode === 'summary') {
+    // 汇总视图是 v-if：切回时容器被销毁重建。先销毁旧图表实例，
+    // 再把「等 stats 后 nextTick 再 init」与「R 双保险去掉 rAF」交给 loadStats，避免绑到已移除 DOM
+    dayChart.dispose()
     loadStats()
-    requestAnimationFrame(() => renderDayChart())
   }
 }
 
 watch(rangeKey, () => loadStats())
 
+/* ---------- 进行中会话：今日时长动态增长（每分钟轻量刷新今日汇总，不重拉列表） ---------- */
+let sessionTimer: ReturnType<typeof setInterval> | null = null
+function stopSessionTimer() {
+  if (sessionTimer) {
+    clearInterval(sessionTimer)
+    sessionTimer = null
+  }
+}
+/** 只刷新今日 summary（进行中段时长由后端实时计长），静默失败不影响 */
+async function loadSummaryOnly() {
+  try {
+    summary.value = await getDevSummary()
+  } catch {
+    /* ignore */
+  }
+}
+watch(sessionRunning, (running) => {
+  stopSessionTimer()
+  if (running) {
+    sessionTimer = setInterval(loadSummaryOnly, 60_000)
+  }
+}, { immediate: true })
+
 onMounted(load)
+onBeforeUnmount(stopSessionTimer)
 </script>
 
 <template>
@@ -526,30 +580,11 @@ onMounted(load)
   </el-dialog>
 
   <!-- 行详情弹窗 -->
-  <el-dialog :model-value="dialogVisible" title="开发记录详情" width="480px" @close="onDialogClose">
-    <div v-if="detail" class="dev-log-detail">
-      <div class="dev-log-detail__row">
-        <span class="dev-log-detail__label">日期</span>
-        <span class="num">{{ detail.date }}</span>
-      </div>
-      <div class="dev-log-detail__row">
-        <span class="dev-log-detail__label">时间</span>
-        <span class="num">{{ detail.time }}</span>
-      </div>
-      <div class="dev-log-detail__row">
-        <span class="dev-log-detail__label">类型</span>
-        <span class="dev-log__type">{{ detail.type }}</span>
-      </div>
-      <div class="dev-log-detail__row">
-        <span class="dev-log-detail__label">模块</span>
-        <span>{{ detail.module }}</span>
-      </div>
-      <div class="dev-log-detail__row">
-        <span class="dev-log-detail__label">内容</span>
-        <span class="dev-log-detail__content">{{ detail.content }}</span>
-      </div>
-    </div>
-  </el-dialog>
+  <RecordDetailDialog :model-value="dialogVisible" title="开发记录详情" :rows="detailRows" @update:model-value="onDialogClose">
+    <template #cell-type="{ row }">
+      <span class="dev-log__type">{{ row.value }}</span>
+    </template>
+  </RecordDetailDialog>
   </div>
 </template>
 

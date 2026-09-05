@@ -5,23 +5,25 @@
  * 数据变更时 emit('changed') → 父级递增 tick，联动 统计/历史 刷新
  *
  * 消耗公式（utils/exercise.ts 纯函数）：
- * - 力量：个数+分钟 → 速度 → 强度系数 → MET×基础
+ * - 力量/有氧计数：个数 ÷ 参考速度 → 等效分钟，消耗按总量主导（与用时无关，免疫用时填错）
  * - 散步：距离+分钟 → 速度 → 档位 MET
  * - 爬楼梯：层数×次数×12秒 → 分钟 → MET 8.0
  * - 平板：秒数 → 分钟 → MET 4.0
- * 体重取「最新一条体重记录」，绝不用目标体重
+ * 打卡实时预览用当前最新体重；已存记录展示用「记录时体重快照」（历史消耗固定）
  */
 import { computed, markRaw, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Dumbbell, Plus, Copy } from '@lucide/vue'
+import { Dumbbell, Copy } from '@lucide/vue'
 import { listExerciseItems, listExerciseRecords, getExerciseLatest, createExerciseRecord, deleteExerciseRecord, createExerciseItem } from '@/api/exercise'
 import type { ExerciseItem, ExerciseRecord } from '@/api/exercise'
 import { listWeightRecords } from '@/api/health'
 import { formatDate } from '@/utils/format'
 import { useUserStore } from '@/store/user'
-import { walkSpeedKmh, walkMet, strengthIntensity, strengthMet, calcKcal, totalSeconds, formatDuration, WALK_SPEED_MAX } from '@/utils/exercise'
+import { walkSpeedKmh, walkMet, cyclingMet, speedMet, stairsMet, repsEffectiveMinutes, calcKcal, totalSeconds, formatDuration, WALK_SPEED_MAX, CYCLING_SPEED_MAX } from '@/utils/exercise'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
 import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
+import GroupedChips from '@/components/GroupedChips/GroupedChips.vue'
+import type { GroupedChipGroup, GroupedChipItem } from '@/components/GroupedChips/GroupedChips.vue'
 
 const props = defineProps<{ tick: number }>()
 const emit = defineEmits<{ (e: 'changed'): void }>()
@@ -33,6 +35,33 @@ const items = ref<ExerciseItem[]>([])
 const loading = ref(false)
 const activeId = ref<number | null>(null)
 const activeItem = computed(() => items.value.find((i) => i.id === activeId.value) ?? null)
+
+/** ExerciseItem → chip 数据（小字 = MET 说明，与原模板文案一致） */
+function toChip(it: ExerciseItem): GroupedChipItem {
+  const sub = it.type === 'plank' ? '按秒'
+    : it.type === 'strength' ? `基础 MET ${it.baseMet}`
+      : ['walk', 'cycling'].includes(it.type) ? '按速度定 MET'
+        : `MET ${it.baseMet}`
+  return { id: it.id, label: it.name, sub }
+}
+
+/** 动作分组：力量/核心 + 有氧 */
+const chipGroups = computed<GroupedChipGroup[]>(() => [
+  {
+    label: '力量 / 核心',
+    items: items.value.filter((i) => ['strength', 'plank'].includes(i.type)).map(toChip)
+  },
+  {
+    label: '有氧',
+    items: items.value.filter((i) => ['walk', 'stairs', 'cardio', 'cycling'].includes(i.type)).map(toChip)
+  }
+])
+
+/** chip 选择 → 映射回 ExerciseItem */
+function onSelectChip(c: GroupedChipItem) {
+  const it = items.value.find((i) => i.id === c.id)
+  if (it) onSelectItem(it)
+}
 
 async function loadItems() {
   loading.value = true
@@ -84,18 +113,21 @@ function liveCalc() {
   const item = activeItem.value
   if (!item) return null
   switch (item.type) {
-    case 'strength': {
+    case 'strength':
+    case 'cardio': {
       const reps = Number(form.value.reps) || 0
+      if (reps <= 0) return { met: item.baseMet, minutes: 0, detail: '输入个数' }
+      // v2 模型：速度→MET（强度）+ 等效分钟=个数÷参考速度（总量）
+      const ref = item.refSpeed ?? 12
+      const effMin = repsEffectiveMinutes(reps, item.refSpeed)
       const secTotal = timeSeconds()
-      if (reps <= 0 || secTotal <= 0) return { met: item.baseMet, minutes: 0, detail: '输入个数与时长' }
-      const min = secTotal / 60
-      const speed = reps / min
-      const it = strengthIntensity(speed, item.refSpeed ?? 12)
-      const met = strengthMet(item.baseMet, speed, item.refSpeed ?? 12)
+      const met = speedMet(item.baseMet, reps, secTotal, item.refSpeed, item.maxSpeed)
+      const speed = secTotal > 0 ? reps / (secTotal / 60) : ref
+      const timeText = secTotal > 0 ? ` · 用时 ${formatDuration(secTotal)}` : ''
       return {
         met,
-        minutes: min,
-        detail: `${reps}个 ÷ ${formatDuration(secTotal)} = ${speed.toFixed(1)}个/分钟 · ${it.label}强度 · MET ${item.baseMet}→${met}`
+        minutes: effMin,
+        detail: `${reps}个${timeText} → ${speed.toFixed(0)}个/分（参考${ref}）· MET ${met.toFixed(1)} · 等效 ${formatDuration(effMin * 60)}`
       }
     }
     case 'walk': {
@@ -110,13 +142,26 @@ function liveCalc() {
       const w = walkMet(kmh)
       return { met: w.met, minutes: min, detail: `${d}km ÷ ${min}min = ${kmh.toFixed(1)}km/h · ${w.label} · MET ${w.met}` }
     }
+    case 'cycling': {
+      const d = Number(form.value.distance) || 0
+      const min = Number(form.value.minutes) || 0
+      if (d <= 0 || min <= 0) return { met: 0, minutes: 0, detail: '输入距离与分钟' }
+      const kmh = walkSpeedKmh(d, min)
+      // 速度超常必为输入错误（如分钟误填成小时），拦截而非默默算个怪数字
+      if (kmh > CYCLING_SPEED_MAX) {
+        return { met: 0, minutes: 0, detail: `输入的距离与时间不匹配（${kmh.toFixed(0)}km/h 超常，分钟可能填错）` }
+      }
+      const c = cyclingMet(kmh)
+      return { met: c.met, minutes: min, detail: `${d}km ÷ ${min}min = ${kmh.toFixed(1)}km/h · ${c.label} · MET ${c.met}` }
+    }
     case 'stairs': {
       const f = Number(form.value.floors) || 0
       const t = Number(form.value.times) || 0
       const secTotal = timeSeconds()
       if (f <= 0 || t <= 0 || secTotal <= 0) return { met: item.baseMet, minutes: 0, detail: '输入层数、次数与时长' }
       const min = secTotal / 60
-      return { met: item.baseMet, minutes: min, detail: `${f}层 × ${t}次 · ${formatDuration(secTotal)}` }
+      const band = stairsMet(f, t, secTotal)
+      return { met: band.met, minutes: min, detail: `${f}层 × ${t}次 · ${formatDuration(secTotal)} · ${(secTotal / (f * t)).toFixed(1)}秒/层 · ${band.label} MET ${band.met}` }
     }
     case 'plank': {
       const s = Number(form.value.seconds) || 0
@@ -152,7 +197,7 @@ async function onSelectItem(item: ExerciseItem) {
     if (last) {
       form.value.weight = last.weight != null ? String(last.weight) : ''
       form.value.reps = last.reps != null ? String(last.reps) : ''
-      if (item.type === 'strength' || item.type === 'stairs') {
+      if (item.type === 'strength' || item.type === 'cardio' || item.type === 'stairs') {
         // 上次时长：拆成 分 + 秒（总秒数优先，兼容旧分钟字段）
         const ts = totalSeconds(last.minutes, last.seconds)
         form.value.min = String(Math.floor(ts / 60) || '')
@@ -198,13 +243,13 @@ function onSave() {
     exerciseId: item.id,
     recordDate: form.value.recordDate,
     weight: item.hasWeight && form.value.weight ? Number(form.value.weight) : null,
-    reps: item.type === 'strength' ? Number(form.value.reps) : null,
-    minutes: item.type === 'walk' ? Number(form.value.minutes) : null,
-    distance: item.type === 'walk' ? Number(form.value.distance) : null,
+    reps: item.type === 'strength' || item.type === 'cardio' ? Number(form.value.reps) : null,
+    minutes: item.type === 'walk' || item.type === 'cycling' ? Number(form.value.minutes) : null,
+    distance: item.type === 'walk' || item.type === 'cycling' ? Number(form.value.distance) : null,
     floors: item.type === 'stairs' ? Number(form.value.floors) : null,
     times: item.type === 'stairs' ? Number(form.value.times) : null,
-    // strength/stairs 存总秒数（分钟+秒合并，精确到秒）；plank 存秒
-    seconds: item.type === 'strength' || item.type === 'stairs'
+    // strength/cardio/stairs 存总秒数（分钟+秒合并，精确到秒）；plank 存秒
+    seconds: item.type === 'strength' || item.type === 'cardio' || item.type === 'stairs'
       ? timeSeconds()
       : item.type === 'plank' ? Number(form.value.seconds) : null,
     hand: item.hasHand ? form.value.hand : null,
@@ -225,7 +270,9 @@ function onSave() {
 
 /* ---------- 今日已练 ---------- */
 const todayRecords = ref<ExerciseRecord[]>([])
+const todayLoading = ref(false)
 async function loadToday() {
+  todayLoading.value = true
   try {
     const res = await listExerciseRecords({
       startDate: formatDate(new Date()),
@@ -236,39 +283,48 @@ async function loadToday() {
     todayRecords.value = res.records
   } catch {
     todayRecords.value = []
+  } finally {
+    todayLoading.value = false
   }
 }
 function itemName(id: number) {
   return items.value.find((i) => i.id === id)?.name ?? '动作'
 }
 function todayKcal(r: ExerciseRecord) {
-  if (!weightKg.value) return 0
+  // 优先用记录时体重快照，历史消耗固定不随当前体重变；为空回退当前体重
+  const w = r.bodyWeight ?? weightKg.value
+  if (!w) return 0
   const item = items.value.find((i) => i.id === r.exerciseId)
   if (!item) return 0
   let met = item.baseMet
   let minutes = 0
-  if (item.type === 'strength' && r.reps) {
-    const secTotal = totalSeconds(r.minutes, r.seconds)
-    if (secTotal <= 0) return 0
-    minutes = secTotal / 60
-    met = strengthMet(item.baseMet, r.reps / minutes, item.refSpeed ?? 12)
-  } else if (item.type === 'walk' && r.distance && r.minutes) {
-    met = walkMet(walkSpeedKmh(Number(r.distance), Number(r.minutes))).met
+  if ((item.type === 'strength' || item.type === 'cardio') && r.reps) {
+    // v2 模型：速度→MET 强度 + 等效分钟总量
+    minutes = repsEffectiveMinutes(r.reps, item.refSpeed)
+    met = speedMet(item.baseMet, r.reps, totalSeconds(r.minutes, r.seconds), item.refSpeed, item.maxSpeed)
+  } else if ((item.type === 'walk' || item.type === 'cycling') && r.distance && r.minutes) {
+    const kmh = walkSpeedKmh(Number(r.distance), Number(r.minutes))
+    met = (item.type === 'cycling' ? cyclingMet(kmh) : walkMet(kmh)).met
     minutes = Number(r.minutes)
   } else if (item.type === 'stairs' && r.floors && r.times) {
-    minutes = totalSeconds(r.minutes, r.seconds) / 60
+    // 秒/层 → MET 档（快爬 8.8 ~ 慢爬 4.2）
+    const secTotal = totalSeconds(r.minutes, r.seconds)
+    met = stairsMet(Number(r.floors), Number(r.times), secTotal).met
+    minutes = secTotal / 60
   } else if (item.type === 'plank' && r.seconds) {
     minutes = r.seconds / 60
   }
-  return calcKcal(met, minutes, weightKg.value).net
+  return calcKcal(met, minutes, w).net
 }
 function todayDetail(r: ExerciseRecord) {
   const item = items.value.find((i) => i.id === r.exerciseId)
   if (!item) return ''
   switch (item.type) {
     case 'strength':
+    case 'cardio':
       return `${r.weight != null ? r.weight + 'kg × ' : ''}${r.reps}个 · ${formatDuration(totalSeconds(r.minutes, r.seconds))}`
     case 'walk':
+    case 'cycling':
       return `${r.distance}km · ${r.minutes}min`
     case 'stairs':
       return `${r.floors}层 × ${r.times}次 · ${formatDuration(totalSeconds(r.minutes, r.seconds))}`
@@ -382,35 +438,14 @@ watch(() => props.tick, () => {
     <BlockTitle title="锻炼打卡" :hint="weightKg ? `按当前体重 ${weightKg}kg 计算消耗` : '请先在「打卡」记录体重'" />
 
     <!-- 动作选择 -->
-    <div class="exi__groups">
-      <span class="exi__group-label">力量 / 核心</span>
-      <div class="exi__chips">
-        <button
-          v-for="it in items.filter((i) => ['strength', 'plank'].includes(i.type))"
-          :key="it.id"
-          class="exi__chip"
-          :class="{ 'is-on': it.id === activeId }"
-          type="button"
-          @click="onSelectItem(it)"
-        >
-          {{ it.name }}<i>{{ it.type === 'plank' ? '按秒' : '基础 MET ' + it.baseMet }}</i>
-        </button>
-      </div>
-      <span class="exi__group-label">有氧</span>
-      <div class="exi__chips">
-        <button
-          v-for="it in items.filter((i) => ['walk', 'stairs'].includes(i.type))"
-          :key="it.id"
-          class="exi__chip"
-          :class="{ 'is-on': it.id === activeId }"
-          type="button"
-          @click="onSelectItem(it)"
-        >
-          {{ it.name }}<i>{{ it.type === 'walk' ? '按速度定 MET' : 'MET ' + it.baseMet }}</i>
-        </button>
-        <button class="exi__chip exi__chip--add" type="button" @click="openAdd"><component :is="markRaw(Plus)" :size="14" /> 自定义</button>
-      </div>
-    </div>
+    <GroupedChips
+      class="exi__groups"
+      :groups="chipGroups"
+      :active-id="activeId"
+      add-label="自定义"
+      @select="onSelectChip"
+      @add="openAdd"
+    />
 
     <!-- 上次提示 -->
     <p v-if="lastRecord" class="exi__last">
@@ -419,7 +454,7 @@ watch(() => props.tick, () => {
 
     <!-- 表单（按动作类型动态渲染） -->
     <div v-if="activeItem" class="exi__form">
-      <template v-if="activeItem.type === 'strength'">
+      <template v-if="activeItem.type === 'strength' || activeItem.type === 'cardio'">
         <div class="exi__row">
           <label v-if="activeItem.hasWeight" class="exi__field">
             <span>重量 (kg，自重留空)</span>
@@ -448,14 +483,14 @@ watch(() => props.tick, () => {
         </div>
       </template>
 
-      <template v-else-if="activeItem.type === 'walk'">
+      <template v-else-if="activeItem.type === 'walk' || activeItem.type === 'cycling'">
         <div class="exi__row">
           <label class="exi__field">
-            <span>走了多远</span>
+            <span>{{ activeItem.type === 'cycling' ? '骑了多远 (km)' : '走了多远 (km)' }}</span>
             <input v-model="form.distance" class="num" inputmode="decimal" placeholder="如 2.5" />
           </label>
           <label class="exi__field">
-            <span>花了多久 (分钟)</span>
+            <span>{{ activeItem.type === 'cycling' ? '骑了多久 (分钟)' : '花了多久 (分钟)' }}</span>
             <input v-model="form.minutes" class="num" inputmode="numeric" placeholder="如 30" />
           </label>
         </div>
@@ -532,7 +567,8 @@ watch(() => props.tick, () => {
           <button class="exi__today-del" type="button" title="删除" @click="onDeleteToday(r)">✕</button>
         </div>
       </TransitionGroup>
-      <p v-else class="exi__today-empty">今天还没锻炼，来一组吧</p>
+      <p v-else-if="!todayLoading" class="exi__today-empty">今天还没锻炼，来一组吧</p>
+      <LoadingMask :show="todayLoading" :size="22" text="加载今日记录…" />
     </div>
 
     <LoadingMask :show="loading" :size="26" text="加载动作…" />
@@ -549,6 +585,7 @@ watch(() => props.tick, () => {
         <span>类型</span>
         <select v-model="addType" class="num">
           <option value="strength">力量（个数+分钟）</option>
+          <option value="cardio">有氧·计数（个数+分钟）</option>
           <option value="plank">静力（秒）</option>
           <option value="walk">有氧（距离+分钟）</option>
           <option value="stairs">爬楼梯（层数+次数）</option>

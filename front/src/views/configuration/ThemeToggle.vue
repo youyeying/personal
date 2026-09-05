@@ -1,30 +1,25 @@
 <script setup lang="ts">
 /**
  * 公共组件 · 白天/黑夜模式切换（苹果风开关）
- * 通过给 <html> 加/去 `dark` class 切换主题，状态持久化到 localStorage('theme-dark')
- * 可在任意需要处复用（本项目中放在导航栏左下角）
+ * 切换逻辑抽至 utils/theme.ts（toggleDarkTheme），命令面板等入口共用；
+ * watchTheme 监听 html class 变化同步显示状态（他处切换本开关也跟随）
  */
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { isDarkTheme, toggleDarkTheme, watchTheme } from '@/utils/theme'
 
 const isDark = ref(false)
 
-/** 应用主题到根节点并持久化 */
-function apply(v: boolean) {
-  document.documentElement.classList.toggle('dark', v)
-  localStorage.setItem('theme-dark', v ? '1' : '0')
-}
-
 /** 切换主题 */
 function toggle() {
-  isDark.value = !isDark.value
-  apply(isDark.value)
+  isDark.value = toggleDarkTheme()
 }
 
+let stopWatch: (() => void) | null = null
 onMounted(() => {
-  const stored = localStorage.getItem('theme-dark')
-  isDark.value = stored ? stored === '1' : document.documentElement.classList.contains('dark')
-  apply(isDark.value)
+  isDark.value = isDarkTheme()
+  stopWatch = watchTheme(() => { isDark.value = isDarkTheme() })
 })
+onBeforeUnmount(() => stopWatch?.())
 </script>
 
 <template>

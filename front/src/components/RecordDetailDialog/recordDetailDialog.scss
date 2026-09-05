@@ -1,0 +1,33 @@
+.rdd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-space-3);
+
+  &__row {
+    display: flex;
+    gap: var(--cb-space-4);
+    font-size: var(--cb-font-md);
+
+    &--note {
+      align-items: flex-start;
+    }
+  }
+
+  &__label {
+    flex-shrink: 0;
+    width: 72px;
+    color: var(--cb-ink-secondary);
+  }
+
+  &__value {
+    color: var(--cb-ink);
+    min-width: 0;
+    word-break: break-word;
+
+    &--note {
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  }
+}

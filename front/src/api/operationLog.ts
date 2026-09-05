@@ -38,7 +38,7 @@ export function listOperationLogs(params: {
 }
 
 /** 操作日志业务字典 */
-export const LOG_MODULES = ['EXPENSE', 'WEIGHT', 'LEARN', 'USER', 'NOTE', 'EXERCISE'] as const
+export const LOG_MODULES = ['EXPENSE', 'WEIGHT', 'LEARN', 'USER', 'NOTE', 'EXERCISE', 'FOOD'] as const
 export const LOG_ACTIONS = ['CREATE', 'UPDATE', 'DELETE', 'RESTORE', 'LOGIN', 'REGISTER'] as const
 
 /** 模块中文显示 */
@@ -48,7 +48,8 @@ export const MODULE_LABELS: Record<string, string> = {
   LEARN: '学习',
   USER: '用户',
   NOTE: '笔记',
-  EXERCISE: '锻炼'
+  EXERCISE: '锻炼',
+  FOOD: '饮食'
 }
 
 /** 动作中文显示 */

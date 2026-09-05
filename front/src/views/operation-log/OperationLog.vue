@@ -11,6 +11,8 @@ import PagePanel from '@/components/PagePanel/PagePanel.vue'
 import DataList from '@/components/DataList/DataList.vue'
 import PagePager from '@/components/PagePager/PagePager.vue'
 import DateRangePicker from '@/components/DateRangePicker/DateRangePicker.vue'
+import RecordDetailDialog from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
+import type { DetailRow } from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
 import type { DataListColumn } from '@/components/DataList/DataList.vue'
 import { listOperationLogs, LOG_MODULES, LOG_ACTIONS, MODULE_LABELS, ACTION_LABELS } from '@/api/operationLog'
 import type { OperationLog } from '@/api/operationLog'
@@ -72,6 +74,19 @@ function onDialogClose() {
   detail.value = null
 }
 
+/** 详情弹窗行 */
+const detailRows = computed<DetailRow[]>(() => {
+  const d = detail.value
+  if (!d) return []
+  return [
+    { key: 'time', label: '时间', value: formatDateTime(d.createdAt) ?? '' as string, mono: true },
+    { key: 'module', label: '模块', value: MODULE_LABELS[d.module] ?? d.module },
+    { key: 'action', label: '动作', value: ACTION_LABELS[d.action] ?? d.action },
+    { key: 'target', label: '对象 ID', value: d.targetId != null ? String(d.targetId) : null, mono: true },
+    { key: 'content', label: '内容', value: d.content, wide: true }
+  ]
+})
+
 onMounted(load)
 </script>
 
@@ -107,30 +122,7 @@ onMounted(load)
   </PagePanel>
 
   <!-- 行详情弹窗 -->
-  <el-dialog :model-value="dialogVisible" title="操作日志详情" width="480px" @close="onDialogClose">
-    <div v-if="detail" class="op-log-detail">
-      <div class="op-log-detail__row">
-        <span class="op-log-detail__label">时间</span>
-        <span class="num">{{ formatDateTime(detail.createdAt) }}</span>
-      </div>
-      <div class="op-log-detail__row">
-        <span class="op-log-detail__label">模块</span>
-        <span>{{ MODULE_LABELS[detail.module] ?? detail.module }}</span>
-      </div>
-      <div class="op-log-detail__row">
-        <span class="op-log-detail__label">动作</span>
-        <span>{{ ACTION_LABELS[detail.action] ?? detail.action }}</span>
-      </div>
-      <div class="op-log-detail__row">
-        <span class="op-log-detail__label">对象 ID</span>
-        <span class="num">{{ detail.targetId ?? '-' }}</span>
-      </div>
-      <div class="op-log-detail__row">
-        <span class="op-log-detail__label">内容</span>
-        <span class="op-log-detail__content">{{ detail.content }}</span>
-      </div>
-    </div>
-  </el-dialog>
+  <RecordDetailDialog :model-value="dialogVisible" title="操作日志详情" :rows="detailRows" @update:model-value="onDialogClose" />
 </template>
 
 <style lang="scss" scoped>

@@ -15,8 +15,10 @@ export interface AuthUserInfo {
   age: number | null
   /** 身高 cm（BMR 二期用） */
   height: number | null
-  /** 性别 male/female（BMR 二期用） */
+  /** 性别 male/female */
   gender: string | null
+  /** 每日目标热量缺口 kcal/天（饮食预算用，用户自定义） */
+  dietTargetGap: number | null
   /** 上次修改密码时间（首次为空可免限修改） */
   passwordUpdatedAt: string | null
   createdAt: string
@@ -78,6 +80,8 @@ export function updateProfileApi(data: {
   height?: number
   /** 性别 male/female */
   gender?: string
+  /** 每日目标热量缺口 kcal/天（0=维持，负=增肌；null 不改） */
+  dietTargetGap?: number | null
 }) {
   return requestApi<{ userInfo: AuthUserInfo }>({
     url: '/auth/profile',

@@ -13,16 +13,25 @@
   --cb-primary-hover: #b88a6e;
   --cb-primary-active: #94664c;
 
-  // ---- 文本（墨绿灰，取自壁纸暗部） ----
-  --cb-ink: #2c312f;              // 主文本
-  --cb-ink-secondary: #5c6159;    // 次要文本
-  --cb-ink-muted: #92988d;        // 弱化文本
+  // ---- 文本（V2 暖灰阶：暖纸墨，从「冷墨绿黑」变「暖近黑」） ----
+  --cb-ink: rgba(28, 30, 26, 0.88);            // 主文本
+  --cb-ink-secondary: rgba(28, 30, 26, 0.62);  // 次要文本
+  --cb-ink-muted: rgba(28, 30, 26, 0.42);      // 弱化文本
 
   // ---- 语义色（克制稳定，暖色系协调） ----
   --cb-error: #b04a3a;
   --cb-warning: #a8821f;
   --cb-teal: #3f7a72;
   --cb-success: #3d7a55;
+
+  // ---- V2 图表维度语义色（全站一致：同一维度同一色，dark 自动提亮） ----
+  --c-intake: #7a8c3e;    // 摄入（暖黄绿，饮食主色）
+  --c-burn: #3f7a72;      // 消耗（墨茶绿）
+  --c-gap: #3d7a55;       // 缺口正向（成功绿）
+  --c-over: #b04a3a;      // 超标（错误红）
+  --c-protein: #4a6fa5;   // 蛋白质（灰蓝）
+  --c-fat: #c9862f;       // 脂肪（暖橙）
+  --c-carb: #8a5fa0;      // 碳水（灰紫）
 
   // ---- 字体 ----
   // 正常页面：霞鹜文楷 Screen（手写楷体，书卷气，unicode-range 按需加载）
@@ -61,9 +70,9 @@
   // 输入框内文字与浮动标签字号（跟随卡片缩放）
   --cb-input-font: clamp(14px, calc(var(--cb-login-card-size) * 0.032), 17px);
 
-  // ---- 阴影 ----
-  --cb-shadow-card: 0 1px 3px rgba(26, 25, 23, 0.06), 0 1px 2px rgba(26, 25, 23, 0.04);
-  --cb-shadow-card-hover: 0 4px 12px rgba(26, 25, 23, 0.1);
+  // ---- 阴影（V2 耳语阴影：2 层极轻，纸叠纸不产生戏剧性投影） ----
+  --cb-shadow-card: 0 1px 2px rgba(28, 30, 26, 0.04), 0 2px 8px rgba(28, 30, 26, 0.05);
+  --cb-shadow-card-hover: 0 2px 4px rgba(28, 30, 26, 0.06), 0 4px 12px rgba(28, 30, 26, 0.07);
 
   // ---- 间距 ----
   --cb-space-1: 4px;
@@ -97,9 +106,9 @@ html.dark {
   --cb-primary-hover: #d09471;
   --cb-primary-active: #a8765a;
 
-  --cb-ink: #ece5d6;               // 主文本换浅暖白
-  --cb-ink-secondary: #b6af9f;
-  --cb-ink-muted: #857f71;
+  --cb-ink: rgba(236, 229, 214, 0.92);          // 主文本换浅暖白（V2 灰阶）
+  --cb-ink-secondary: rgba(236, 229, 214, 0.64);
+  --cb-ink-muted: rgba(236, 229, 214, 0.44);
 
   // 语义色微提亮，保证暗底识别度
   --cb-error: #d06a55;
@@ -107,8 +116,18 @@ html.dark {
   --cb-teal: #54a095;
   --cb-success: #57a06b;
 
-  --cb-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
-  --cb-shadow-card-hover: 0 6px 18px rgba(0, 0, 0, 0.55);
+  // V2 图表语义色暗底提亮
+  --c-intake: #94a85c;
+  --c-burn: #54a095;
+  --c-gap: #57a06b;
+  --c-over: #d06a55;
+  --c-protein: #6b8cc0;
+  --c-fat: #d99c4a;
+  --c-carb: #a580b8;
+
+  // 耳语阴影（暗底加深一档保可见性）
+  --cb-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --cb-shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.3);
 
   // Element Plus 深色派生
   --el-color-primary: var(--cb-primary);

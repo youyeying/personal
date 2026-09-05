@@ -34,6 +34,17 @@
     padding: var(--cb-space-5);
   }
 
+  /* 发薪日提醒条 */
+  &__payday {
+    margin-bottom: var(--cb-space-3);
+    padding: var(--cb-space-3) var(--cb-space-4);
+    border-radius: var(--cb-radius-btn);
+    background: color-mix(in srgb, var(--cb-mod) 10%, var(--cb-surface));
+    border: 1px solid var(--cb-hairline);
+    font-size: var(--cb-font-sm);
+    color: var(--cb-ink-secondary);
+  }
+
   &__seg {
     display: inline-flex;
     gap: 2px;

@@ -21,6 +21,8 @@ import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
 import DateRangePicker from '@/components/DateRangePicker/DateRangePicker.vue'
 import DataList from '@/components/DataList/DataList.vue'
+import RecordDetailDialog from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
+import type { DetailRow } from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
 import type { DataListColumn } from '@/components/DataList/DataList.vue'
 import { WAYS, durationParts } from '../learnShared'
 
@@ -45,14 +47,14 @@ const wayFilter = ref('')
 const keyword = ref('')
 
 /** 列定义：主题(自适应)/方式/时长/掌握/日期/操作
- * hideBelow：窄屏时隐藏次要列（方式/掌握/日期），详情看行弹窗 */
+ * 窄屏卡片化（cardBelow 560）：容器 <560px 整表降级堆叠卡片，数据全展示（替代原 hideBelow 列隐藏） */
 const columns: DataListColumn[] = [
   { key: 'title', label: '学习主题', ratio: 3 },
-  { key: 'way', label: '方式', width: 84, hideBelow: 760 },
+  { key: 'way', label: '方式', width: 84 },
   { key: 'duration', label: '时长', width: 92 },
-  { key: 'mastery', label: '掌握', width: 112, hideBelow: 640 },
-  { key: 'date', label: '日期', width: 100, hideBelow: 560 },
-  { key: 'ops', label: '操作', width: 88 }
+  { key: 'mastery', label: '掌握', width: 112 },
+  { key: 'date', label: '日期', width: 100 },
+  { key: 'ops', label: '操作', width: 88, ops: true }
 ]
 
 /** silent=true 后台静默刷新（编辑/删除后的 tick 联动），不显示加载遮罩防闪烁 */
@@ -102,6 +104,21 @@ function onDialogClose() {
 function fileUrl(f: NoteFile) {
   return `/uploads/${f.filePath}`
 }
+
+/** 详情弹窗行（方式/掌握/附件走自定义插槽：标签徽标/星级/文件链接） */
+const detailRows = computed<DetailRow[]>(() => {
+  const d = detail.value
+  if (!d) return []
+  return [
+    { key: 'title', label: '学习主题', value: d.title },
+    { key: 'way', label: '方式', value: d.way },
+    { key: 'duration', label: '时长', value: `${durationParts(d.duration).h}h ${durationParts(d.duration).m}m` },
+    { key: 'mastery', label: '掌握', value: null },
+    { key: 'date', label: '日期', value: d.learnDate, mono: true },
+    { key: 'note', label: '收获笔记', value: d.content || '—', wide: true },
+    ...(d.files.length ? [{ key: 'files', label: '附件', value: null }] : [])
+  ]
+})
 
 /* ---------- 修改弹窗 ---------- */
 const editVisible = ref(false)
@@ -214,7 +231,7 @@ watch(() => props.tick, () => loadList(true))
 
     <!-- 列表 -->
     <template v-if="records.length">
-      <DataList :items="records" :columns="columns" :max-rows="size" clickable @row-click="onRowClick">
+      <DataList :items="records" :columns="columns" :max-rows="size" clickable :card-below="560" @row-click="onRowClick">
         <template #cell="{ item, column }">
           <span v-if="column.key === 'title'" class="lr__c-title">
             {{ item.title }}
@@ -341,54 +358,30 @@ watch(() => props.tick, () => loadList(true))
   </el-dialog>
 
   <!-- 行详情（只读） -->
-  <el-dialog :model-value="dialogVisible" title="学习记录详情" width="480px" @close="onDialogClose">
-    <div v-if="detail" class="lr__detail">
-      <div class="lr__drow">
-        <span class="lr__dlabel">学习主题</span>
-        <span>{{ detail.title }}</span>
-      </div>
-      <div class="lr__drow">
-        <span class="lr__dlabel">方式</span>
-        <span class="lr__tag">{{ detail.way }}</span>
-      </div>
-      <div class="lr__drow">
-        <span class="lr__dlabel">时长</span>
-        <span class="num">{{ durationParts(detail.duration).h }}h {{ durationParts(detail.duration).m }}m</span>
-      </div>
-      <div class="lr__drow">
-        <span class="lr__dlabel">掌握</span>
-        <span>
-          <span v-for="n in 5" :key="n" class="lr__c-star" :class="n <= (detail.mastery ?? 0) ? 'is-on' : ''">
-            <component :is="markRaw(Star)" :size="14" />
-          </span>
-        </span>
-      </div>
-      <div class="lr__drow">
-        <span class="lr__dlabel">日期</span>
-        <span class="num">{{ detail.learnDate }}</span>
-      </div>
-      <div class="lr__drow lr__drow--note">
-        <span class="lr__dlabel">收获笔记</span>
-        <span>{{ detail.content || '—' }}</span>
-      </div>
-      <div v-if="detail.files.length" class="lr__drow lr__drow--note">
-        <span class="lr__dlabel">附件</span>
-        <span class="lr__dfiles">
-          <a
-            v-for="f in detail.files"
-            :key="f.id"
-            class="lr__file-name"
-            :href="fileUrl(f)"
-            target="_blank"
-            rel="noopener"
-          >{{ f.fileName }}</a>
-        </span>
-      </div>
-    </div>
-    <template #footer>
-      <el-button @click="onDialogClose">关闭</el-button>
+  <RecordDetailDialog :model-value="dialogVisible" title="学习记录详情" :rows="detailRows" @update:model-value="onDialogClose">
+    <template #cell-way>
+      <span class="lr__tag">{{ detail?.way }}</span>
     </template>
-  </el-dialog>
+    <template #cell-mastery>
+      <span v-if="detail">
+        <span v-for="n in 5" :key="n" class="lr__c-star" :class="n <= (detail.mastery ?? 0) ? 'is-on' : ''">
+          <component :is="markRaw(Star)" :size="14" />
+        </span>
+      </span>
+    </template>
+    <template #cell-files>
+      <span v-if="detail" class="lr__dfiles">
+        <a
+          v-for="f in detail.files"
+          :key="f.id"
+          class="lr__file-name"
+          :href="fileUrl(f)"
+          target="_blank"
+          rel="noopener"
+        >{{ f.fileName }}</a>
+      </span>
+    </template>
+  </RecordDetailDialog>
 </template>
 
 <style lang="scss" scoped>

@@ -14,6 +14,7 @@ import { getAccessToken } from '@/utils/authToken'
 import { getMe } from '@/api/auth'
 import AppHeader from '@/views/configuration/AppHeader.vue'
 import SideNav from '@/views/configuration/SideNav.vue'
+import CommandPalette from '@/components/CommandPalette/CommandPalette.vue'
 
 const themeStore = useThemeStore()
 const layout = useLayoutStore()
@@ -71,6 +72,9 @@ onUnmounted(() => {
         </main>
       </div>
     </section>
+
+    <!-- 命令面板（Ctrl+K 快速跳模块/记一笔，Teleport 至 body） -->
+    <CommandPalette />
   </div>
 </template>
 

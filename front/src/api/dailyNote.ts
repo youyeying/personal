@@ -22,6 +22,8 @@ export interface DailySummary {
   expense: number
   /** 当日收入 */
   income: number
+  /** 当日锻炼记录（前端按 MET 公式算净消耗） */
+  exerciseRecords: ExerciseRecordForSummary[]
   /** 当日体重（无则 null） */
   weight: number | null
   /** 较上次体重的变化（无则 null） */
@@ -32,6 +34,18 @@ export interface DailySummary {
   learnMinutes: number
   /** 当日开发时长（分钟） */
   devMinutes: number
+}
+
+/** 锻炼记录精简类型（summary 返回，用于算净消耗） */
+export interface ExerciseRecordForSummary {
+  exerciseId: number
+  reps: number | null
+  minutes: number | null
+  seconds: number | null
+  distance: number | null
+  floors: number | null
+  times: number | null
+  bodyWeight: number | null
 }
 
 /** 查某天总结 */

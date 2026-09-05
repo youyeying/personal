@@ -7,6 +7,8 @@ import com.personal.backend.entity.ExpenseCategory;
 import com.personal.backend.mapper.ExpenseCategoryMapper;
 import com.personal.backend.utils.OwnedUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,6 +50,7 @@ public class ExpenseCategoryService {
     }
 
     /** 修改分类（名称 / 排序） */
+    @CacheEvict(cacheNames = "expenseCategories", allEntries = true)
     public ExpenseCategory update(ExpenseCategory category) {
         Long userId = UserContext.requireUserId();
         ExpenseCategory exist = OwnedUtil.requireOwned(categoryMapper, category.getId(), userId,

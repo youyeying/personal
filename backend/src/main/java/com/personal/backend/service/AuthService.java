@@ -7,10 +7,12 @@ import com.personal.backend.dto.*;
 import com.personal.backend.entity.AuthSession;
 import com.personal.backend.entity.ExerciseItem;
 import com.personal.backend.entity.ExpenseCategory;
+import com.personal.backend.entity.FoodItem;
 import com.personal.backend.entity.User;
 import com.personal.backend.mapper.AuthSessionMapper;
 import com.personal.backend.mapper.ExerciseItemMapper;
 import com.personal.backend.mapper.ExpenseCategoryMapper;
+import com.personal.backend.mapper.FoodItemMapper;
 import com.personal.backend.mapper.UserMapper;
 import com.personal.backend.utils.JwtUtils;
 import jakarta.servlet.http.Cookie;
@@ -49,6 +51,7 @@ public class AuthService {
     private final AuthSessionMapper authSessionMapper;
     private final ExpenseCategoryMapper expenseCategoryMapper;
     private final ExerciseItemMapper exerciseItemMapper;
+    private final FoodItemMapper foodItemMapper;
     private final JwtUtils jwtUtils;
     private final OperationLogService operationLogService;
     private final FileService fileService;
@@ -93,6 +96,7 @@ public class AuthService {
 
         copyDefaultCategories(user.getId());
         copyDefaultExercises(user.getId());
+        copyDefaultFoods(user.getId());
 
         operationLogService.record(user.getId(), "USER", "REGISTER", user.getId(),
                 "注册账号：" + request.getUsername());
@@ -217,6 +221,13 @@ public class AuthService {
         }
         if (request.getGender() != null) {
             user.setGender(request.getGender());
+        }
+        if (request.getDietTargetGap() != null) {
+            Integer gap = request.getDietTargetGap();
+            if (gap < -9999 || gap > 3000) {
+                throw new BizException("目标缺口需在 -9999~3000 之间（0=维持，负=增肌，1000~1500=快速减脂）");
+            }
+            user.setDietTargetGap(gap);
         }
         userMapper.updateById(user);
 
@@ -468,6 +479,31 @@ public class AuthService {
         }
     }
 
+    /** 复制初始用户的默认食物到新用户（注册即可用） */
+    private void copyDefaultFoods(Long newUserId) {
+        List<FoodItem> defaults = foodItemMapper.selectList(
+                new LambdaQueryWrapper<FoodItem>()
+                        .eq(FoodItem::getUserId, 1L)
+                        .orderByAsc(FoodItem::getSortOrder));
+        for (FoodItem f : defaults) {
+            FoodItem copy = new FoodItem();
+            copy.setUserId(newUserId);
+            copy.setName(f.getName());
+            copy.setType(f.getType());
+            copy.setKcal(f.getKcal());
+            copy.setProtein(f.getProtein());
+            copy.setFat(f.getFat());
+            copy.setCarbs(f.getCarbs());
+            copy.setSodium(f.getSodium());
+            copy.setFiber(f.getFiber());
+            copy.setDefaultGrams(f.getDefaultGrams());
+            copy.setUnitLabel(f.getUnitLabel());
+            copy.setFavorite(f.getFavorite());
+            copy.setSortOrder(f.getSortOrder());
+            foodItemMapper.insert(copy);
+        }
+    }
+
     /** 脱敏返回用户信息（不返回密码） */
     private Map<String, Object> toUserInfo(User user) {
         Map<String, Object> info = new HashMap<>();
@@ -480,6 +516,7 @@ public class AuthService {
         info.put("age", user.getAge());
         info.put("height", user.getHeight());
         info.put("gender", user.getGender());
+        info.put("dietTargetGap", user.getDietTargetGap());
         info.put("passwordUpdatedAt", user.getPasswordUpdatedAt());
         info.put("createdAt", user.getCreatedAt());
         return info;

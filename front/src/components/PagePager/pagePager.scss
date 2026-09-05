@@ -1,7 +1,14 @@
 /**
- * PagePager 分页条样式（右对齐）
+ * PagePager 分页条样式（右对齐 + 单行兜底）
  */
 .pager {
   display: flex;
   justify-content: flex-end;
+  min-width: 0; // 允许在 flex 布局中收缩，让 ResizeObserver 拿到真实可用宽度
+
+  // 分页条强制单行（宽度收缩由 PagePager 的 layout 动态分档负责，见组件注释）
+  :deep(.el-pagination) {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
 }

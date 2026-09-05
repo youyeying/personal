@@ -10,13 +10,15 @@ import { Pencil, Trash2, Copy } from '@lucide/vue'
 import { listExerciseItems, listExerciseRecords, updateExerciseRecord, deleteExerciseRecord } from '@/api/exercise'
 import type { ExerciseItem, ExerciseRecord } from '@/api/exercise'
 import { listWeightRecords } from '@/api/health'
-import { walkSpeedKmh, walkMet, strengthMet, calcKcal, totalSeconds, formatDuration } from '@/utils/exercise'
+import { walkSpeedKmh, walkMet, cyclingMet, speedMet, stairsMet, repsEffectiveMinutes, calcKcal, totalSeconds, formatDuration } from '@/utils/exercise'
 import { confirmDelete } from '@/utils/confirm'
 import PagePager from '@/components/PagePager/PagePager.vue'
 import LoadingMask from '@/components/LoadingMask/LoadingMask.vue'
 import BlockTitle from '@/components/BlockTitle/BlockTitle.vue'
 import DateRangePicker from '@/components/DateRangePicker/DateRangePicker.vue'
 import DataList from '@/components/DataList/DataList.vue'
+import RecordDetailDialog from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
+import type { DetailRow } from '@/components/RecordDetailDialog/RecordDetailDialog.vue'
 import type { DataListColumn } from '@/components/DataList/DataList.vue'
 
 const props = defineProps<{ tick: number }>()
@@ -39,51 +41,56 @@ function itemOf(r: ExerciseRecord) {
   return items.value.find((i) => i.id === r.exerciseId)
 }
 
-/** 按记录算力量/总时长的分钟数（seconds 优先） */
-function strengthMinutesOf(r: ExerciseRecord): number {
-  return totalSeconds(r.minutes, r.seconds) / 60
-}
-
-/** 计算一条记录的净消耗（前端公式） */
+/** 计算一条记录的净消耗（前端公式；优先用记录时体重快照，历史消耗固定） */
 function calcNet(r: ExerciseRecord): number {
-  if (!weightKg.value) return 0
+  const w = r.bodyWeight ?? weightKg.value
+  if (!w) return 0
   const item = itemOf(r)
   if (!item) return 0
   let met = item.baseMet
   let minutes = 0
-  if (item.type === 'strength' && r.reps) {
-    minutes = strengthMinutesOf(r)
-    if (minutes <= 0) return 0
-    met = strengthMet(item.baseMet, r.reps / minutes, item.refSpeed ?? 12)
-  } else if (item.type === 'walk' && r.distance && r.minutes) {
-    met = walkMet(walkSpeedKmh(Number(r.distance), Number(r.minutes))).met
+  if ((item.type === 'strength' || item.type === 'cardio') && r.reps) {
+    // v2 模型：速度→MET 强度 + 等效分钟总量
+    minutes = repsEffectiveMinutes(r.reps, item.refSpeed)
+    met = speedMet(item.baseMet, r.reps, totalSeconds(r.minutes, r.seconds), item.refSpeed, item.maxSpeed)
+  } else if ((item.type === 'walk' || item.type === 'cycling') && r.distance && r.minutes) {
+    const kmh = walkSpeedKmh(Number(r.distance), Number(r.minutes))
+    met = (item.type === 'cycling' ? cyclingMet(kmh) : walkMet(kmh)).met
     minutes = Number(r.minutes)
   } else if (item.type === 'stairs' && r.floors && r.times) {
-    minutes = totalSeconds(r.minutes, r.seconds) / 60
+    // 秒/层 → MET 档（快爬 8.8 ~ 慢爬 4.2）
+    const secTotal = totalSeconds(r.minutes, r.seconds)
+    met = stairsMet(Number(r.floors), Number(r.times), secTotal).met
+    minutes = secTotal / 60
   } else if (item.type === 'plank' && r.seconds) {
     minutes = r.seconds / 60
   }
-  return calcKcal(met, minutes, weightKg.value).net
+  return calcKcal(met, minutes, w).net
 }
 function calcTotal(r: ExerciseRecord): number {
-  if (!weightKg.value) return 0
+  const w = r.bodyWeight ?? weightKg.value
+  if (!w) return 0
   const item = itemOf(r)
   if (!item) return 0
   let met = item.baseMet
   let minutes = 0
-  if (item.type === 'strength' && r.reps) {
-    minutes = strengthMinutesOf(r)
-    if (minutes <= 0) return 0
-    met = strengthMet(item.baseMet, r.reps / minutes, item.refSpeed ?? 12)
-  } else if (item.type === 'walk' && r.distance && r.minutes) {
-    met = walkMet(walkSpeedKmh(Number(r.distance), Number(r.minutes))).met
+  if ((item.type === 'strength' || item.type === 'cardio') && r.reps) {
+    // v2 模型：速度→MET 强度 + 等效分钟总量
+    minutes = repsEffectiveMinutes(r.reps, item.refSpeed)
+    met = speedMet(item.baseMet, r.reps, totalSeconds(r.minutes, r.seconds), item.refSpeed, item.maxSpeed)
+  } else if ((item.type === 'walk' || item.type === 'cycling') && r.distance && r.minutes) {
+    const kmh = walkSpeedKmh(Number(r.distance), Number(r.minutes))
+    met = (item.type === 'cycling' ? cyclingMet(kmh) : walkMet(kmh)).met
     minutes = Number(r.minutes)
   } else if (item.type === 'stairs' && r.floors && r.times) {
-    minutes = totalSeconds(r.minutes, r.seconds) / 60
+    // 秒/层 → MET 档（快爬 8.8 ~ 慢爬 4.2）
+    const secTotal = totalSeconds(r.minutes, r.seconds)
+    met = stairsMet(Number(r.floors), Number(r.times), secTotal).met
+    minutes = secTotal / 60
   } else if (item.type === 'plank' && r.seconds) {
     minutes = r.seconds / 60
   }
-  return calcKcal(met, minutes, weightKg.value).total
+  return calcKcal(met, minutes, w).total
 }
 
 /** 参数摘要文本 */
@@ -92,8 +99,10 @@ function paramText(r: ExerciseRecord) {
   if (!item) return ''
   switch (item.type) {
     case 'strength':
+    case 'cardio':
       return `${r.weight != null ? r.weight + 'kg × ' : ''}${r.reps}个 · ${formatDuration(totalSeconds(r.minutes, r.seconds))}`
     case 'walk':
+    case 'cycling':
       return `${r.distance}km · ${r.minutes}min`
     case 'stairs':
       return `${r.floors}层 × ${r.times}次 · ${formatDuration(totalSeconds(r.minutes, r.seconds))}`
@@ -164,7 +173,7 @@ function openEdit(r: ExerciseRecord) {
   const item = items.value.find((i) => i.id === r.exerciseId)
   // strength/stairs：时长拆成分+秒
   const totalSec = totalSeconds(r.minutes, r.seconds)
-  const needSplit = item?.type === 'strength' || item?.type === 'stairs'
+  const needSplit = item?.type === 'strength' || item?.type === 'cardio' || item?.type === 'stairs'
   editForm.value = {
     id: r.id,
     exerciseId: r.exerciseId,
@@ -190,19 +199,19 @@ async function onEditSave() {
   editSaving.value = true
   try {
     // strength/stairs 时长：分钟+秒 → 总秒数
-    const timeSec = (item.type === 'strength' || item.type === 'stairs')
+    const timeSec = (item.type === 'strength' || item.type === 'cardio' || item.type === 'stairs')
       ? Math.round((Number(editForm.value.min) || 0) * 60 + (Number(editForm.value.sec) || 0))
       : 0
     await updateExerciseRecord(editForm.value.id, {
       exerciseId: editForm.value.exerciseId,
       recordDate: editForm.value.recordDate,
       weight: item.hasWeight && editForm.value.weight ? Number(editForm.value.weight) : null,
-      reps: item.type === 'strength' ? Number(editForm.value.reps) : null,
-      minutes: item.type === 'walk' ? Number(editForm.value.minutes) : null,
-      distance: item.type === 'walk' ? Number(editForm.value.distance) : null,
+      reps: item.type === 'strength' || item.type === 'cardio' ? Number(editForm.value.reps) : null,
+      minutes: item.type === 'walk' || item.type === 'cycling' ? Number(editForm.value.minutes) : null,
+      distance: item.type === 'walk' || item.type === 'cycling' ? Number(editForm.value.distance) : null,
       floors: item.type === 'stairs' ? Number(editForm.value.floors) : null,
       times: item.type === 'stairs' ? Number(editForm.value.times) : null,
-      seconds: item.type === 'strength' || item.type === 'stairs'
+      seconds: item.type === 'strength' || item.type === 'cardio' || item.type === 'stairs'
         ? timeSec
         : item.type === 'plank' ? Number(editForm.value.seconds) : null,
       hand: item.hasHand ? editForm.value.hand : null,
@@ -226,6 +235,20 @@ function onDialogClose() {
   detail.value = null
 }
 
+/** 详情弹窗行（手为可选行） */
+const detailRows = computed<DetailRow[]>(() => {
+  const d = detail.value
+  if (!d) return []
+  return [
+    { key: 'date', label: '日期', value: d.recordDate, mono: true },
+    { key: 'item', label: '动作', value: itemName(d.exerciseId) },
+    { key: 'param', label: '参数', value: paramText(d), mono: true },
+    ...(d.hand ? [{ key: 'hand', label: '手', value: handText(d.hand) }] : []),
+    { key: 'kcal', label: '净消耗', value: `${calcNet(d)} kcal（总 ${calcTotal(d)}）`, mono: true },
+    { key: 'note', label: '备注', value: d.note || '—', wide: true }
+  ]
+})
+
 onMounted(loadList)
 watch(() => props.tick, () => loadList(true))
 </script>
@@ -240,7 +263,7 @@ watch(() => props.tick, () => loadList(true))
     </div>
 
     <template v-if="records.length">
-      <DataList :items="records" :columns="columns" :max-rows="size" clickable @row-click="onRowClick">
+      <DataList :items="records" :columns="columns" :max-rows="size" clickable :card-below="560" @row-click="onRowClick">
         <template #cell="{ item, column }">
           <span v-if="column.key === 'date'" class="num">{{ (item as ExerciseRecord).recordDate }}</span>
           <span v-else-if="column.key === 'action'" class="exh__action">{{ itemName((item as ExerciseRecord).exerciseId) }}</span>
@@ -277,12 +300,12 @@ watch(() => props.tick, () => loadList(true))
   <el-dialog v-model="editVisible" title="修改锻炼记录" width="420px">
     <div class="exh__edit">
       <div class="exh__field">
-        <label>动作</label>
-        <select v-model="editForm.exerciseId" class="num">
-          <option v-for="it in items" :key="it.id" :value="it.id">{{ it.name }}</option>
-        </select>
+        <label>动作（可输入搜索）</label>
+        <el-select v-model="editForm.exerciseId" filterable placeholder="搜索或选择动作">
+          <el-option v-for="it in items" :key="it.id" :value="it.id" :label="it.name" />
+        </el-select>
       </div>
-      <template v-if="editItem?.type === 'strength'">
+      <template v-if="editItem?.type === 'strength' || editItem?.type === 'cardio'">
         <div class="exh__optgrid">
           <div class="exh__field">
             <label>重量 (kg，自重留空)</label>
@@ -312,7 +335,7 @@ watch(() => props.tick, () => loadList(true))
           </div>
         </div>
       </template>
-      <div v-else-if="editItem?.type === 'walk'" class="exh__optgrid">
+      <div v-else-if="editItem?.type === 'walk' || editItem?.type === 'cycling'" class="exh__optgrid">
         <div class="exh__field">
           <label>距离 (km)</label>
           <input v-model="editForm.distance" class="num" inputmode="decimal" />
@@ -360,37 +383,7 @@ watch(() => props.tick, () => loadList(true))
   </el-dialog>
 
   <!-- 行详情（只读） -->
-  <el-dialog :model-value="dialogVisible" title="锻炼记录详情" width="420px" @close="onDialogClose">
-    <div v-if="detail" class="exh__detail">
-      <div class="exh__drow">
-        <span class="exh__dlabel">日期</span>
-        <span class="num">{{ detail.recordDate }}</span>
-      </div>
-      <div class="exh__drow">
-        <span class="exh__dlabel">动作</span>
-        <span>{{ itemName(detail.exerciseId) }}</span>
-      </div>
-      <div class="exh__drow">
-        <span class="exh__dlabel">参数</span>
-        <span class="num">{{ paramText(detail) }}</span>
-      </div>
-      <div v-if="detail.hand" class="exh__drow">
-        <span class="exh__dlabel">手</span>
-        <span>{{ handText(detail.hand) }}</span>
-      </div>
-      <div class="exh__drow">
-        <span class="exh__dlabel">净消耗</span>
-        <span class="num">{{ calcNet(detail) }} kcal（总 {{ calcTotal(detail) }}）</span>
-      </div>
-      <div class="exh__drow exh__drow--note">
-        <span class="exh__dlabel">备注</span>
-        <span>{{ detail.note || '—' }}</span>
-      </div>
-    </div>
-    <template #footer>
-      <el-button @click="onDialogClose">关闭</el-button>
-    </template>
-  </el-dialog>
+  <RecordDetailDialog :model-value="dialogVisible" title="锻炼记录详情" width="420px" :rows="detailRows" @update:model-value="onDialogClose" />
 </template>
 
 <style lang="scss" scoped>

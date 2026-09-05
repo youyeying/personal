@@ -8,7 +8,7 @@
  * - 中等改动 → 更新第二个数字（次版本）：v1.0.0 → v1.1.0
  * - 低级改动 → 更新第三个数字（修订）  ：v1.0.0 → v1.0.1
  */
-export const APP_VERSION = '1.27.0'
+export const APP_VERSION = '2.1.0'
 
 /** 应用名 */
 export const APP_NAME = '个人记录'

@@ -25,6 +25,10 @@ backend/.mvn/wrapper/maven-wrapper.jar
 backend/uploads/
 uploads/
 png/
+database/backups/
+
+# ===== 锻炼参考数据（本地文档，不上传）=====
+锻炼.md
 
 # ===== 敏感配置（含数据库账号密码，严禁上传）=====
 backend/src/main/resources/application.properties

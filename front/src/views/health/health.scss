@@ -544,39 +544,6 @@
     flex-direction: column;
     gap: var(--cb-space-3);
   }
-
-  /* ===== 行详情（只读） ===== */
-  &__detail {
-    display: flex;
-    flex-direction: column;
-    gap: var(--cb-space-3);
-  }
-  &__drow {
-    display: flex;
-    align-items: baseline;
-    gap: var(--cb-space-4);
-    font-size: var(--cb-font-mg);
-    color: var(--cb-ink);
-    &--note {
-      align-items: flex-start;
-    }
-  }
-  &__dlabel {
-    flex-shrink: 0;
-    width: 76px;
-    font-size: var(--cb-font-xs);
-    color: var(--cb-ink-muted);
-  }
-  &__dweight {
-    font-weight: 600;
-    i {
-      font-style: normal;
-      font-size: var(--cb-font-xs);
-      color: var(--cb-ink-muted);
-      margin-left: 2px;
-      font-weight: 400;
-    }
-  }
 }
 
 // ---------- 响应式 ----------

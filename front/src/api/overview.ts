@@ -54,6 +54,8 @@ export interface MonthOverview {
 export interface OverviewData {
   today: TodayOverview
   month: MonthOverview
+  /** 全量可支配余额（历史收入−支出，发薪自动+工资） */
+  disposable: number
 }
 
 /** 首页概览（今日 + 本月） */

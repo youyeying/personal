@@ -11,8 +11,11 @@ import {
   House,
   Wallet,
   Opportunity,
+  Basketball,
+  Food,
   Reading,
   Notebook,
+  EditPen,
   List,
   Monitor,
   User
@@ -39,8 +42,11 @@ export const MODULES: ModuleTheme[] = [
   { key: 'overview', path: '/', name: '首页概览', desc: '今日与本月收支、体重、学习全貌', tag: 'LIVE', accent: '#a8765a', icon: markRaw(House) },
   { key: 'expense', path: '/expense', name: '记账', desc: '收支记录、分类与统计', tag: '存钱余额', accent: '#c08a3e', icon: markRaw(Wallet) },
   { key: 'health', path: '/health', name: '健康', desc: '体重打卡与趋势', tag: '减重中', accent: '#3f7a72', icon: markRaw(Opportunity) },
+  { key: 'exercise', path: '/exercise', name: '锻炼', desc: '锻炼打卡、统计与消耗分析', tag: '燃脂中', accent: '#b0653f', icon: markRaw(Basketball) },
+  { key: 'food', path: '/food', name: '饮食', desc: '饮食记录、能量结余与营养分析', tag: '控卡中', accent: '#7a8c3e', icon: markRaw(Food) },
   { key: 'learn', path: '/learn', name: '学习', desc: '学习记录与附件', tag: '精进', accent: '#4f7a8c', icon: markRaw(Reading) },
   { key: 'daily-note', path: '/daily-note', name: '每日总结', desc: '每天一句话小结', tag: '今日心情', accent: '#a8716a', icon: markRaw(Notebook) },
+  { key: 'report', path: '/report', name: '周报', desc: '跨模块周 / 月复盘汇总', tag: '复盘', accent: '#8a6a4f', icon: markRaw(EditPen) },
   { key: 'operation-log', path: '/operation-log', name: '操作日志', desc: '系统操作记录', tag: '轨迹', accent: '#6b7a66', icon: markRaw(List) },
   { key: 'dev-log', path: '/dev-log', name: '开发日志', desc: '开发会话与功能记录', tag: '进度', accent: '#5f7a8c', icon: markRaw(Monitor) },
   { key: 'profile', path: '/profile', name: '个人中心', desc: '昵称、密码、目标体重', tag: '我的', accent: '#8a8a80', icon: markRaw(User) }
