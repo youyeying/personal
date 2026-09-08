@@ -1,0 +1,101 @@
+/**
+ * 后台布局壳样式
+ * - 两栏：左侧导航满高（flex 子项自动贴满高度）+ 右侧 side（header + 内容区）
+ * - 右侧内容区独立滚动（min-height:0 + overflow-y:auto）
+ * - 抽屉全屏 overlay：导航隐藏时由 header 菜单按钮调起
+ */
+.app-layout {
+  height: 100%;
+  display: flex;
+  background: var(--sk-canvas);
+
+  // 右侧：header + 内容区同宽，宽度由内容弹性决定
+  &__side {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    // 不再做页面级横向滚动兜底（各页面组件已自带窄屏降级/省略），
+    // 从根本上杜绝「内容超宽 → 整页出现横向滚动条」
+    overflow-x: hidden;
+  }
+  // 内包裹：与可用宽等宽（不再 fit-content 跟随内容固有宽度撑宽布局）
+  &__inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    // 纵向滚动仍在 main：滚动条只在 header 下方，不延伸到 header
+    overflow-y: auto;
+    // 横向一律裁切：任何元素残留溢出不再撑出页面级横向滚动条
+    overflow-x: hidden;
+    // 滚动条占位常驻：垂直滚动条出现/消失不再改变 clientWidth（±15px），
+    // 避免「横向溢出临界 → 滚动条闪现 → 宽度反馈」的循环抖动
+    scrollbar-gutter: stable;
+  }
+
+  // ---- 抽屉全屏导航 ----
+  &__drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+  }
+
+  &__mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 18, 14, 0.4);
+  }
+
+  &__panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%; // 全屏导航
+  }
+}
+
+// ---- 抽屉进入/退出动画 ----
+.drawer-enter-active,
+.drawer-leave-active {
+  transition: opacity 0.3s ease;
+
+  .app-layout__panel {
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+}
+
+.drawer-enter-from,
+.drawer-leave-to {
+  opacity: 0;
+
+  .app-layout__panel {
+    transform: translateX(-100%);
+  }
+}
+
+.drawer-enter-to,
+.drawer-leave-from {
+  opacity: 1;
+
+  .app-layout__panel {
+    transform: translateX(0);
+  }
+}
+
+// 窄屏（≤560px）：允许内容随视口压缩（min-width 归零，配合各页响应式降级），
+// 并隐藏页面内部横向滚动条（移动端惯例，避免滑块下方出现「跟随的一条」）
+@media (max-width: 560px) {
+  .app-layout__inner { min-width: 0; }
+  .app-layout__side {
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+}

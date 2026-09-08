@@ -26,10 +26,14 @@ public class AuthInterceptor implements HandlerInterceptor {
     /** 免认证接口白名单（与 WebConfig excludePathPatterns 双保险） */
     private static final Set<String> WHITE_LIST = Set.of(
             "/api/auth/login",
+            "/api/auth/admin/login",
             "/api/auth/register",
             "/api/auth/refresh",
             "/api/auth/logout"
     );
+
+    /** 开发向接口路径前缀：仅开发账号（user_type=2）可访问（不带尾斜杠，配合下方严格匹配兼容无子路径的列表接口） */
+    private static final String[] ADMIN_PREFIXES = {"/api/dev", "/api/operation-logs", "/api/admin"};
 
     private final JwtUtils jwtUtils;
 
@@ -55,9 +59,30 @@ public class AuthInterceptor implements HandlerInterceptor {
             Claims claims = jwtUtils.parseToken(token);
             Long userId = jwtUtils.getUserId(claims);
             String username = claims.get("username", String.class);
-            UserContext.set(new LoginUser(userId, username));
+            Integer userType = claims.get("userType", Integer.class);
+            if (userType == null) userType = 1; // 旧 token 兜底：业务用户
+            UserContext.set(new LoginUser(userId, username, userType));
+
+            // 接口隔离：开发向接口仅 user_type=2；其余业务接口仅 user_type=1
+            //（/api/auth/me|profile|password 两种类型均可用，me 内部按 userType 路由）
+            // 严格匹配：精确等于前缀，或前缀后紧跟 '/'（避免 /api/dev-xxx 误判）
+            boolean isAdminApi = false;
+            for (String prefix : ADMIN_PREFIXES) {
+                if (uri.equals(prefix) || uri.startsWith(prefix + "/")) {
+                    isAdminApi = true;
+                    break;
+                }
+            }
+            if (isAdminApi) {
+                UserContext.requireAdmin();
+            } else if (!uri.startsWith("/api/auth/")) {
+                UserContext.requireBusinessUser();
+            }
             return true;
         } catch (Exception e) {
+            if (e instanceof BizException) {
+                throw (BizException) e;
+            }
             throw new BizException(401, "未登录或登录已过期");
         }
     }

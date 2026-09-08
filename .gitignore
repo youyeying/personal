@@ -8,10 +8,11 @@
 
 # ===== TRAE 工具 =====
 .trae-html-share-packages/
+.trae/
 
-# ===== 前端 =====
-front/node_modules/
-front/dist/
+# ===== 前端（Monorepo：apps/* 与 packages/*）=====
+node_modules/
+dist/
 *.tsbuildinfo
 
 # ===== 后端 =====
@@ -34,6 +35,9 @@ database/backups/
 backend/src/main/resources/application.properties
 backend/src/main/resources/application-*.properties
 backend/src/main/resources/application-*.yml
+
+# ===== 今日功能记录（临时文件，导入开发日志后删除，不提交）=====
+今日功能记录-*.md
 
 # ===== 系统杂项 =====
 Thumbs.db

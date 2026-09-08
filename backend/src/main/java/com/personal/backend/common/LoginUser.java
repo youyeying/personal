@@ -17,4 +17,7 @@ public class LoginUser {
 
     /** 登录名 */
     private String username;
+
+    /** 用户类型：1=业务用户 user 表 / 2=开发账号 admin_user 表 */
+    private Integer userType;
 }

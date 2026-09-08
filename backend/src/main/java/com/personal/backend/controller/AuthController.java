@@ -38,6 +38,15 @@ public class AuthController {
         return Result.ok(authService.login(request, httpRequest, response), "登录成功");
     }
 
+    /** 开发账号登录（管理端 /admin/login，admin_user 表，user_type=2） */
+    @RateLimit(maxPerMinute = 5)
+    @PostMapping("/admin/login")
+    public Result<Map<String, Object>> adminLogin(@Valid @RequestBody LoginRequest request,
+                                                  HttpServletRequest httpRequest,
+                                                  HttpServletResponse response) {
+        return Result.ok(authService.adminLogin(request, httpRequest, response), "登录成功");
+    }
+
     /** 刷新 accessToken（用 httpOnly Cookie 里的 refresh token，滚动续期） */
     @PostMapping("/refresh")
     public Result<Map<String, Object>> refresh(HttpServletRequest request, HttpServletResponse response) {

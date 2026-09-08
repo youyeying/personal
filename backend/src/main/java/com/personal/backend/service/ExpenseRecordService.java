@@ -172,19 +172,23 @@ public class ExpenseRecordService {
         }
     }
 
-    /** 批量加载分类名 */
+    /** 批量加载分类名（模板 user_id=0 + 本人自定义） */
     private Map<Long, String> loadCategoryNames(Long userId) {
         return categoryMapper.selectList(
-                        new LambdaQueryWrapper<ExpenseCategory>().eq(ExpenseCategory::getUserId, userId))
+                        new LambdaQueryWrapper<ExpenseCategory>().in(ExpenseCategory::getUserId, 0L, userId))
                 .stream().collect(Collectors.toMap(ExpenseCategory::getId, ExpenseCategory::getName));
     }
 
-    /** 记录内容：如 "餐饮 -25.00" / "工资 +8000.00" */
+    /** 记录内容：如 "餐饮 -25.00" / "工资 +8000.00"；有备注时附上（谁做了什么的审计） */
     private String buildContent(ExpenseRecord record) {
         Map<Long, String> names = loadCategoryNames(record.getUserId());
         String name = names.getOrDefault(record.getCategoryId(), "");
         String prefix = record.getType() == 1 ? "-" : "+";
-        return name + " " + prefix + record.getAmount();
+        String content = name + " " + prefix + record.getAmount();
+        if (record.getNote() != null && !record.getNote().isBlank()) {
+            content += "，备注：" + record.getNote();
+        }
+        return content;
     }
 
     /** 分类统计转展示结构 */

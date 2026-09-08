@@ -23,11 +23,11 @@ public class ExpenseCategoryService {
     private final ExpenseCategoryMapper categoryMapper;
     private final OperationLogService operationLogService;
 
-    /** 查询当前用户分类列表，按类型 + 排序 */
+    /** 查询当前用户分类列表（系统模板 user_id=0 + 我的自定义），按类型 + 排序 */
     public List<ExpenseCategory> list(Integer type) {
         Long userId = UserContext.requireUserId();
         LambdaQueryWrapper<ExpenseCategory> wrapper = new LambdaQueryWrapper<ExpenseCategory>()
-                .eq(ExpenseCategory::getUserId, userId);
+                .in(ExpenseCategory::getUserId, 0L, userId);
         if (type != null) {
             wrapper.eq(ExpenseCategory::getType, type);
         }

@@ -1,0 +1,46 @@
+/**
+ * 公共组件 · BlockTitle 区块标题样式
+ * 主色随模块 --sk-mod；hint 灰字；aside 操作区靠右
+ */
+.block-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-space-3);
+  margin-bottom: var(--sk-space-4);
+  // 标题行允许换行：宽屏单行（空间足够不换行），窄屏按钮组/aside 超宽时整体换到第二行，
+  // 避免 aside 因 flex-shrink:0 撑破卡片（如统计页 今天/近7/30/90 四个范围按钮）
+  flex-wrap: wrap;
+
+  &__heading {
+    margin: 0;
+    font-size: var(--sk-font-lg);
+    font-weight: var(--sk-font-weight-medium);
+    color: var(--sk-mod);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__hint {
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
+    // 宽度不足时截断为省略号（大厂做法），而不是换行/把按钮挤到下一排
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__aside {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+}
+
+// 窄屏（≤560px）：标题旁说明小字隐藏（跟随大厂「窄屏降级次要信息」），
+// 给标题和按钮组让出全部宽度
+@media (max-width: 560px) {
+  .block-title__hint { display: none; }
+}

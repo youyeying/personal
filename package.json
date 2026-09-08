@@ -1,0 +1,15 @@
+{
+  "name": "personal-record-workspace",
+  "version": "2.5.0",
+  "private": true,
+  "description": "个人记录系统 Monorepo（apps/user-app 用户端 + apps/admin-app 开发端 + packages 共享层）",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:user": "npm run dev --workspace @personal/user-app",
+    "dev:admin": "npm run dev --workspace @personal/admin-app",
+    "type-check": "npm run type-check --workspaces"
+  }
+}

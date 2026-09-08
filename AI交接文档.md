@@ -28,15 +28,20 @@
 
 ## 二、项目概述
 
-**个人记录系统**（单体全栈，目录 `e:\personal`）：
+**个人记录系统**（Monorepo 全栈，目录 `e:\personal`，v2.5.0 拆分双应用）：
 
 | 层 | 技术栈 | 目录 |
 |---|---|---|
-| 前端 | Vue3 `<script setup lang="ts">` + Vite + Element Plus + ECharts + SCSS | `e:\personal\front` |
+| 用户端 | Vue3 `<script setup lang="ts">` + Vite + Element Plus + ECharts + SCSS | `e:\personal\apps\user-app`（端口 5173） |
+| 开发端 | Vue3 + Vite + Element Plus（开发日志/操作日志/基础数据管理） | `e:\personal\apps\admin-app`（端口 5174） |
 | 后端 | SpringBoot + MyBatis-Plus + MySQL（用户在 IDEA 中手动运行） | `e:\personal\backend` |
 | 文档 | 需求/设计/数据库文档 + 开发日志 | `e:\personal\database`、根目录 |
 
-**业务模块**（独立路由页面，侧边栏平级入口）：首页概览、记账、健康、锻炼、饮食、学习、每日总结、周报、操作日志、开发日志、个人中心。
+**业务模块**（用户端独立路由页面，侧边栏平级入口）：首页概览、记账、健康、锻炼、饮食、学习、每日总结、周报、个人中心。
+
+**开发端模块**（admin-app，仅开发账号 xyloveyh 可登录）：开发日志、操作日志、基础数据管理（食物/动作/分类全局模板）。
+
+**双账号体系（v2.5.0）**：业务用户 `user` 表（终端用户，仅见业务页面）；开发账号 `admin_user` 表（管理员，仅见开发向页面，接口经 userType=2 隔离）。基础数据预置行 `user_id=0` 为全局模板，业务用户查询取 `user_id IN (0, 自己)` 并集。
 
 **核心数据口径**（改动前必须理解）：
 - 锻炼消耗按「记录时体重快照」计算，历史不随当前体重变化
@@ -60,7 +65,7 @@
 
 ### 3.3 隐喻系统：每个 token 都对应一种纸的物理属性
 
-定义在 `front/src/styles/theme.scss`（全站唯一定义处，禁止在别处硬编码颜色）：
+定义在 `apps/user-app/src/styles/theme.scss`（全站唯一定义处，禁止在别处硬编码颜色）：
 
 ```scss
 --sk-canvas: #f2ede4;      // 页面背景 = 纸（暖米白，不是纯白）
@@ -210,7 +215,7 @@
 
 ### 7.1 文档三件套
 1. 功能设计先落需求规格文档（新增模块先补条目）
-2. 实现后同步 前端设计文档.md / 后端设计文档.md（版本号递增，`front/src/config.ts` 的 APP_VERSION 同步）
+2. 实现后同步 前端设计文档.md / 后端设计文档.md（版本号递增，`apps/{user-app,admin-app}/src/config.ts` 的 APP_VERSION 同步）
 3. 收尾创建「今日功能记录-YYYY-MM-DD.md」，格式 `### [类型] 模块 标题` + 描述行；类型只允许 **新增/修改/删除/修复**；**每条合并后 ≤500 字**（后端 varchar(500)，超限会中断批量录入）
 
 ### 7.2 开发日志工作流（每天结束必须）

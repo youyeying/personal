@@ -29,11 +29,17 @@ public class JwtUtils {
 
     /** 生成 Token（accessToken：短期，默认 15 分钟） */
     public String generateToken(Long userId, String username) {
+        return generateToken(userId, username, 1);
+    }
+
+    /** 生成 Token（accessToken），携带用户类型（1=业务用户 / 2=开发账号） */
+    public String generateToken(Long userId, String username, Integer userType) {
         Date now = new Date();
         Date expire = new Date(now.getTime() + expireMinutes * 60_000L);
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("username", username)
+                .claim("userType", userType == null ? 1 : userType)
                 .issuedAt(now)
                 .expiration(expire)
                 .signWith(getKey())

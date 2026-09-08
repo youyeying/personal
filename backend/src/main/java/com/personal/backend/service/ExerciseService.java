@@ -39,12 +39,12 @@ public class ExerciseService {
     private final WeightRecordMapper weightRecordMapper;
     private final OperationLogService operationLogService;
 
-    /** 查询我的动作字典（按 sort_order 升序）；@Cacheable 本地缓存 5 分钟，写操作 @CacheEvict 立即失效 */
+    /** 查询我的动作字典（系统模板 user_id=0 + 我的自定义，按 sort_order 升序）；@Cacheable 本地缓存 5 分钟 */
     @Cacheable(cacheNames = "exerciseItems", key = "T(com.personal.backend.common.UserContext).requireUserId()")
     public List<ExerciseItem> listItems() {
         Long userId = UserContext.requireUserId();
         return itemMapper.selectList(new LambdaQueryWrapper<ExerciseItem>()
-                .eq(ExerciseItem::getUserId, userId)
+                .in(ExerciseItem::getUserId, 0L, userId)
                 .orderByAsc(ExerciseItem::getSortOrder));
     }
 
@@ -265,10 +265,10 @@ public class ExerciseService {
         }
     }
 
-    /** 校验动作归属并返回 */
+    /** 校验动作归属并返回（模板 user_id=0 全局共享，或属于当前用户） */
     private ExerciseItem requireItem(Long exerciseId, Long userId) {
         ExerciseItem item = itemMapper.selectById(exerciseId);
-        if (item == null || !item.getUserId().equals(userId)) {
+        if (item == null || !(item.getUserId().equals(0L) || item.getUserId().equals(userId))) {
             throw new BizException("锻炼动作不存在");
         }
         return item;

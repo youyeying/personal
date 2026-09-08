@@ -2,17 +2,14 @@ package com.personal.backend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.personal.backend.common.BizException;
+import com.personal.backend.common.LoginUser;
 import com.personal.backend.common.UserContext;
 import com.personal.backend.dto.*;
+import com.personal.backend.entity.AdminUser;
 import com.personal.backend.entity.AuthSession;
-import com.personal.backend.entity.ExerciseItem;
-import com.personal.backend.entity.ExpenseCategory;
-import com.personal.backend.entity.FoodItem;
 import com.personal.backend.entity.User;
+import com.personal.backend.mapper.AdminUserMapper;
 import com.personal.backend.mapper.AuthSessionMapper;
-import com.personal.backend.mapper.ExerciseItemMapper;
-import com.personal.backend.mapper.ExpenseCategoryMapper;
-import com.personal.backend.mapper.FoodItemMapper;
 import com.personal.backend.mapper.UserMapper;
 import com.personal.backend.utils.JwtUtils;
 import jakarta.servlet.http.Cookie;
@@ -47,11 +44,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class AuthService {
 
+    /** 用户类型常量：1=业务用户 user 表 / 2=开发账号 admin_user 表 */
+    private static final int USER_TYPE_USER = 1;
+    private static final int USER_TYPE_ADMIN = 2;
+
     private final UserMapper userMapper;
+    private final AdminUserMapper adminUserMapper;
     private final AuthSessionMapper authSessionMapper;
-    private final ExpenseCategoryMapper expenseCategoryMapper;
-    private final ExerciseItemMapper exerciseItemMapper;
-    private final FoodItemMapper foodItemMapper;
     private final JwtUtils jwtUtils;
     private final OperationLogService operationLogService;
     private final FileService fileService;
@@ -64,14 +63,22 @@ public class AuthService {
     private boolean cookieSecure;
 
     /** /auth/refresh 限流：同一 IP 每分钟最多尝试次数（防暴力） */
-    private static final int REFRESH_MAX_PER_MINUTE = 20;
+    private static final int REFRESH_MAX_PER_MINUTE = 60;
     private final Map<String, long[]> refreshRate = new ConcurrentHashMap<>();
 
-    /** refresh Cookie 名称 */
-    private static final String REFRESH_COOKIE = "refresh_token";
+    /** refresh Cookie 名称：区分站点会话（本地双端口同域 localhost，同名 Cookie 会互相覆盖导致串号） */
+    private static final String REFRESH_COOKIE_USER = "refresh_token";
+    private static final String REFRESH_COOKIE_ADMIN = "refresh_token_admin";
+    /** 全部 Cookie 名（登出/清理时都清） */
+    private static final String[] ALL_REFRESH_COOKIES = {REFRESH_COOKIE_USER, REFRESH_COOKIE_ADMIN};
+
+    /** 按用户类型取 refresh Cookie 名 */
+    private static String refreshCookieName(int userType) {
+        return userType == USER_TYPE_ADMIN ? REFRESH_COOKIE_ADMIN : REFRESH_COOKIE_USER;
+    }
 
     /**
-     * 注册：创建用户 + 复制默认分类。
+     * 注册：创建用户（模板数据 user_id=0 全局共享，无需复制；查询时与本人自定义取并集）。
      * 不自动登录、不写会话/Cookie（注册后由用户走登录，避免产生孤儿会话）
      */
     @Transactional
@@ -94,10 +101,6 @@ public class AuthService {
         user.setNickname(request.getNickname() != null ? request.getNickname() : request.getUsername());
         userMapper.insert(user);
 
-        copyDefaultCategories(user.getId());
-        copyDefaultExercises(user.getId());
-        copyDefaultFoods(user.getId());
-
         operationLogService.record(user.getId(), "USER", "REGISTER", user.getId(),
                 "注册账号：" + request.getUsername());
 
@@ -118,13 +121,39 @@ public class AuthService {
             throw new BizException("密码错误");
         }
 
-        createSession(user.getId(), httpRequest, response);
+        createSession(user.getId(), USER_TYPE_USER, httpRequest, response);
         operationLogService.record(user.getId(), "USER", "LOGIN", user.getId(),
                 "用户登录：" + user.getUsername());
 
         Map<String, Object> result = new HashMap<>();
-        result.put("accessToken", jwtUtils.generateToken(user.getId(), user.getUsername()));
+        result.put("accessToken", jwtUtils.generateToken(user.getId(), user.getUsername(), USER_TYPE_USER));
+        result.put("userType", USER_TYPE_USER);
         result.put("userInfo", toUserInfo(user));
+        return result;
+    }
+
+    /**
+     * 开发账号登录（管理端）：校验 admin_user 表账号密码，写会话（user_type=2）+ 签发 accessToken
+     */
+    public Map<String, Object> adminLogin(LoginRequest request, HttpServletRequest httpRequest,
+                                          HttpServletResponse response) {
+        AdminUser admin = adminUserMapper.selectOne(
+                new LambdaQueryWrapper<AdminUser>().eq(AdminUser::getUsername, request.getUsername()));
+        if (admin == null) {
+            throw new BizException("开发账号不存在");
+        }
+        if (!passwordEncoder.matches(request.getPassword(), admin.getPassword())) {
+            throw new BizException("密码错误");
+        }
+
+        createSession(admin.getId(), USER_TYPE_ADMIN, httpRequest, response);
+        operationLogService.record(admin.getId(), "ADMIN", "LOGIN", admin.getId(),
+                "开发账号登录：" + admin.getUsername());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("accessToken", jwtUtils.generateToken(admin.getId(), admin.getUsername(), USER_TYPE_ADMIN));
+        result.put("userType", USER_TYPE_ADMIN);
+        result.put("userInfo", toAdminInfo(admin));
         return result;
     }
 
@@ -135,37 +164,72 @@ public class AuthService {
         checkOrigin(request);
         rateLimit(request);
 
-        String refreshToken = readCookie(request, REFRESH_COOKIE);
+        // 按调用站点严格取对应 refresh Cookie：前端 refreshAccessToken 带 ?site=admin（开发端）或 site=user/缺省（用户端）
+        // 独立 Cookie 名隔离两站会话，杜绝 localhost 双端口同域串号
+        String site = request.getParameter("site");
+        String refreshToken = readCookie(request, "admin".equals(site) ? REFRESH_COOKIE_ADMIN : REFRESH_COOKIE_USER);
         if (!StringUtils.hasText(refreshToken)) {
             throw new BizException(401, "登录已过期，请重新登录");
         }
 
         AuthSession session = findByHash(hash(refreshToken));
+        if (session == null) {
+            // 并发刷新宽容：多标签页各自持同一 refresh_token 刷新时，先到的已 rotation 作废旧 token，
+            // 后到的若直接判过期会把正常用户踢出登录。这里按「同一设备 60 秒内刚更新过的会话」合并：
+            // 仍持有效会话则续期，仅真正无会话/全过期才判 401。
+            // 关键：宽容查询必须按「调用站点的 userType」过滤——用户端/开发端在同一浏览器同 UA，
+            // 若不限 userType，一端刷新后 60s 内另一端刷新会命中对方的会话、拿到错误用户类型的 token 被踢。
+            String ua = request.getHeader("User-Agent");
+            String deviceKey = hash(ua != null ? ua : "");
+            int expectType = "admin".equals(site) ? USER_TYPE_ADMIN : USER_TYPE_USER;
+            session = authSessionMapper.selectOne(new LambdaQueryWrapper<AuthSession>()
+                    .eq(AuthSession::getUserType, expectType)
+                    .eq(AuthSession::getDeviceKey, deviceKey)
+                    .ge(AuthSession::getUpdatedAt, LocalDateTime.now().minusSeconds(60))
+                    .orderByDesc(AuthSession::getUpdatedAt)
+                    .last("LIMIT 1"));
+        }
         if (session == null || !session.getExpiresAt().isAfter(LocalDateTime.now())) {
             throw new BizException(401, "登录已过期，请重新登录");
         }
 
-        // rotation：换新 refresh token + 滚动到期，旧 token 立即失效
+        // rotation：换新 refresh token + 滚动到期，旧 token 立即失效（按会话类型写对应 Cookie）
         String newToken = randomToken();
         session.setRefreshTokenHash(hash(newToken));
         session.setExpiresAt(LocalDateTime.now().plusHours(sessionExpireHours));
         session.setUpdatedAt(LocalDateTime.now());
         authSessionMapper.updateById(session);
-        setRefreshCookie(response, newToken);
+        int sessionType = session.getUserType() == null ? USER_TYPE_USER : session.getUserType();
+        setRefreshCookie(response, refreshCookieName(sessionType), newToken);
 
+        // 按会话用户类型路由到 user / admin_user 表，签发带 userType 的新 accessToken
+        Integer userType = session.getUserType() == null ? USER_TYPE_USER : session.getUserType();
+        if (userType == USER_TYPE_ADMIN) {
+            AdminUser admin = adminUserMapper.selectById(session.getUserId());
+            if (admin == null) {
+                throw new BizException(401, "登录已过期，请重新登录");
+            }
+            return Map.of("accessToken", jwtUtils.generateToken(admin.getId(), admin.getUsername(), USER_TYPE_ADMIN),
+                    "userType", USER_TYPE_ADMIN);
+        }
         User user = userMapper.selectById(session.getUserId());
         if (user == null) {
             throw new BizException(401, "登录已过期，请重新登录");
         }
-        return Map.of("accessToken", jwtUtils.generateToken(session.getUserId(), user.getUsername()));
+        return Map.of("accessToken", jwtUtils.generateToken(user.getId(), user.getUsername(), USER_TYPE_USER),
+                "userType", USER_TYPE_USER);
     }
 
     /**
      * 登出：删除当前会话 + 清 Cookie
      */
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = readCookie(request, REFRESH_COOKIE);
-        if (StringUtils.hasText(refreshToken)) {
+        // 清两枚 Cookie（user/admin）对应的会话，防站点会话残留
+        for (String cookieName : ALL_REFRESH_COOKIES) {
+            String refreshToken = readCookie(request, cookieName);
+            if (!StringUtils.hasText(refreshToken)) {
+                continue;
+            }
             AuthSession session = findByHash(hash(refreshToken));
             if (session != null) {
                 session.setUpdatedAt(LocalDateTime.now());
@@ -176,11 +240,22 @@ public class AuthService {
     }
 
     /**
-     * 获取当前登录用户信息
+     * 获取当前登录用户信息（按会话用户类型路由到 user / admin_user 表）
      */
     public Map<String, Object> me() {
-        User user = getUserById(UserContext.requireUserId());
-        return Map.of("userInfo", toUserInfo(user));
+        LoginUser loginUser = UserContext.get();
+        if (loginUser == null) {
+            throw new BizException(401, "未登录或登录已过期");
+        }
+        if (loginUser.getUserType() != null && loginUser.getUserType() == USER_TYPE_ADMIN) {
+            AdminUser admin = adminUserMapper.selectById(loginUser.getId());
+            if (admin == null) {
+                throw new BizException(401, "用户不存在或已注销");
+            }
+            return Map.of("userType", USER_TYPE_ADMIN, "userInfo", toAdminInfo(admin));
+        }
+        User user = getUserById(loginUser.getId());
+        return Map.of("userType", USER_TYPE_USER, "userInfo", toUserInfo(user));
     }
 
     /**
@@ -277,7 +352,7 @@ public class AuthService {
     // ===================== 会话 / Cookie 私有方法 =====================
 
     /** 创建或复用会话并写 Cookie：按 用户+设备指纹 复用同一设备的有效会话，避免行随登录次数增长 */
-    private void createSession(Long userId, HttpServletRequest request, HttpServletResponse response) {
+    private void createSession(Long userId, Integer userType, HttpServletRequest request, HttpServletResponse response) {
         String ua = request.getHeader("User-Agent");
         String deviceKey = hash(ua != null ? ua : "");
         LocalDateTime now = LocalDateTime.now();
@@ -299,6 +374,7 @@ public class AuthService {
             session.setDeviceKey(deviceKey);
             session.setDeviceName(parseDeviceName(ua));
         }
+        session.setUserType(userType == null ? USER_TYPE_USER : userType);
         session.setRefreshTokenHash(hash(token));
         session.setExpiresAt(now.plusHours(sessionExpireHours));
         if (session.getId() == null) {
@@ -307,7 +383,7 @@ public class AuthService {
             session.setUpdatedAt(now);
             authSessionMapper.updateById(session);
         }
-        setRefreshCookie(response, token);
+        setRefreshCookie(response, refreshCookieName(userType == null ? USER_TYPE_USER : userType), token);
     }
 
     /** 从 User-Agent 简单解析出可读设备名（浏览器 · 系统），仅展示用 */
@@ -351,8 +427,8 @@ public class AuthService {
                 new LambdaQueryWrapper<AuthSession>().eq(AuthSession::getRefreshTokenHash, tokenHash));
     }
 
-    private void setRefreshCookie(HttpServletResponse response, String value) {
-        Cookie cookie = new Cookie(REFRESH_COOKIE, value);
+    private void setRefreshCookie(HttpServletResponse response, String cookieName, String value) {
+        Cookie cookie = new Cookie(cookieName, value);
         cookie.setHttpOnly(true);
         cookie.setSecure(cookieSecure);
         cookie.setPath("/");
@@ -361,13 +437,16 @@ public class AuthService {
         response.addCookie(cookie);
     }
 
+    /** 清全部 refresh Cookie（user/admin 两枚） */
     private void clearRefreshCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie(REFRESH_COOKIE, "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        for (String cookieName : ALL_REFRESH_COOKIES) {
+            Cookie cookie = new Cookie(cookieName, "");
+            cookie.setHttpOnly(true);
+            cookie.setSecure(cookieSecure);
+            cookie.setPath("/");
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+        }
     }
 
     private String readCookie(HttpServletRequest request, String name) {
@@ -443,65 +522,16 @@ public class AuthService {
         return user;
     }
 
-    /** 复制初始用户的默认分类到新用户 */
-    private void copyDefaultCategories(Long newUserId) {
-        List<ExpenseCategory> defaults = expenseCategoryMapper.selectList(
-                new LambdaQueryWrapper<ExpenseCategory>()
-                        .eq(ExpenseCategory::getUserId, 1L)
-                        .orderByAsc(ExpenseCategory::getSortOrder));
-        for (ExpenseCategory c : defaults) {
-            ExpenseCategory copy = new ExpenseCategory();
-            copy.setUserId(newUserId);
-            copy.setName(c.getName());
-            copy.setType(c.getType());
-            copy.setSortOrder(c.getSortOrder());
-            expenseCategoryMapper.insert(copy);
-        }
-    }
-
-    /** 复制初始用户的默认锻炼动作到新用户（注册即可用，无需自建动作） */
-    private void copyDefaultExercises(Long newUserId) {
-        List<ExerciseItem> defaults = exerciseItemMapper.selectList(
-                new LambdaQueryWrapper<ExerciseItem>()
-                        .eq(ExerciseItem::getUserId, 1L)
-                        .orderByAsc(ExerciseItem::getSortOrder));
-        for (ExerciseItem e : defaults) {
-            ExerciseItem copy = new ExerciseItem();
-            copy.setUserId(newUserId);
-            copy.setName(e.getName());
-            copy.setType(e.getType());
-            copy.setBaseMet(e.getBaseMet());
-            copy.setRefSpeed(e.getRefSpeed());
-            copy.setHasWeight(e.getHasWeight());
-            copy.setHasHand(e.getHasHand());
-            copy.setSortOrder(e.getSortOrder());
-            exerciseItemMapper.insert(copy);
-        }
-    }
-
-    /** 复制初始用户的默认食物到新用户（注册即可用） */
-    private void copyDefaultFoods(Long newUserId) {
-        List<FoodItem> defaults = foodItemMapper.selectList(
-                new LambdaQueryWrapper<FoodItem>()
-                        .eq(FoodItem::getUserId, 1L)
-                        .orderByAsc(FoodItem::getSortOrder));
-        for (FoodItem f : defaults) {
-            FoodItem copy = new FoodItem();
-            copy.setUserId(newUserId);
-            copy.setName(f.getName());
-            copy.setType(f.getType());
-            copy.setKcal(f.getKcal());
-            copy.setProtein(f.getProtein());
-            copy.setFat(f.getFat());
-            copy.setCarbs(f.getCarbs());
-            copy.setSodium(f.getSodium());
-            copy.setFiber(f.getFiber());
-            copy.setDefaultGrams(f.getDefaultGrams());
-            copy.setUnitLabel(f.getUnitLabel());
-            copy.setFavorite(f.getFavorite());
-            copy.setSortOrder(f.getSortOrder());
-            foodItemMapper.insert(copy);
-        }
+    /** 脱敏返回开发账号信息（不返回密码） */
+    private Map<String, Object> toAdminInfo(AdminUser admin) {
+        Map<String, Object> info = new HashMap<>();
+        info.put("id", admin.getId());
+        info.put("username", admin.getUsername());
+        info.put("phone", admin.getPhone());
+        info.put("nickname", admin.getNickname());
+        info.put("avatar", admin.getAvatar());
+        info.put("createdAt", admin.getCreatedAt());
+        return info;
     }
 
     /** 脱敏返回用户信息（不返回密码） */

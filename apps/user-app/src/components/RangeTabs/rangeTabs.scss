@@ -1,0 +1,24 @@
+/**
+ * RangeTabs 范围切换按钮组样式（抽自记账 exp__range / 健康 hl__range）
+ */
+.range-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &__btn {
+    border: 1px solid var(--sk-hairline);
+    background: var(--sk-surface);
+    color: var(--sk-ink-secondary);
+    padding: 4px 13px;
+    border-radius: var(--sk-radius-btn);
+    font-size: var(--sk-font-sm);
+    cursor: pointer;
+
+    &.is-active {
+      border-color: var(--sk-mod);
+      background: color-mix(in srgb, var(--sk-mod) 14%, var(--sk-surface));
+      color: var(--sk-mod);
+    }
+  }
+}

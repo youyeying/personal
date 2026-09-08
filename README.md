@@ -6,6 +6,12 @@
 
 ## 更新日志（最新在上）
 
+- **v2.5.0（2026-09-08）**
+  - 新增 拆分用户端/开发端两套系统：前端 Monorepo 双站点（`apps/user-app` 用户端 + `apps/admin-app` 开发端）+ 后端 `admin_user` 开发账号表 + 开发端登录（`/admin/login`）+ 开发页（开发日志/操作日志/基础数据管理三种模板页），业务接口与开发向接口按用户类型隔离（AuthInterceptor + JWT userType）
+  - 新增 双 Cookie 会话隔离（`refresh_token` / `refresh_token_admin`），/auth/refresh 按 `?site=` 读对应 Cookie 并加限流与并发宽容；RefreshToken 滚动 rotation、SHA-256 哈希落库
+  - 新增 共享层 `packages/shared`：双端重复工具（format/fetchAll/daysSeries/confirm/theme/useECharts/mdDraft/validators）收敛唯一实现；认证与请求封装参数化工厂（createTokenManager(site)/createRequestApi），双端 vite alias 直引源码
+  - 修复 双站点频繁掉登录：①前端双端共用 localStorage key 互相清空 token → 站点后缀隔离；②后端 refresh 宽容查询未按 userType 过滤（同 UA 串会话）→ 按调用站点过滤；③refresh 限流 20→60 次/分
+  - 修改 锻炼负重动作消耗模型（哑铃/臂力棒）为「强度+做功」：MET 按速度比定强度（封顶 2.5×参考）+ 负重做功（重量×9.8×0.35m×次数÷25%），9.5kg×40次×30s ≈ 7.4 kcal（对齐豆包量级）；全站消耗展示统一 roundKcal 保留 1 位小数，消除浮点尾差（2453.2000000003 等）
 - **v2.2.0（2026-09-05）**
   - 修改 主题 token 前缀全站改名 `--cb-` → `--sk-`：56 个变量（theme.scss 唯一定义处）值不变，58 个文件（.vue/.scss/.ts）所有 `var()` 引用 + 图表 cssVar 字面量统一迁移；明暗主题实测取值正确，前端/后端设计文档 token 名同步
   - 修复 图表容器窄屏横向溢出：全站 7 处 ECharts 容器（饮食统计/健康趋势/学习统计/记账趋势/锻炼分析×2/开发日志汇总）统一补 `overflow:hidden + min-width:0`，终止内部布局把面板/卡片撑宽的「两层横向」冒泡；297px 极窄实测全站无横向滚轮
@@ -100,19 +106,22 @@
 ## 目录结构
 
 ```
-├── front/                前端（Vite 工程，入口 src/index.ts，端口 5173）
-│   └── src/
-│       ├── views/        页面（记账/健康/学习/每日总结/开发日志/操作日志/个人中心/首页）
-│       ├── components/   公共组件（DataList/PagePanel/DateRangePicker 等）
-│       ├── api/          接口封装（自动带 token、统一报错）
-│       └── utils/        工具（含 exercise.ts 锻炼热量算法）
-├── backend/              后端（Spring Boot，端口 8080）
-│   └── src/main/resources/application.properties   ← 本地配置，自己创建（见下）
-│   └── src/main/resources/application.properties.example   ← 配置模板（仓库内）
+├── apps/                   前端（Monorepo，npm workspaces）
+│   ├── user-app/           用户端（Vite 工程，端口 5173）
+│   │   └── src/
+│   │       ├── views/      业务页面（记账/健康/锻炼/饮食/学习/每日总结/周报/个人中心/首页）
+│   │       ├── components/ 公共组件（DataList/PagePanel/DateRangePicker 等）
+│   │       ├── api/        接口封装（自动带 token、统一报错）
+│   │       └── utils/      工具（含 exercise.ts 锻炼热量算法）
+│   └── admin-app/          开发端（端口 5174：/admin/login + 开发日志 + 操作日志 + 基础数据管理）
+├── packages/
+│   └── shared/             双端共享层（纯工具 + token/请求工厂，双端 vite alias 直引源码）
+├── backend/                后端（Spring Boot，端口 8080）
+│   └── src/main/resources/application.properties   ← 本地配置，自己创建（含开发账号 app.admin.*，见下）
 ├── database/
-│   ├── schema.sql        数据库初始化脚本（建库 + 12 张表）
+│   ├── schema.sql          数据库初始化脚本（建库 + 18 张表）
 │   └── 数据库设计文档.md
-└── *.md                  需求/前端/后端设计文档
+└── *.md                    需求/前端/后端设计文档
 ```
 
 ## 环境要求
@@ -172,25 +181,31 @@ cd backend
 > 提示：Java 26 + MyBatis-Plus 分页若有 final 字段反射警告，在 IDEA 启动配置 VM options 加
 > `--enable-final-field-mutation=ALL-UNNAMED`
 
-### 第 4 步：启动前端
+### 第 4 步：启动前端（Monorepo，两个站点）
 
 ```bash
-cd front
+# 根目录安装 workspace 依赖
 npm install
-npm run dev
+
+# 用户端（端口 5173）
+npm run dev --workspace @personal/user-app
+
+# 开发端（端口 5174）
+npm run dev --workspace @personal/admin-app
 ```
 
-浏览器打开 **http://localhost:5173**（Vite 代理 `/api` → 后端 8080，无需额外配置）。
+浏览器打开 **http://localhost:5173**（用户端）或 **http://localhost:5174/admin/login**（开发端，Vite 代理 `/api` → 后端 8080，无需额外配置）。
 
 ## 默认账号
 
-| 用户名 | 密码 |
-|---|---|
-| `admin` | `admin123` |
+| 站点 | 用户名 | 密码 |
+|---|---|---|
+| 用户端 `/login` | 业务账号（注册或既有 youyeying） | 见个人中心 |
+| 开发端 `/admin/login` | `xyloveyh` | 配置于 `backend/src/main/resources/application.properties` 的 `app.admin.password` |
 
-首次进入后建议在「个人中心」修改密码（修改后密码 1 个月内不能再次修改）。账号由后端首次启动自动写入数据库，不会出现在任何 SQL 文件里。
+用户端业务账号注册即用；开发账号由后端启动时按配置自动写入 `admin_user` 表（admin_user 为空时），不出现任何 SQL 文件。开发账号登录后仅能访问开发日志/操作日志/基础数据管理，业务用户看不到这些页面。
 
-> 安全提示：源码中预留的默认账号已脱敏（admin/admin123）；正式部署请务必修改密码并更换 `application.properties` 中的 JWT 密钥。
+> 安全提示：正式部署请务必修改 `application.properties` 中的开发账号密码与 JWT 密钥。
 
 ## 常见问题
 
@@ -198,7 +213,7 @@ npm run dev
 |---|---|
 | 后端 500 / 连不上数据库 | 检查第 2 步 `spring.datasource.username/password` 是否改成你自己的 |
 | 改了后端代码没生效 | 后端无热更新，改完需重启 |
-| 前端端口被占用 | Vite 会自动 +1（5174）；或改 `front/vite.config.ts` 的 `port` |
+| 前端端口被占用 | Vite 会自动 +1；或改 `apps/{user-app,admin-app}/vite.config.ts` 的 `port` |
 | 头像/附件无法上传 | 确认 `backend/uploads/` 目录可写；大小上限 10MB |
 | 上传超过 10MB | 前后端均为 10MB 上限，需同时调整第 2 步配置与前端校验 |
 | 我忘记数据库账号 | 用 MySQL root 执行 `ALTER USER 'root'@'localhost' IDENTIFIED BY '新密码';` 后同步改到 application.properties |

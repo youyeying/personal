@@ -42,12 +42,12 @@ public class FoodService {
 
     // ================= 食物字典 =================
 
-    /** 查询我的食物字典（收藏优先，再按类型+排序）；@Cacheable 本地缓存 5 分钟，写操作 @CacheEvict 立即失效 */
+    /** 查询我的食物字典（系统模板 user_id=0 + 我的自定义，收藏优先，再按类型+排序）；@Cacheable 本地缓存 5 分钟 */
     @Cacheable(cacheNames = "foodItems", key = "T(com.personal.backend.common.UserContext).requireUserId()")
     public List<FoodItem> listItems() {
         Long userId = UserContext.requireUserId();
         return itemMapper.selectList(new LambdaQueryWrapper<FoodItem>()
-                .eq(FoodItem::getUserId, userId)
+                .in(FoodItem::getUserId, 0L, userId)
                 .orderByDesc(FoodItem::getFavorite)
                 .orderByAsc(FoodItem::getType)
                 .orderByAsc(FoodItem::getSortOrder));
@@ -290,10 +290,10 @@ public class FoodService {
         }
     }
 
-    /** 校验食物归属并返回 */
+    /** 校验食物归属并返回（模板 user_id=0 全局共享，或属于当前用户） */
     private FoodItem requireFood(Long foodId, Long userId) {
         FoodItem item = itemMapper.selectById(foodId);
-        if (item == null || !item.getUserId().equals(userId)) {
+        if (item == null || !(item.getUserId().equals(0L) || item.getUserId().equals(userId))) {
             throw new BizException("食物不存在");
         }
         return item;

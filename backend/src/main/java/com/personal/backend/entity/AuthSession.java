@@ -26,6 +26,9 @@ public class AuthSession {
     /** 所属用户 */
     private Long userId;
 
+    /** 用户类型：1=业务用户 user 表 / 2=开发账号 admin_user 表 */
+    private Integer userType;
+
     /** refresh token 的 SHA-256 十六进制哈希 */
     private String refreshTokenHash;
 

@@ -1,66 +1,81 @@
 package com.personal.backend.config;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.personal.backend.entity.AdminUser;
 import com.personal.backend.entity.ExerciseItem;
 import com.personal.backend.entity.ExpenseCategory;
-import com.personal.backend.entity.User;
+import com.personal.backend.mapper.AdminUserMapper;
 import com.personal.backend.mapper.ExerciseItemMapper;
 import com.personal.backend.mapper.ExpenseCategoryMapper;
-import com.personal.backend.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
 /**
- * 启动数据初始化：用户表为空时创建初始管理员账号
- * （schema.sql 已预置 user_id=1 的默认分类，初始用户自增 id=1 与之对应）
+ * 启动数据初始化：
+ * 1. 校验系统全局模板（user_id=0：收支分类 / 锻炼动作 / 食物）缺失时补建
+ * 2. admin_user 开发账号表为空时创建初始开发账号（账号/密码来自 application.properties，不硬编码源码）
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    private final UserMapper userMapper;
+    private final AdminUserMapper adminUserMapper;
     private final ExpenseCategoryMapper expenseCategoryMapper;
     private final ExerciseItemMapper exerciseItemMapper;
 
+    /** 初始开发账号（application.properties 配置，gitignore 排除，不入库文档） */
+    @Value("${app.admin.username:}")
+    private String adminUsername;
+
+    @Value("${app.admin.password:}")
+    private String adminPassword;
+
     @Override
     public void run(String... args) {
-        Long count = userMapper.selectCount(null);
-        if (count > 0) {
-            return;
-        }
-
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        User admin = new User();
-        admin.setUsername("admin");
-        admin.setPassword(encoder.encode("admin123"));
-        admin.setPhone("13800138000");
-        admin.setNickname("系统管理员");
-        userMapper.insert(admin);
+        initAdminUser();
 
         // 校验默认分类是否存在，缺失则补建（防止 schema.sql 未预置时系统不可用）
         List<ExpenseCategory> defaults = expenseCategoryMapper.selectList(
-                new LambdaQueryWrapper<ExpenseCategory>().eq(ExpenseCategory::getUserId, 1L));
+                new LambdaQueryWrapper<ExpenseCategory>().eq(ExpenseCategory::getUserId, 0L));
         if (defaults.isEmpty()) {
             insertDefaultCategories();
         }
 
         // 校验默认锻炼动作是否存在，缺失则补建（schema.sql 已预置，双保险）
         List<ExerciseItem> items = exerciseItemMapper.selectList(
-                new LambdaQueryWrapper<ExerciseItem>().eq(ExerciseItem::getUserId, 1L));
+                new LambdaQueryWrapper<ExerciseItem>().eq(ExerciseItem::getUserId, 0L));
         if (items.isEmpty()) {
             insertDefaultExercises();
         }
-
-        log.info("初始账号已创建：admin / admin123（首次登录后请尽快修改密码）");
     }
 
-    /** 补建默认分类（与 schema.sql 预置一致） */
+    /** admin_user 表空时创建初始开发账号（账号/密码来自配置） */
+    private void initAdminUser() {
+        if (adminUserMapper.selectCount(null) > 0) {
+            return;
+        }
+        if (!StringUtils.hasText(adminUsername) || !StringUtils.hasText(adminPassword)) {
+            log.warn("未配置初始开发账号（app.admin.username/password），跳过 admin_user 初始化");
+            return;
+        }
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        AdminUser admin = new AdminUser();
+        admin.setUsername(adminUsername);
+        admin.setPassword(encoder.encode(adminPassword));
+        admin.setNickname("开发人员");
+        adminUserMapper.insert(admin);
+        log.info("初始开发账号已创建：{}（首次登录后请尽快修改密码）", adminUsername);
+    }
+
+    /** 补建默认分类（与 schema.sql 预置一致，user_id=0 全局模板） */
     private void insertDefaultCategories() {
         String[][] expense = {
                 {"餐饮", "1", "1"}, {"交通", "1", "2"}, {"购物", "1", "3"},
@@ -81,14 +96,14 @@ public class DataInitializer implements CommandLineRunner {
 
     private void insertCategory(String name, int type, int sortOrder) {
         ExpenseCategory c = new ExpenseCategory();
-        c.setUserId(1L);
+        c.setUserId(0L);
         c.setName(name);
         c.setType(type);
         c.setSortOrder(sortOrder);
         expenseCategoryMapper.insert(c);
     }
 
-    /** 补建默认锻炼动作（与 schema.sql 预置一致，双保险） */
+    /** 补建默认锻炼动作（与 schema.sql 预置一致，user_id=0 全局模板，双保险） */
     private void insertDefaultExercises() {
         Object[][] rows = {
                 {"床上平躺举哑铃", "strength", "3.5", 12, true, true},
@@ -104,7 +119,7 @@ public class DataInitializer implements CommandLineRunner {
         int order = 1;
         for (Object[] row : rows) {
             ExerciseItem e = new ExerciseItem();
-            e.setUserId(1L);
+            e.setUserId(0L);
             e.setName((String) row[0]);
             e.setType((String) row[1]);
             e.setBaseMet(new java.math.BigDecimal((String) row[2]));

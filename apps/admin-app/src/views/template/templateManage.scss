@@ -1,0 +1,57 @@
+/**
+ * 基础数据管理页样式
+ */
+@use '../../styles/theme' as *;
+
+.tmpl {
+  // 与用户端内容卡一致的内边距（布局壳 main 无 padding，页面自带）
+  padding: var(--sk-space-4);
+  background: var(--sk-surface);
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-lg);
+
+  &__tabs {
+    :deep(.el-tabs__header) {
+      margin-bottom: var(--sk-space-4);
+    }
+  }
+}
+
+/* 模板列表页通用布局 */
+.tmpl-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-4);
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sk-space-3);
+    flex-wrap: wrap;
+  }
+
+  &__toolbar-right {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sk-space-3);
+    flex-wrap: wrap;
+  }
+
+  &__count {
+    font-size: var(--sk-font-xs);
+    color: var(--sk-ink-muted);
+  }
+
+  &__list {
+    min-width: 0;
+    position: relative; // LoadingMask 覆盖遮罩定位基准
+  }
+}
+
+/* 编辑弹窗表单 */
+.tmpl-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 var(--sk-space-4);
+}
