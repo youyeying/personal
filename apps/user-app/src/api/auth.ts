@@ -50,11 +50,12 @@ export function register(data: { username: string; password: string; phone: stri
   })
 }
 
-/** 登出：撤销服务端会话 + 清 refresh Cookie */
+/** 登出：撤销服务端会话 + 清 refresh Cookie（site=user 只清用户端会话，绝不误删开发端） */
 export function logout() {
   return requestApi<null>({
     url: '/auth/logout',
     method: 'POST',
+    params: { site: 'user' },
     silent: true
   })
 }

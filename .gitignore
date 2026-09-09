@@ -10,6 +10,9 @@
 .trae-html-share-packages/
 .trae/
 
+# ===== WorkBuddy 工作区数据（AI 助手本地记忆，不入库）=====
+.workbuddy/
+
 # ===== 前端（Monorepo：apps/* 与 packages/*）=====
 node_modules/
 dist/
@@ -27,6 +30,7 @@ backend/uploads/
 uploads/
 png/
 database/backups/
+记忆.md
 
 # ===== 锻炼参考数据（本地文档，不上传）=====
 锻炼.md

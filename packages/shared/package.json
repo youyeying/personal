@@ -5,5 +5,8 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
   "description": "用户端/开发端共享层：纯工具 + 认证 token 管理 + 请求封装工厂（源码直引，由双端 vite/tsc 编译）"
 }

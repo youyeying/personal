@@ -38,6 +38,12 @@ app.session.expire-hours=24
 # refresh Cookie 是否 Secure（生产 HTTPS 设为 true，本地 http 保持 false）
 app.session.cookie-secure=false
 
+# ===================== 开发账号（v2.5.0 双账号体系，必配） =====================
+# admin_user 表为空时，DataInitializer 用这两项创建初始开发账号（开发端 /admin/login 登录用）
+# 不配置则跳过初始化（启动仅打 warn），开发端将无法登录
+app.admin.username=你的_开发账号_用户名
+app.admin.password=换成你自己的_开发账号_密码
+
 # ===================== 文件上传 =====================
 # 本地存储根目录（相对于项目运行目录）
 app.upload-path=./uploads

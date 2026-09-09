@@ -55,3 +55,11 @@
   grid-template-columns: 1fr 1fr;
   gap: 0 var(--sk-space-4);
 }
+
+/* 行内操作按钮组（编辑/删除，自三个模板页 .vue 内联样式收敛至此） */
+.tmpl-page__ops {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}

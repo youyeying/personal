@@ -69,8 +69,6 @@ public class AuthService {
     /** refresh Cookie 名称：区分站点会话（本地双端口同域 localhost，同名 Cookie 会互相覆盖导致串号） */
     private static final String REFRESH_COOKIE_USER = "refresh_token";
     private static final String REFRESH_COOKIE_ADMIN = "refresh_token_admin";
-    /** 全部 Cookie 名（登出/清理时都清） */
-    private static final String[] ALL_REFRESH_COOKIES = {REFRESH_COOKIE_USER, REFRESH_COOKIE_ADMIN};
 
     /** 按用户类型取 refresh Cookie 名 */
     private static String refreshCookieName(int userType) {
@@ -221,22 +219,29 @@ public class AuthService {
     }
 
     /**
-     * 登出：删除当前会话 + 清 Cookie
+     * 登出：只删除「调用站点」的会话并清对应 Cookie（user→refresh_token / admin→refresh_token_admin）
+     * 关键：logout 不带独立登录态（在拦截器白名单内），必须靠 ?site= 参数确定站点——
+     * 用户端/开发端在同一浏览器 cookie jar 共存两枚 Cookie，若统统删除会互相误删、另一端反复掉登录。
      */
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        // 清两枚 Cookie（user/admin）对应的会话，防站点会话残留
-        for (String cookieName : ALL_REFRESH_COOKIES) {
-            String refreshToken = readCookie(request, cookieName);
-            if (!StringUtils.hasText(refreshToken)) {
-                continue;
-            }
+        String site = request.getParameter("site");
+        String cookieName = "admin".equals(site) ? REFRESH_COOKIE_ADMIN : REFRESH_COOKIE_USER;
+
+        String refreshToken = readCookie(request, cookieName);
+        if (StringUtils.hasText(refreshToken)) {
             AuthSession session = findByHash(hash(refreshToken));
             if (session != null) {
                 session.setUpdatedAt(LocalDateTime.now());
                 authSessionMapper.deleteById(session.getId()); // 置逻辑删除
             }
         }
-        clearRefreshCookie(response);
+        // 仅清本站点 Cookie（业务站清 refresh_token / 开发站清 refresh_token_admin）
+        Cookie cookie = new Cookie(cookieName, "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(cookieSecure);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 
     /**
@@ -341,10 +346,13 @@ public class AuthService {
         user.setPasswordUpdatedAt(LocalDateTime.now());
         userMapper.updateById(user);
 
-        // 撤销该用户所有会话，强制重新登录
+        // 撤销该用户所有会话，强制重新登录（按 userType 过滤：user 与 admin 的 id 数值可能相同，防误删开发端会话）
         authSessionMapper.delete(
-                new LambdaQueryWrapper<AuthSession>().eq(AuthSession::getUserId, user.getId()));
-        clearRefreshCookie(response);
+                new LambdaQueryWrapper<AuthSession>()
+                        .eq(AuthSession::getUserId, user.getId())
+                        .eq(AuthSession::getUserType, USER_TYPE_USER));
+        // 仅清业务用户 refresh Cookie（不连座开发端 admin Cookie）
+        clearRefreshCookie(response, REFRESH_COOKIE_USER);
 
         operationLogService.record("USER", "UPDATE", user.getId(), "修改密码");
     }
@@ -364,8 +372,12 @@ public class AuthService {
                 .lt(AuthSession::getExpiresAt, now));
 
         // 复用该设备未过期会话（同一浏览器反复登录只保一行）；没有则新增
+        // 必须按 userType 过滤（v2.5.2）：业务用户与开发账号的 id 数值可能相同（同为 1），
+        // 同浏览器 UA 一致时若不限类型，两端登录会互相覆写同一行会话的 refreshTokenHash，
+        // 导致另一端 Cookie 对不上库被反复踢登录
         AuthSession session = authSessionMapper.selectOne(new LambdaQueryWrapper<AuthSession>()
                 .eq(AuthSession::getUserId, userId)
+                .eq(AuthSession::getUserType, userType == null ? USER_TYPE_USER : userType)
                 .eq(AuthSession::getDeviceKey, deviceKey)
                 .gt(AuthSession::getExpiresAt, now));
         if (session == null) {
@@ -437,16 +449,14 @@ public class AuthService {
         response.addCookie(cookie);
     }
 
-    /** 清全部 refresh Cookie（user/admin 两枚） */
-    private void clearRefreshCookie(HttpServletResponse response) {
-        for (String cookieName : ALL_REFRESH_COOKIES) {
-            Cookie cookie = new Cookie(cookieName, "");
-            cookie.setHttpOnly(true);
-            cookie.setSecure(cookieSecure);
-            cookie.setPath("/");
-            cookie.setMaxAge(0);
-            response.addCookie(cookie);
-        }
+    /** 清指定 refresh Cookie（可传单枚；不再提供「清全部」，防连座误删另一站点） */
+    private void clearRefreshCookie(HttpServletResponse response, String cookieName) {
+        Cookie cookie = new Cookie(cookieName, "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(cookieSecure);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 
     private String readCookie(HttpServletRequest request, String name) {

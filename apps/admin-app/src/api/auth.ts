@@ -77,11 +77,12 @@ export function register(data: { username: string; password: string; phone: stri
   })
 }
 
-/** 登出：撤销服务端会话 + 清 refresh Cookie */
+/** 登出：撤销服务端会话 + 清 refresh Cookie（site=admin 只清开发端会话，绝不误删用户端） */
 export function logout() {
   return requestApi<null>({
     url: '/auth/logout',
     method: 'POST',
+    params: { site: 'admin' },
     silent: true
   })
 }

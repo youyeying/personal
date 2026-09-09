@@ -1,6 +1,6 @@
 {
   "name": "@personal/admin-app",
-  "version": "2.5.0",
+  "version": "2.5.4",
   "private": true,
   "type": "module",
   "description": "个人记录系统-开发端（开发日志/操作日志/基础数据管理）",

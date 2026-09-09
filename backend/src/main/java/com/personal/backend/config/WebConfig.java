@@ -50,11 +50,17 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:" + absolutePath + "/");
     }
 
-    /** 跨域配置（前端 Vite 默认 5173 端口） */
+    /**
+     * 跨域配置（v2.5.4 收紧）：仅放行本机双端口前端。
+     * 双端页面均走 Vite 代理（同源），公网隧道也经代理转发——浏览器直连 8080 的跨源请求
+     * 在当前架构下不存在，白名单仅作纵深防御（防任意网页带 Cookie 调 /api 读响应）。
+     */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOriginPatterns("*")
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns(
+                        "http://localhost:5173", "http://localhost:5174",
+                        "http://127.0.0.1:5173", "http://127.0.0.1:5174")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)

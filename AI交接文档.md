@@ -1,6 +1,6 @@
 # AI 开发交接文档（个人记录系统）
 
-> 本文档供接手开发的 AI 完整阅读。请先理解「你是谁、在为谁开发、这是什么气质的项目」，再动手写任何一行代码。**设计理念章节（第三节）是本文档的灵魂，请逐字读完。**
+> 本文档供接手开发的 AI 完整阅读。请先理解「你是谁、在为谁开发、这是什么气质的项目」，再动手写任何一行代码。**设计理念章节（第三节）是本文档的灵魂，请逐字读完。** 本文档随每轮开发更新，最近一次：2026-09-09（v2.5.3 静默刷新单飞锁复位修复——静置后必掉登录的真正根因）
 
 ---
 
@@ -28,12 +28,13 @@
 
 ## 二、项目概述
 
-**个人记录系统**（Monorepo 全栈，目录 `e:\personal`，v2.5.0 拆分双应用）：
+**个人记录系统**（Monorepo 全栈，目录 `e:\personal`，v2.5.0 拆分双应用 + 共享层）：
 
 | 层 | 技术栈 | 目录 |
 |---|---|---|
 | 用户端 | Vue3 `<script setup lang="ts">` + Vite + Element Plus + ECharts + SCSS | `e:\personal\apps\user-app`（端口 5173） |
 | 开发端 | Vue3 + Vite + Element Plus（开发日志/操作日志/基础数据管理） | `e:\personal\apps\admin-app`（端口 5174） |
+| 共享层 | 双端唯一实现：format/fetchAll/daysSeries/confirm/theme/useECharts/mdDraft/validators + tokenManager + requestFactory | `e:\personal\packages\shared`（vite alias 直引源码） |
 | 后端 | SpringBoot + MyBatis-Plus + MySQL（用户在 IDEA 中手动运行） | `e:\personal\backend` |
 | 文档 | 需求/设计/数据库文档 + 开发日志 | `e:\personal\database`、根目录 |
 
@@ -43,8 +44,10 @@
 
 **双账号体系（v2.5.0）**：业务用户 `user` 表（终端用户，仅见业务页面）；开发账号 `admin_user` 表（管理员，仅见开发向页面，接口经 userType=2 隔离）。基础数据预置行 `user_id=0` 为全局模板，业务用户查询取 `user_id IN (0, 自己)` 并集。
 
+**认证（双站点隔离，v2.5.0/v2.5.1 加固；v2.5.2 会话隔离修复）**：用户端 `refresh_token` + 开发端 `refresh_token_admin` 两枚独立 httpOnly Cookie；`/auth/refresh` 按 `?site=user|admin` 读对应 Cookie 并限流（60/分）；refresh 并发宽容按调用站点 userType 过滤（防双站同 UA 串会话）；`/auth/logout` 按 `?site=` 只清本站点会话与 Cookie——**禁止遍历全删两枚 Cookie**（曾导致一端登出误删另一端会话，另一端反复掉登录）。前端跨 tab 同步 key 带站点后缀（`auth_token_synced_at_user/_admin`），双端同源 localStorage 互不干扰。v2.5.2 补充：登录会话复用按「用户+userType+设备」三条件（user 与 admin 的 id 数值可能相同，不限类型会互相覆写会话行导致另一端被踢）；双端 vite 代理禁开 `changeOrigin`（Host 必须原样透传，否则 `/auth/refresh` 的 Origin 同源校验在 127.0.0.1/局域网 IP/公网隧道访问下必然失败，反复掉登录）。
+
 **核心数据口径**（改动前必须理解）：
-- 锻炼消耗按「记录时体重快照」计算，历史不随当前体重变化
+- 锻炼消耗按「记录时体重快照」计算，历史不随当前体重变化；负重力量动作（哑铃/臂力棒）用「强度+做功」模型，全站 `roundKcal` 保留 1 位小数（详见第五节）
 - 每天实际消耗 = 1.2×BMR（久坐基准）+ 当天锻炼净消耗
 - 饮食预算 = 1.2×BMR + 今日锻炼净消耗 − 目标缺口（dietTargetGap，范围 -9999~3000，用户自定义）
 - 缺口 ÷ 7700 ≈ 预估减脂 kg
@@ -161,29 +164,22 @@
 
 ---
 
-## 五、当前任务进度（截至 2026-09-05 深夜，V2 已全站落地）
+## 五、当前任务进度（截至 2026-09-08，v2.5.0 双应用 + 共享层 + 认证加固完成）
 
-### 5.1 今日已完成（7 轮，全部 type-check / mvnw test / 浏览器实测通过）
+### 5.1 已完成（type-check / mvnw compile / 浏览器实测通过）
 
-1. **V2「书卷气」视觉全站落地（APP_VERSION 2.0.0）**：
-   - token 层：暖灰阶文本 rgba(28,30,26,.88/.62/.42) + 2 层耳语阴影 + 图表语义色（--c-intake 摄入 #7a8c3e / --c-burn 消耗 #3f7a72 / --c-gap #3d7a55 / --c-over #b04a3a / 蛋白蓝/脂肪橙/碳水紫，暗色自动提亮）
-   - 新公共组件：`components/ProgressRing/`（SVG 环形进度，超预算自动红，≤560px 缩 64px）+ `components/RecordHeatmap/`（GitHub 式格点，五档色阶随模块主色，≤560px 截 21 格）
-   - 逐页接入：饮食记录页横幅双环+页尾 30 天双行热力图、统计页语义色+营养达标面板（DRIs 2023 医学参考：蛋白 1.2g/kg、脂肪 25% 供能、碳水 50%、钠 ≤2000mg、纤维 ≥25g）、首页能量结余卡摄入环、锻炼分析页 --c-burn+热力图+「连续锻炼 N 天」成就、健康打卡页 30 天热力图（含体脂更深一档）
-2. **饮食功能补齐**：食物编辑（GroupedChips 加 showEdit 铅笔，自定义食物弹窗新增/编辑两用+5 营养素字段）；历史修改弹窗食物/动作下拉换 el-select filterable 可搜索+默认份量带出；统计口径修正（**当天没有饮食记录不计入缺口**，DayRow.counted 标记，首页预估减脂同口径）；统计页行布局修复（值列 minmax+nowrap 不再换行）
-3. **窄屏适配补齐**：每日总结弹窗 560px 降单列；锻炼/学习历史 DataList cardBelow=560 卡片化（学习弃 hideBelow）；饮食历史两行卡片重排
-4. **数据导出**：后端 ExportController/ExportService（GET /export/{module}.csv 六模块 CSV + /export/all.json 全量备份）；前端 api/export.ts + 个人中心「数据导出」弹窗
-5. **周报页 /report**：侧边栏「周报」入口（主色 #8a6a4f），本周/本月/上月，全前端聚合三组指标（记账收支结余 / 锻炼+饮食缺口+体重 / 学习+心情）；已修复收支方向 bug（type===2 才是收入）
-6. **命令面板 Ctrl+K**：`components/CommandPalette/`，快捷 5 项+导航 10 模块+切主题，搜索/↑↓/Enter/Esc 完整键盘交互；主题切换抽 utils/theme.ts 共享
-7. **后端四件**：springdoc 3.1.0 接口文档（/swagger-ui/index.html，全局 Bearer）；字典 Caffeine 缓存 5 分钟（foodItems/exerciseItems/expenseCategories，写操作 @CacheEvict）；@RateLimit 限流（登录 5/分、注册 3/分、上传 10、5/分）；数据库每日备份（database/backup-db.ps1 + 计划任务 PersonalRecordDBBackup 每日 03:00，备份至 database/backups/ 保留 14 份）
-8. **单元测试**：前端 Vitest（npm run test，26 例：MET/BMR 全公式）+ 后端 JUnit5+Mockito（mvnw test，17 例：FoodService 校验/限流窗口/CSV 转义）
-9. **收尾四件（深夜补做）**：① 分页条窄屏换行修复——PagePager 公共组件 ResizeObserver 观察父级容器三档收缩 layout（≥560 完整 / 340~560 去 total / <340 仅翻页，**必须观察父级**：各页 __pager 父容器 flex+右对齐会把自身 shrink 到内容宽，观察自身会死循环），浏览器实测三档单行；② 死代码清理——全项目组件/api/store 均有引用，唯 utils/fileReader.ts 零引用已删除；③ 版本号三处对齐 2.1.0（config.ts / package.json / pom.xml，后端 jar 名变为 backend-2.1.0.jar）；④ 数据库设计文档 + schema.sql 补全（版本对齐 v2.1.0、user 表补 diet_target_gap、补 development_session/feature_log/饮食三表共 5 个缺失明细章节、消耗口径更新为 v1.29.0 新公式）
+**v2.5.0 拆分双应用（2026-09-07~08）**：
+1. **Monorepo 双站点**：`apps/user-app`（用户端 5173）+ `apps/admin-app`（开发端 5174）+ `packages/shared` 共享层；后端 `admin_user` 开发账号表（物理隔离）+ `/api/admin/login` + 开发端页面（开发日志/操作日志/基础数据管理三模板）
+2. **接口隔离**：`/api/dev/**`、`/api/operation-logs/**`、`/api/admin/**` 仅 userType=2；业务接口仅 userType=1；基础数据模板 `user_id IN (0, 自己)` 并集
+3. **双 Cookie 会话隔离 + 认证加固**：`refresh_token` / `refresh_token_admin`；refresh 按 `?site=` 读、限流 60/分、宽容按 userType 过滤；logout 按 `?site=` 精确清理（v2.5.1 修复连座误删）；前端跨 tab key 站点后缀；共享层工厂（createTokenManager/createRequestApi）收敛双端认证实现
+4. **GitHub 首次提交 v2.5.0**：原仓库直接 push（无需删库），application.properties/.trae/今日功能记录 已 gitignore
+5. **锻炼消耗最终口径**：负重力量动作「强度+做功」模型（MET 速度比封顶 2.5 + 做功 0.35m/25% 效率），9.5kg×40×30s ≈ 7.4 kcal；全站 `roundKcal` 1 位小数消除浮点尾差；历史/统计/分析/周报/首页/日报全跟随
 
 ### 5.2 待办（很少了）
 
-1. 开发日志录入：今日功能记录已含全部 9 轮（含深夜收尾四件），用户自行「导入 md」收尾
-2. PWA（手机桌面图标+离线）：**用户明确暂不做**，等 H5 二期（App 端信息架构已有规划，见前端设计文档 5.13）
-3. 换机注意：备份计划任务注册在当前电脑，新机器需重新 `schtasks /Create`（见 7.3）；GitHub 仓库 Public，注意不要提交 application.properties / 锻炼.md / database/backups/
-4. 分页条若后续有新页面接入：直接用 PagePager 组件即自带窄屏自适应，无需单独处理
+1. PWA（手机桌面图标+离线）：**用户明确暂不做**，等 H5 二期（App 端信息架构已有规划，见前端设计文档 5.13）
+2. 换机注意：备份计划任务注册在当前电脑，新机器需重新 `schtasks /Create`（见 7.3）；GitHub 仓库 Public，注意不要提交 application.properties / 锻炼.md / database/backups/
+3. 分页条若后续有新页面接入：直接用 PagePager 组件即自带窄屏自适应，无需单独处理
 
 ---
 
@@ -203,7 +199,9 @@
 | `LoadingMask` | `components/LoadingMask/` | 不透明加载遮罩 |
 | `RecordDetailDialog` | `components/RecordDetailDialog/` | 列表行详情弹窗（多页复用） |
 | `DataList` | `components/DataList/` | 泛型列表（hideBelow 列隐藏 / cardBelow 卡片化降级） |
-| `recordNetKcal` | `utils/exercise.ts` | 单条锻炼记录净消耗（体重快照优先） |
+| `recordNetKcal` | `utils/exercise.ts`（v2.5.0 起共享层 re-export） | 单条锻炼记录净消耗（体重快照优先）；负重动作「强度+做功」模型，roundKcal 1 位小数 |
+| `createTokenManager(site)` | `packages/shared/src/tokenManager.ts` | accessToken 内存单例 + 静默刷新（重试/单飞/跨 tab 同步 key 带站点后缀） |
+| `createRequestApi` | `packages/shared/src/requestFactory.ts` | Axios 封装工厂（token/登录跳转路径/清理回调参数化，双端共用） |
 | `fetchAllRecords` | `utils/fetchAll.ts` | 循环翻页取全量（后端每页上限 100） |
 | `fillDaysRange` / `groupByDate` | `utils/daysSeries.ts` | 日期补齐 / 按天聚合 |
 | 后端 `ExportService` | `service/ExportService.java` | CSV 六模块导出 + JSON 全量备份 |
@@ -257,6 +255,13 @@ POST /api/dev/session/end     （结束当天会话）
 - **后端 Spring Boot 4.1 无 jackson-databind（Jackson 3 改包名）**：Controller 手动 ObjectMapper 编译不过，返回 Map/实体由 Spring MVC 自动序列化
 - **ps1 脚本必须 UTF-8 带 BOM**（否则 Windows PowerShell 5.1 按 GBK 解析中文报语法错）
 - springdoc 3.1.0 首次下载 jar 可能损坏（zip empty）：删 `~/.m2/repository/org/springdoc` 重下
+- **双站点会话互相干扰（v2.5.1 最大教训）**：用户端/开发端同浏览器（同域 localhost）共存两枚 refresh Cookie（refresh_token / refresh_token_admin）——**任何「遍历两枚全删/全清」的操作都会误杀另一端**（曾：logout() 遍历 ALL_REFRESH_COOKIES 全删，一端登出导致另一端静默掉登录）；所有会话操作必须按 `?site=` 精确到本站点
+- **双端共用 localStorage key 会互相清 token（v2.5.0）**：双端同源共享 localStorage，跨 tab 同步 key 必须带站点后缀（auth_token_synced_at_user/_admin），否则一端刷新写 key 触发另一端清空重刷
+- **后端 refresh 宽容查询必须按 userType 过滤（v2.5.0）**：双站点同 UA（deviceKey 相同），宽容查询不带 userType 会命中对方会话、签发错误类型 token 被踢；限流 20/分偏紧（双端共享 IP），放宽 60/分
+- **登录会话复用必须按 userType 过滤（v2.5.2）**：createSession 按「用户+设备指纹」复用会话行，但业务用户与开发账号 id 数值可能相同（同为 1）+ 同浏览器 UA 一致 → 两端登录互相覆写同一行 refreshTokenHash，另一端 Cookie 失效被反复踢登录；复用查询与修改密码撤销会话都必须带 userType
+- **vite 代理禁开 changeOrigin（v2.5.2）**：后端 /auth/refresh 校验 Origin host vs Host host，changeOrigin 把 Host 改写成 localhost:8080 后，127.0.0.1/局域网 IP/公网隧道访问必然校验失败（「非法的跨域请求」）→ 刷新永远失败反复掉登录；必须让 Host 原样透传到后端
+- **单飞锁必须用后复位（v2.5.3）**：tokenManager 的 refreshing Promise 完成后必须置回 null——单飞锁只防并发，不能当缓存用；不复位则下次刷新直接返回旧 Promise 里的过期 accessToken（根本不会真正调 /auth/refresh），重放 401 被踢，表现为静置一段时间回来必掉登录
+- **后端重启才生效**：改动 AuthService 等 Java 后必须提醒用户重启；«git 里 class 时间比源码新 ≠ 已生效»——核对运行进程启动时间
 - Mockito strict 模式：未用到的 stub 报 UnnecessaryStubbing——stub 挪进用例内按需打
 
 ### ⚠️ 编辑回滚问题（本项目最高频的坑，2026-09-05 单日 15+ 次）
@@ -268,11 +273,12 @@ POST /api/dev/session/end     （结束当天会话）
 
 ## 九、下一步行动指引
 
-1. 开发日志收尾（用户操作）：开发日志页「导入 md」录入今日功能记录，结束会话后删除临时 md
+1. 开发日志已录入（2026-09-08：13 条功能已导入 feature_log，会话已结束，临时 md 已删）
 2. 若接手新需求：先读 `需求规格文档.md` 与「前端/后端设计文档.md」对应章节，按第四节设计习惯执行（先方案后代码）
 3. 长期方向（用户已确认）：PWA 暂缓等 H5 二期；成就体系不优先（书卷气克制）；其余无排期
-4. 每轮开发固定动作：改完跑 `npm run type-check`（改公式加跑 `npm run test`；后端 `mvnw test`）→ 编辑点 Select-String 验证落盘 → 文档三件套同步 → 今日功能记录追加
+4. 每轮开发固定动作：改完跑 `npm run type-check`（改公式加跑 `npm run test`；后端 `mvnw test`）→ 编辑点 Select-String 验证落盘 → 文档三件套同步 → 今日功能记录追加 → 开发日志工作流录入
+5. **双站点改动红线**：任何会话/Cookie/localStorage 相关改动，必须先看第五节与第八节认证隔离教训——只按 `?site=` 精确定位到站点，禁止遍历双端
 
 ---
 
-*交接人：小幽（TraeCode）· 2026-09-05 深夜 · V2 落地完成之际*
+*交接人：小幽（TraeCode）· 2026-09-08 · v2.5.0 双应用 + 共享层 + 认证隔离加固完成*

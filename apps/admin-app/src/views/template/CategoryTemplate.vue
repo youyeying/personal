@@ -180,11 +180,4 @@ async function handleDelete(item: TemplateCategory) {
 
 <style lang="scss" scoped>
 @use './templateManage';
-
-.tmpl-page__ops {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-}
 </style>

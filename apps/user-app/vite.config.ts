@@ -24,14 +24,15 @@ export default defineConfig({
     allowedHosts: ['.trycloudflare.com'],
     proxy: {
       // 前端请求 /api/** 代理到后端
+      // 注意：不能开 changeOrigin——后端 /auth/refresh 有 Origin vs Host 同源校验，
+      // changeOrigin 会把 Host 改写为 localhost:8080，用 127.0.0.1/局域网 IP/公网隧道访问时
+      // Origin host 与改写后的 Host host 必然不匹配，刷新接口永远失败 → 反复掉登录（v2.5.2）
       '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
+        target: 'http://localhost:8080'
       },
       // 本地文件上传回显
       '/uploads': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
+        target: 'http://localhost:8080'
       }
     }
   }

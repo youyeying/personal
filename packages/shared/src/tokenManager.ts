@@ -119,6 +119,13 @@ export function createTokenManager(site: 'user' | 'admin'): TokenManager {
       return null
     })()
 
+    // 单飞锁用后必须复位（v2.5.3）：Promise 完成后置回 null，
+    // 否则下次过期再进来时 `if (refreshing) return refreshing` 直接复用上一次
+    // 已 resolve 的旧 Promise——返回早已过期的旧 accessToken，重放必然再 401 被踢
+    void refreshing.finally(() => {
+      refreshing = null
+    })
+
     return refreshing
   }
 

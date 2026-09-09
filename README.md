@@ -6,6 +6,24 @@
 
 ## 更新日志（最新在上）
 
+- **v2.5.4（2026-09-10 · 拆分收尾修复 + CORS 收紧）**
+  - 修复 开发端端口与文档不符：`apps/admin-app/vite.config.ts` 5173→**5174**（README/前端设计文档/记忆均为 5174 口径；双站点同端口时谁后启动谁被挤到 5174，按文档打开 5174/admin/login 会踩坑）
+  - 修复 新部署开发端无法登录：`application.properties.example` 补 `app.admin.username/password`（DataInitializer v2.5.0 起读配置创建开发账号，模板缺项时空库启动仅 warn 跳过）；README 第 2 步改「必改三处」
+  - 修复 根目录一键脚本：`packages/shared` 补 `type-check` script（`npm run type-check --workspaces` 不再中断）；根 `package.json` 补 `test` 转发（26 例 Vitest 全仓可跑）
+  - 修改 CORS 收紧：`addMapping("/**") + allowedOriginPatterns("*")` → 仅 `/api/**` + localhost 双端口四来源——双端均走 Vite 代理同源，纯纵深防御无功能影响
+  - 修改 开发端三个模板页 .vue 内联样式 `.tmpl-page__ops` 收敛进 `templateManage.scss`（回归「.vue 不写样式内容」约定）
+  - 清理 删除 `apps/user-app/package-lock.json` 拆分残留；AppLogo 清理 dev-log/operation-log 失效图标 key；.gitignore 补 `.workbuddy/`；后端设计文档两处 admin/admin123 过时描述修正
+  - 同步 本工作区补齐上游 v2.5.1~2.5.3 认证加固（logout 按 site / 会话复用按 userType / 单飞锁复位 / vite 移除 changeOrigin）
+- **v2.5.3（2026-09-09 · 静默刷新单飞锁修复）**
+  - 修复 静置一段时间后必掉登录：共享层 tokenManager 的单飞锁 `refreshing` 在刷新完成后从未复位——下次 accessToken 过期再进刷新逻辑时，`if (refreshing) return refreshing` 直接复用上一次已 resolve 的旧 Promise，拿到**早已过期的旧 accessToken**（并未真正调 /auth/refresh），重放再 401 后被踢回登录页；表现为整页加载后只有第一次过期刷新正常，之后连续使用跨过第二个 15 分钟或静置几小时回来必要求重新登录。现 Promise 结束后复位单飞锁，每次过期都真正换新
+  - 修改 版本号三处对齐 2.5.3
+- **v2.5.2（2026-09-09 · 登录态稳定性修复）**
+  - 修复 同浏览器双端反复掉登录：登录会话复用查询只按「用户+设备指纹」未按 userType 过滤——业务用户与开发账号 id 数值相同（同为 1）时两端共用并互相覆写同一行 `auth_session`（refreshTokenHash 被后登录端替换），另一端 Cookie 对不上库被反复踢登录；现按「用户+userType+设备」三条件隔离会话行
+  - 修复 非 localhost 访问（127.0.0.1/局域网 IP/公网隧道）必掉登录：vite 代理 `changeOrigin` 把 Host 改写为 `localhost:8080`，后端 `/auth/refresh` 的 Origin 同源校验（Origin host vs Host host）必然不匹配抛「非法的跨域请求」；双端代理移除改写，Host 原样透传，校验恢复语义
+  - 修改 修改密码撤销会话按 userType 过滤（同 id 数值场景不再误删开发端会话）；版本号三处对齐 2.5.2
+- **v2.5.0（2026-09-08 · 认证隔离加固）**
+  - 修复 另一端反复掉登录：logout 改按 `?site=` 只清本站点会话/Cookie，杜绝登出连座误删另一站点（同浏览器双 Cookie 共存）；refresh 并发宽容按调用站点 userType 过滤、限流放宽 60/分；前端跨 tab 同步 key 站点后缀隔离，双端完全互不影响
+  - 新增 packages/shared 双端共享层（工具/token/request 工厂唯一实现），后续改一处两端生效
 - **v2.5.0（2026-09-08）**
   - 新增 拆分用户端/开发端两套系统：前端 Monorepo 双站点（`apps/user-app` 用户端 + `apps/admin-app` 开发端）+ 后端 `admin_user` 开发账号表 + 开发端登录（`/admin/login`）+ 开发页（开发日志/操作日志/基础数据管理三种模板页），业务接口与开发向接口按用户类型隔离（AuthInterceptor + JWT userType）
   - 新增 双 Cookie 会话隔离（`refresh_token` / `refresh_token_admin`），/auth/refresh 按 `?site=` 读对应 Cookie 并加限流与并发宽容；RefreshToken 滚动 rotation、SHA-256 哈希落库
@@ -150,19 +168,23 @@ cd backend/src/main/resources
 cp application.properties.example application.properties
 ```
 
-然后编辑 `application.properties`，只改两处：
+然后编辑 `application.properties`，必改三处：
 
 ```properties
-# ======= 数据源：改成你自己的 MySQL =======
+# ======= 1. 数据源：改成你自己的 MySQL =======
 spring.datasource.username=你的_mysql_用户名
 spring.datasource.password=你的_mysql_密码
 # 若数据库不在本机，把 localhost:3306 改成你的地址
 spring.datasource.url=jdbc:mysql://localhost:3306/personal_record?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
 
-# ======= 认证：部署到公网务必换掉 =======
+# ======= 2. 认证：部署到公网务必换掉 =======
 app.jwt.secret=换成你自己的_jwt_secret_随机长字符串
 # 本地 http 保持 false；HTTPS 部署改为 true
 app.session.cookie-secure=false
+
+# ======= 3. 开发账号：admin_user 空库首次启动时自动创建（不配置则开发端无法登录） =======
+app.admin.username=你的_开发账号_用户名
+app.admin.password=换成你自己的_开发账号_密码
 ```
 
 其余项（端口、文件上传大小、逻辑删除等）一般无需改动。

@@ -41,16 +41,6 @@ const LOGOS: Record<string, string> = {
   'daily-note': `
     <path d="M4 20l.9-3.4L15.7 5.8a1.5 1.5 0 0 1 2.1 0l.4.4a1.5 1.5 0 0 1 0 2.1L7.4 19.1 4 20z"/>
     <path d="M13.4 7.6l3 3"/>`,
-  // 操作日志：剪贴板清单
-  'operation-log': `
-    <rect x="5" y="4" width="14" height="17" rx="2"/>
-    <path d="M9 4.6V3h6v1.6"/>
-    <path d="M8.7 11h6.6M8.7 15h4.4"/>`,
-  // 开发日志：终端
-  'dev-log': `
-    <rect x="3" y="4" width="18" height="16" rx="2"/>
-    <path d="M7 9l3 3-3 3"/>
-    <path d="M12 15h5"/>`,
   // 个人中心：用户
   profile: `
     <circle cx="12" cy="8" r="3.6"/>
